@@ -76,12 +76,22 @@
         <h1>Daily Time Attendance</h1>
         <p>Track employee time-in and time-out efficiently and securely.</p>
         <div class="buttons">
-            <button class="btn btn-login" onclick="location.href='login.html'">Login</button>
-            <button class="btn btn-register" onclick="location.href='register.html'">Register</button>
+            <button class="btn btn-login">Login</button>
+            <button class="btn btn-register">Register</button>
         </div>
         <footer>
             © 2026 Daily Time Attendance System
         </footer>
     </div>
+
+    <script>
+        // Redirect buttons safely for Vercel static hosting
+        document.querySelector('.btn-login').addEventListener('click', () => {
+            window.location.href = 'login.html';
+        });
+        document.querySelector('.btn-register').addEventListener('click', () => {
+            window.location.href = 'register.html';
+        });
+    </script>
 </body>
 </html>
