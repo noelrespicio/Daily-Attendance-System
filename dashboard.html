@@ -127,6 +127,12 @@
         <p>Time recorded. Cancel within <span id="countdown">5</span> seconds</p>
         <button onclick="cancelLast()">Cancel</button>
     </div>
+    <br>
+
+<button onclick="window.location.href='view_attendance.html'"
+style="width:100%;background:#00e6e6;color:#003;">
+📄 View Attendance
+</button>
 </div>
 
 <script>
@@ -245,8 +251,27 @@ async function saveToSupabase() {
         .update(updateData)
         .eq("user_id", USER_ID)
         .eq("attendance_date", today);
-}
 
+    // 🔒 disable button permanently
+    disableButton(pendingColumn);
+}
+    function disableButton(column) {
+    const btnMap = {
+        time_in: "btn_time_in",
+        lunch_break_out: "btn_lbo",
+        lunch_break_in: "btn_lbi",
+        coffee_break_out: "btn_cbo",
+        coffee_break_in: "btn_cbi",
+        time_out: "btn_time_out"
+    };
+
+    const btn = document.getElementById(btnMap[column]);
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = 0.5;
+        btn.style.cursor = "not-allowed";
+    }
+}
 
 function cancelLast() {
     if (!pendingColumn) return;
@@ -262,12 +287,32 @@ function cancelLast() {
 
     document.getElementById(map[pendingColumn]).textContent = "--:--";
 
+    // enable button again
+    enableButton(pendingColumn);
+
     pendingColumn = null;
     pendingTime = null;
     clearInterval(countdownTimer);
     document.getElementById("cancelBox").style.display = "none";
 }
 
+function enableButton(column) {
+    const btnMap = {
+        time_in: "btn_time_in",
+        lunch_break_out: "btn_lbo",
+        lunch_break_in: "btn_lbi",
+        coffee_break_out: "btn_cbo",
+        coffee_break_in: "btn_cbi",
+        time_out: "btn_time_out"
+    };
+
+    const btn = document.getElementById(btnMap[column]);
+    if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = 1;
+        btn.style.cursor = "pointer";
+    }
+}
 </script>
 
 </body>
