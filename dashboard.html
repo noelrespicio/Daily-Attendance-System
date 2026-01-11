@@ -140,40 +140,83 @@ const supabase = supabase.createClient(
 // Clock & date
 function updateClock() {
     const now = new Date();
-    document.getElementById('clock').textContent = now.toLocaleTimeString();
-    document.getElementById('date').textContent = now.toDateString();
+
+    const dateOptions = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+
+    const timeOptions = {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+
+    document.getElementById("date").textContent =
+        now.toLocaleDateString('en-US', dateOptions);
+
+    document.getElementById("clock").textContent =
+        now.toLocaleTimeString('en-US', timeOptions);
 }
+
 setInterval(updateClock, 1000);
 updateClock();
 
+/* ===== ATTENDANCE LOGIC ===== */
 let lastAction = null;
 let countdownTimer;
 let seconds = 5;
 
-async function recordTime(column) {
+function recordTime(column) {
     const now = new Date();
-    document.getElementById(column.replace('_','')).textContent = now.toLocaleTimeString();
+    const timeString = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
 
-    lastAction = column;
+    // map ids properly
+    const map = {
+        time_in: "time_in",
+        lunch_break_out: "lbo",
+        lunch_break_in: "lbi",
+        coffee_break_out: "cbo",
+        coffee_break_in: "cbi",
+        time_out: "time_out"
+    };
+
+    document.getElementById(map[column]).textContent = timeString;
+
+    lastAction = map[column];
     seconds = 5;
-    document.getElementById('countdown').textContent = seconds;
-    document.getElementById('cancelBox').style.display = 'block';
 
+    document.getElementById("countdown").textContent = seconds;
+    document.getElementById("cancelBox").style.display = "block";
+
+    clearInterval(countdownTimer);
     countdownTimer = setInterval(() => {
         seconds--;
-        document.getElementById('countdown').textContent = seconds;
+        document.getElementById("countdown").textContent = seconds;
+
         if (seconds === 0) {
             clearInterval(countdownTimer);
-            document.getElementById('cancelBox').style.display = 'none';
+            document.getElementById("cancelBox").style.display = "none";
+            lastAction = null;
         }
     }, 1000);
 }
 
 function cancelLast() {
     if (!lastAction) return;
-    document.getElementById(lastAction.replace('_','')).textContent = '--:--';
+
+    document.getElementById(lastAction).textContent = "--:--";
     clearInterval(countdownTimer);
-    document.getElementById('cancelBox').style.display = 'none';
+    document.getElementById("cancelBox").style.display = "none";
+    lastAction = null;
 }
 </script>
 </body>
