@@ -4,22 +4,25 @@
 <meta charset="UTF-8">
 <title>Dashboard | Daily Time Attendance</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <!-- Supabase JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-body { min-height: 100vh; background: linear-gradient(135deg, #1e3c72, #2a5298); color: #fff; display: flex; justify-content: center; align-items: center; }
-.dashboard { width: 100%; max-width: 900px; background: rgba(255,255,255,0.12); backdrop-filter: blur(12px); padding: 30px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-.date { text-align: center; font-size: 18px; margin-bottom: 5px; }
-.clock { text-align: center; font-size: 42px; font-weight: bold; margin-bottom: 25px; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-th, td { border: 1px solid rgba(255,255,255,0.3); padding: 12px; text-align: center; font-size: 14px; }
-th { background: rgba(255,255,255,0.15); }
-.buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-button { padding: 14px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; background: #fff; color: #1e3c72; transition: 0.3s; }
-button:hover { transform: translateY(-2px); }
-.cancel-box { margin-top: 15px; text-align: center; display: none; }
-.cancel-box button { background: #ff4d4d; color: #fff; margin-top: 10px; }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { min-height:100vh; background:linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; display:flex; justify-content:center; align-items:center; }
+.dashboard { width:100%; max-width:900px; background:rgba(255,255,255,0.12); backdrop-filter:blur(12px); padding:30px; border-radius:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3); }
+.date { text-align:center; font-size:18px; margin-bottom:5px; }
+.clock { text-align:center; font-size:42px; font-weight:bold; margin-bottom:25px; }
+table { width:100%; border-collapse:collapse; margin-bottom:25px; }
+th, td { border:1px solid rgba(255,255,255,0.3); padding:12px; text-align:center; font-size:14px; }
+th { background:rgba(255,255,255,0.15); }
+.buttons { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:15px; }
+button { padding:14px; border:none; border-radius:30px; font-weight:600; cursor:pointer; background:#fff; color:#1e3c72; transition:0.3s; }
+button:hover:not(:disabled){ transform:translateY(-2px); }
+button:disabled { opacity:0.5; cursor:not-allowed; }
+.cancel-box { margin-top:10px; text-align:center; display:none; }
+.cancel-box button { background:#ff4d4d; color:#fff; margin-top:10px; }
 </style>
 </head>
 <body>
@@ -40,7 +43,7 @@ button:hover { transform: translateY(-2px); }
             </tr>
         </thead>
         <tbody>
-            <tr id="attendanceRow">
+            <tr>
                 <td id="time_in">--:--</td>
                 <td id="lbo">--:--</td>
                 <td id="lbi">--:--</td>
@@ -65,47 +68,42 @@ button:hover { transform: translateY(-2px); }
         <button onclick="cancelLast()">Cancel</button>
     </div>
 
-    <br>
-    <button onclick="window.location.href='view_attendance.html'" style="width:100%;background:#00e6e6;color:#003;">
+    <button onclick="window.location.href='view_attendance.html'" style="width:100%;background:#00e6e6;color:#003;margin-top:10px;">
         📄 View Attendance
     </button>
 </div>
 
 <script>
-/* ===== SUPABASE SETUP ===== */
+/* ===== USER & SUPABASE ===== */
+const USER_ID = 1; // TODO: replace with Auth user ID
+let pendingColumn = null;
+let pendingTime = null;
+let countdownTimer = null;
+let seconds = 5;
+
 const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let USER_ID = null;
-let pendingColumn = null;
-let pendingTime = null;
-
-/* ===== AUTH CHECK ===== */
-async function getUser() {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error || !user) {
-        alert("You are not logged in!");
-        window.location.href = "login.html";
-        return;
-    }
-    USER_ID = user.id; // unique user id
-    await ensureTodayRow();
-    await loadTodayAttendance();
-}
-
 /* ===== CLOCK & DATE ===== */
 function updateClock() {
     const now = new Date();
-    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-    document.getElementById("date").textContent = now.toLocaleDateString('en-US', dateOptions);
-    document.getElementById("clock").textContent = now.toLocaleTimeString('en-US', timeOptions);
+    document.getElementById("date").textContent = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    document.getElementById("clock").textContent = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true });
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-/* ===== ATTENDANCE LOGIC ===== */
+/* ===== BUTTON MAP ===== */
+const buttonMap = {
+    time_in: "btn_time_in",
+    lunch_break_out: "btn_lbo",
+    lunch_break_in: "btn_lbi",
+    coffee_break_out: "btn_cbo",
+    coffee_break_in: "btn_cbi",
+    time_out: "btn_time_out"
+};
+
 const cellMap = {
     time_in: "time_in",
     lunch_break_out: "lbo",
@@ -115,15 +113,7 @@ const cellMap = {
     time_out: "time_out"
 };
 
-const btnMap = {
-    time_in: "btn_time_in",
-    lunch_break_out: "btn_lbo",
-    lunch_break_in: "btn_lbi",
-    coffee_break_out: "btn_cbo",
-    coffee_break_in: "btn_cbi",
-    time_out: "btn_time_out"
-};
-
+/* ===== ENSURE TODAY ROW ===== */
 async function ensureTodayRow() {
     const today = new Date().toISOString().split("T")[0];
     const { data } = await supabase
@@ -138,6 +128,7 @@ async function ensureTodayRow() {
     }
 }
 
+/* ===== LOAD TODAY ATTENDANCE ===== */
 async function loadTodayAttendance() {
     const today = new Date().toISOString().split("T")[0];
     const { data } = await supabase
@@ -157,29 +148,26 @@ async function loadTodayAttendance() {
     }
 }
 
-function formatTime(iso) {
-    return new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
-}
-
+/* ===== RECORD TIME ===== */
 async function recordTime(column) {
+    if (pendingColumn) return; // prevent multiple clicks during countdown
+
     const now = new Date();
-    const isoTime = now.toISOString();
-    const displayTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-
-    document.getElementById(cellMap[column]).textContent = displayTime;
+    pendingTime = now.toISOString();
     pendingColumn = column;
-    pendingTime = isoTime;
 
-    let seconds = 5;
+    document.getElementById(cellMap[column]).textContent = formatTime(pendingTime);
+    seconds = 5;
     document.getElementById("countdown").textContent = seconds;
     document.getElementById("cancelBox").style.display = "block";
 
-    clearInterval(window.countdownTimer);
-    window.countdownTimer = setInterval(async () => {
+    clearInterval(countdownTimer);
+    countdownTimer = setInterval(async () => {
         seconds--;
         document.getElementById("countdown").textContent = seconds;
-        if (seconds === 0) {
-            clearInterval(window.countdownTimer);
+
+        if (seconds <= 0) {
+            clearInterval(countdownTimer);
             document.getElementById("cancelBox").style.display = "none";
             await saveToSupabase();
             pendingColumn = null;
@@ -188,6 +176,7 @@ async function recordTime(column) {
     }, 1000);
 }
 
+/* ===== SAVE TO SUPABASE ===== */
 async function saveToSupabase() {
     const today = new Date().toISOString().split("T")[0];
     const updateData = {};
@@ -202,37 +191,30 @@ async function saveToSupabase() {
     disableButton(pendingColumn);
 }
 
-function disableButton(column) {
-    const btn = document.getElementById(btnMap[column]);
-    if (btn) {
-        btn.disabled = true;
-        btn.style.opacity = 0.5;
-        btn.style.cursor = "not-allowed";
-    }
-}
-
-function enableButton(column) {
-    const btn = document.getElementById(btnMap[column]);
-    if (btn) {
-        btn.disabled = false;
-        btn.style.opacity = 1;
-        btn.style.cursor = "pointer";
-    }
-}
-
+/* ===== CANCEL LAST ===== */
 function cancelLast() {
     if (!pendingColumn) return;
+
     document.getElementById(cellMap[pendingColumn]).textContent = "--:--";
-    enableButton(pendingColumn);
     pendingColumn = null;
     pendingTime = null;
-    clearInterval(window.countdownTimer);
+    clearInterval(countdownTimer);
     document.getElementById("cancelBox").style.display = "none";
 }
 
-/* ===== INIT DASHBOARD ===== */
-getUser();
-</script>
+/* ===== BUTTON HELPERS ===== */
+function disableButton(column) {
+    const btn = document.getElementById(buttonMap[column]);
+    if (btn) btn.disabled = true;
+}
 
+function enableButton(column) {
+    const btn = document.getElementById(buttonMap[column]);
+    if (btn) btn.disabled = false;
+}
+
+/* ===== INIT ===== */
+ensureTodayRow().then(loadTodayAttendance);
+</script>
 </body>
 </html>
