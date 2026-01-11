@@ -116,25 +116,30 @@
     </div>
 
 <script>
-const supabase = supabase.createClient(
-    const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
+/* ===== SUPABASE CONFIG ===== */
+const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
 
+/* ===== CREATE SUPABASE CLIENT ===== */
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
 );
 
+/* ===== LOGIN ===== */
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
     });
 
     if (error) {
-        alert(error.message);
+        alert("Login failed: " + error.message);
         return;
     }
 
@@ -142,5 +147,6 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     window.location.href = "dashboard.html";
 });
 </script>
+
 </body>
 </html>
