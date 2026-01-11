@@ -102,8 +102,8 @@ Already have an account? <a href="login.html">Login</a>
 </div>
 
 <script>
- const SUPABASE_URL = 'https://wlthlwxcmltwescezjlk.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o';
+const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
 
 const supabase = window.supabase.createClient(
     SUPABASE_URL,
@@ -113,7 +113,7 @@ const supabase = window.supabase.createClient(
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const firstname = firstnameInput.value = document.getElementById("firstname").value;
+    const firstname = document.getElementById("firstname").value;
     const lastname = document.getElementById("lastname").value;
     const email = document.getElementById("email").value;
     const employee_id = document.getElementById("employee_id").value;
