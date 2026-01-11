@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>View Attendance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    margin: 0;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    background: #fff;
+    color: #1e3c72;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    border-radius: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.3);
+    text-align: center;
+    font-size: 14px;
+}
+
+th {
+    background: rgba(255,255,255,0.15);
+    position: sticky;
+    top: 0;
+}
+
+/* 📱 Mobile */
+@media (max-width: 600px) {
+    h2 { font-size: 18px; }
+    th, td { font-size: 12px; padding: 8px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">
+        ⬅ Back to Dashboard
+    </button>
+
+    <h2>Attendance Records</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time In</th>
+                    <th>LB Out</th>
+                    <th>LB In</th>
+                    <th>CB Out</th>
+                    <th>CB In</th>
+                    <th>Final Out</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceBody">
+                <tr>
+                    <td colspan="7">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+/* ===== SUPABASE ===== */
+const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
+const SUPABASE_KEY = "YOUR_ANON_KEY";
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const USER_ID = 1; // palitan pag may auth
+
+/* ===== LOAD ATTENDANCE ===== */
+async function loadAttendance() {
+    const { data, error } = await supabaseClient
+        .from("attendance")
+        .select("*")
+        .eq("user_id", USER_ID)
+        .order("attendance_date", { ascending: false });
+
+    const tbody = document.getElementById("attendanceBody");
+    tbody.innerHTML = "";
+
+    if (error || !data.length) {
+        tbody.innerHTML = `<tr><td colspan="7">No records found</td></tr>`;
+        return;
+    }
+
+    data.forEach(row => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${row.attendance_date}</td>
+                <td>${formatTime(row.time_in)}</td>
+                <td>${formatTime(row.lunch_break_out)}</td>
+                <td>${formatTime(row.lunch_break_in)}</td>
+                <td>${formatTime(row.coffee_break_out)}</td>
+                <td>${formatTime(row.coffee_break_in)}</td>
+                <td>${formatTime(row.time_out)}</td>
+            </tr>
+        `;
+    });
+}
+
+function formatTime(time) {
+    if (!time) return "--";
+    return new Date(time).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+}
+
+loadAttendance();
+</script>
+</body>
+</html>
