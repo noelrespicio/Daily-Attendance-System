@@ -75,11 +75,60 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 
 <script>
 /* ===== USER & SUPABASE ===== */
-const USER_ID = 1; // TODO: replace with Auth user ID
-let pendingColumn = null;
-let pendingTime = null;
-let countdownTimer = null;
-let seconds = 5;
+/* ===== GET AUTHENTICATED USER ===== */
+let USER_ID = null;
+
+async function getUser() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
+        alert("You are not logged in! Redirecting to login page...");
+        window.location.href = "login.html"; // change to your login page
+        return;
+    }
+    USER_ID = user.id; // this is unique per logged-in user
+    ensureTodayRow().then(loadTodayAttendance);
+}
+
+/* ===== ENSURE TODAY ROW ===== */
+async function ensureTodayRow() {
+    if (!USER_ID) return;
+    const today = new Date().toISOString().split("T")[0];
+    const { data } = await supabase
+        .from("attendance")
+        .select("id")
+        .eq("user_id", USER_ID)
+        .eq("attendance_date", today)
+        .single();
+
+    if (!data) {
+        await supabase.from("attendance").insert({ user_id: USER_ID, attendance_date: today });
+    }
+}
+
+/* ===== LOAD TODAY ATTENDANCE ===== */
+async function loadTodayAttendance() {
+    if (!USER_ID) return;
+    const today = new Date().toISOString().split("T")[0];
+    const { data } = await supabase
+        .from("attendance")
+        .select("*")
+        .eq("user_id", USER_ID)
+        .eq("attendance_date", today)
+        .single();
+
+    if (!data) return;
+
+    for (const col in cellMap) {
+        if (data[col]) {
+            document.getElementById(cellMap[col]).textContent = formatTime(data[col]);
+            disableButton(col);
+        }
+    }
+}
+
+/* ===== INIT ===== */
+getUser();
+
 
 const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
@@ -113,40 +162,6 @@ const cellMap = {
     time_out: "time_out"
 };
 
-/* ===== ENSURE TODAY ROW ===== */
-async function ensureTodayRow() {
-    const today = new Date().toISOString().split("T")[0];
-    const { data } = await supabase
-        .from("attendance")
-        .select("id")
-        .eq("user_id", USER_ID)
-        .eq("attendance_date", today)
-        .single();
-
-    if (!data) {
-        await supabase.from("attendance").insert({ user_id: USER_ID, attendance_date: today });
-    }
-}
-
-/* ===== LOAD TODAY ATTENDANCE ===== */
-async function loadTodayAttendance() {
-    const today = new Date().toISOString().split("T")[0];
-    const { data } = await supabase
-        .from("attendance")
-        .select("*")
-        .eq("user_id", USER_ID)
-        .eq("attendance_date", today)
-        .single();
-
-    if (!data) return;
-
-    for (const col in cellMap) {
-        if (data[col]) {
-            document.getElementById(cellMap[col]).textContent = formatTime(data[col]);
-            disableButton(col);
-        }
-    }
-}
 
 /* ===== RECORD TIME ===== */
 async function recordTime(column) {
