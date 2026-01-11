@@ -138,6 +138,25 @@ const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
+async function ensureTodayRow() {
+    const today = new Date().toISOString().split("T")[0];
+
+    const { data } = await supabaseClient
+        .from("attendance")
+        .select("id")
+        .eq("user_id", USER_ID)
+        .eq("attendance_date", today)
+        .single();
+
+    if (!data) {
+        await supabaseClient.from("attendance").insert({
+            user_id: USER_ID,
+            attendance_date: today
+        });
+    }
+}
+
+ensureTodayRow();
 
 /* ===== CLOCK & DATE ===== */
 function updateClock() {
@@ -172,9 +191,10 @@ let lastAction = null;
 let countdownTimer;
 let seconds = 5;
 
-function recordTime(column) {
+async function recordTime(column) {
     const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', {
+    const isoTime = now.toISOString();
+    const displayTime = now.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
@@ -190,35 +210,64 @@ function recordTime(column) {
         time_out: "time_out"
     };
 
-    document.getElementById(map[column]).textContent = timeString;
+    document.getElementById(map[column]).textContent = displayTime;
 
-    lastAction = map[column];
+    pendingColumn = column;
+    pendingTime = isoTime;
+
     seconds = 5;
-
     document.getElementById("countdown").textContent = seconds;
     document.getElementById("cancelBox").style.display = "block";
 
     clearInterval(countdownTimer);
-    countdownTimer = setInterval(() => {
+    countdownTimer = setInterval(async () => {
         seconds--;
         document.getElementById("countdown").textContent = seconds;
 
         if (seconds === 0) {
             clearInterval(countdownTimer);
             document.getElementById("cancelBox").style.display = "none";
-            lastAction = null;
+
+            await saveToSupabase();
+            pendingColumn = null;
+            pendingTime = null;
         }
     }, 1000);
 }
+async function saveToSupabase() {
+    const today = new Date().toISOString().split("T")[0];
+
+    const updateData = {};
+    updateData[pendingColumn] = pendingTime;
+
+    await supabaseClient
+        .from("attendance")
+        .update(updateData)
+        .eq("user_id", USER_ID)
+        .eq("attendance_date", today);
+}
+
 
 function cancelLast() {
-    if (!lastAction) return;
+    if (!pendingColumn) return;
 
-    document.getElementById(lastAction).textContent = "--:--";
+    const map = {
+        time_in: "time_in",
+        lunch_break_out: "lbo",
+        lunch_break_in: "lbi",
+        coffee_break_out: "cbo",
+        coffee_break_in: "cbi",
+        time_out: "time_out"
+    };
+
+    document.getElementById(map[pendingColumn]).textContent = "--:--";
+
+    pendingColumn = null;
+    pendingTime = null;
     clearInterval(countdownTimer);
     document.getElementById("cancelBox").style.display = "none";
-    lastAction = null;
 }
+
 </script>
 
 </body>
