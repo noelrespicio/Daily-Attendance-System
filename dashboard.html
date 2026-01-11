@@ -130,14 +130,16 @@
 </div>
 
 <script>
-// Supabase client
-const supabase = supabase.createClient(
-   const SUPABASE_URL = 'https://wlthlwxcmltwescezjlk.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o';
+/* ===== SUPABASE SETUP ===== */
+const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
 
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
 );
 
-// Clock & date
+/* ===== CLOCK & DATE ===== */
 function updateClock() {
     const now = new Date();
 
@@ -179,7 +181,6 @@ function recordTime(column) {
         hour12: true
     });
 
-    // map ids properly
     const map = {
         time_in: "time_in",
         lunch_break_out: "lbo",
@@ -219,6 +220,7 @@ function cancelLast() {
     lastAction = null;
 }
 </script>
+
 </body>
 </html>
 
