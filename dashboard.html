@@ -114,14 +114,15 @@
         </tbody>
     </table>
 
-    <div class="buttons">
-        <button onclick="recordTime('time_in')">Time In</button>
-        <button onclick="recordTime('lunch_break_out')">LB Out</button>
-        <button onclick="recordTime('lunch_break_in')">LB In</button>
-        <button onclick="recordTime('coffee_break_out')">CB Out</button>
-        <button onclick="recordTime('coffee_break_in')">CB In</button>
-        <button onclick="recordTime('time_out')">Final Out</button>
-    </div>
+   <div class="buttons">
+    <button id="btn_time_in" onclick="recordTime('time_in')">Time In</button>
+    <button id="btn_lbo" onclick="recordTime('lunch_break_out')">LB Out</button>
+    <button id="btn_lbi" onclick="recordTime('lunch_break_in')">LB In</button>
+    <button id="btn_cbo" onclick="recordTime('coffee_break_out')">CB Out</button>
+    <button id="btn_cbi" onclick="recordTime('coffee_break_in')">CB In</button>
+    <button id="btn_time_out" onclick="recordTime('time_out')">Final Out</button>
+</div>
+
 
     <div class="cancel-box" id="cancelBox">
         <p>Time recorded. Cancel within <span id="countdown">5</span> seconds</p>
@@ -136,6 +137,10 @@ style="width:100%;background:#00e6e6;color:#003;">
 </div>
 
 <script>
+    const USER_ID = 1; // palitan kapag naka-auth na
+let pendingColumn = null;
+let pendingTime = null;
+    
 /* ===== SUPABASE SETUP ===== */
 const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
@@ -272,6 +277,52 @@ async function saveToSupabase() {
         btn.style.cursor = "not-allowed";
     }
 }
+async function loadTodayAttendance() {
+    const today = new Date().toISOString().split("T")[0];
+
+    const { data, error } = await supabaseClient
+        .from("attendance")
+        .select("*")
+        .eq("user_id", USER_ID)
+        .eq("attendance_date", today)
+        .single();
+
+    if (!data) return;
+
+    // show saved times
+    if (data.time_in) {
+        document.getElementById("time_in").textContent = formatTime(data.time_in);
+        disableButton("time_in");
+    }
+    if (data.lunch_break_out) {
+        document.getElementById("lbo").textContent = formatTime(data.lunch_break_out);
+        disableButton("lunch_break_out");
+    }
+    if (data.lunch_break_in) {
+        document.getElementById("lbi").textContent = formatTime(data.lunch_break_in);
+        disableButton("lunch_break_in");
+    }
+    if (data.coffee_break_out) {
+        document.getElementById("cbo").textContent = formatTime(data.coffee_break_out);
+        disableButton("coffee_break_out");
+    }
+    if (data.coffee_break_in) {
+        document.getElementById("cbi").textContent = formatTime(data.coffee_break_in);
+        disableButton("coffee_break_in");
+    }
+    if (data.time_out) {
+        document.getElementById("time_out").textContent = formatTime(data.time_out);
+        disableButton("time_out");
+    }
+}
+function formatTime(iso) {
+    return new Date(iso).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    });
+}
 
 function cancelLast() {
     if (!pendingColumn) return;
@@ -313,8 +364,11 @@ function enableButton(column) {
         btn.style.cursor = "pointer";
     }
 }
-</script>
+  
 
+</script>
+  ensureTodayRow();
+loadTodayAttendance();
 </body>
 </html>
 
