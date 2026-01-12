@@ -1,373 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard | Daily Time Attendance</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Dashboard</title>
 
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 20px;
+}
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .dashboard {
-            width: 100%;
-            max-width: 900px;
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(12px);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        .date {
-            text-align: center;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        .clock {
-            text-align: center;
-            font-size: 42px;
-            font-weight: bold;
-            margin-bottom: 25px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 25px;
-        }
-        th, td {
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 12px;
-            text-align: center;
-            font-size: 14px;
-        }
-        th {
-            background: rgba(255,255,255,0.15);
-        }
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-        }
-        button {
-            padding: 14px;
-            border: none;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-            background: #fff;
-            color: #1e3c72;
-            transition: 0.3s;
-        }
-        button:hover { transform: translateY(-2px); }
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-        .cancel-box {
-            margin-top: 15px;
-            text-align: center;
-            display: none;
-        }
-        .cancel-box button {
-            background: #ff4d4d;
-            color: #fff;
-            margin-top: 10px;
-        }
-    </style>
+#date {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+#clock {
+  font-size: 2rem;
+  margin-top: 5px;
+}
+
+.table {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.cell {
+  background: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.cell strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button.cancel {
+  background: #dc3545;
+}
+
+button:disabled {
+  background: #aaa;
+}
+</style>
 </head>
+
 <body>
-<div class="dashboard">
-    <div class="date" id="date"></div>
-    <div class="clock" id="clock"></div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Time In</th>
-                <th>LB Out</th>
-                <th>LB In</th>
-                <th>CB Out</th>
-                <th>CB In</th>
-                <th>Final Out</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr id="attendanceRow">
-                <td id="time_in">--:--</td>
-                <td id="lbo">--:--</td>
-                <td id="lbi">--:--</td>
-                <td id="cbo">--:--</td>
-                <td id="cbi">--:--</td>
-                <td id="time_out">--:--</td>
-            </tr>
-        </tbody>
-    </table>
+<header>
+  <div id="date"></div>
+  <div id="clock"></div>
+  <p>Welcome, <strong id="userEmail"></strong></p>
+</header>
 
-   <div class="buttons">
-    <button id="btn_time_in" onclick="recordTime('time_in')">Time In</button>
-    <button id="btn_lbo" onclick="recordTime('lunch_break_out')">LB Out</button>
-    <button id="btn_lbi" onclick="recordTime('lunch_break_in')">LB In</button>
-    <button id="btn_cbo" onclick="recordTime('coffee_break_out')">CB Out</button>
-    <button id="btn_cbi" onclick="recordTime('coffee_break_in')">CB In</button>
-    <button id="btn_time_out" onclick="recordTime('time_out')">Final Out</button>
+<!-- ATTENDANCE ROW -->
+<div class="table">
+  <div class="cell"><strong>Time In</strong><span id="time_in">--</span></div>
+  <div class="cell"><strong>Time Out</strong><span id="time_out">--</span></div>
+  <div class="cell"><strong>LB Out</strong><span id="lb_out">--</span></div>
+  <div class="cell"><strong>LB In</strong><span id="lb_in">--</span></div>
+  <div class="cell"><strong>CB Out</strong><span id="cb_out">--</span></div>
+  <div class="cell"><strong>CB In</strong><span id="cb_in">--</span></div>
+  <div class="cell"><strong>Final Out</strong><span id="final_out">--</span></div>
 </div>
 
+<!-- BUTTONS -->
+<div class="buttons">
+  <button onclick="mark('time_in')">TIME IN</button>
+  <button onclick="mark('time_out')">TIME OUT</button>
+  <button onclick="mark('lb_out')">LB OUT</button>
+  <button onclick="mark('lb_in')">LB IN</button>
+  <button onclick="mark('cb_out')">CB OUT</button>
+  <button onclick="mark('cb_in')">CB IN</button>
+  <button onclick="mark('final_out')">FINAL OUT</button>
+</div>
 
-    <div class="cancel-box" id="cancelBox">
-        <p>Time recorded. Cancel within <span id="countdown">5</span> seconds</p>
-        <button onclick="cancelLast()">Cancel</button>
-    </div>
-    <br>
-
-<button onclick="window.location.href='view_attendance.html'"
-style="width:100%;background:#00e6e6;color:#003;">
-📄 View Attendance
+<br>
+<button class="cancel" onclick="cancelSave()" id="cancelBtn" disabled>
+Cancel (5s)
 </button>
-</div>
 
-<script>
-    const USER_ID = 1; // palitan kapag naka-auth na
-let pendingColumn = null;
-let pendingTime = null;
-    
-/* ===== SUPABASE SETUP ===== */
-const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
+const supabase = createClient(
+  'https://YOUR_PROJECT.supabase.co',
+  'YOUR_PUBLIC_ANON_KEY'
 );
-async function ensureTodayRow() {
-    const today = new Date().toISOString().split("T")[0];
 
-    const { data } = await supabaseClient
-        .from("attendance")
-        .select("id")
-        .eq("user_id", USER_ID)
-        .eq("attendance_date", today)
-        .single();
+let pendingField = null;
+let timer = null;
 
-    if (!data) {
-        await supabaseClient.from("attendance").insert({
-            user_id: USER_ID,
-            attendance_date: today
-        });
-    }
-}
+const { data: sessionData } = await supabase.auth.getSession();
+const user = sessionData.session?.user;
 
-ensureTodayRow();
+if (!user) location.href = "index.html";
+document.getElementById("userEmail").textContent = user.email;
 
-/* ===== CLOCK & DATE ===== */
+// DATE & CLOCK
 function updateClock() {
-    const now = new Date();
-
-    const dateOptions = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    };
-
-    const timeOptions = {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    };
-
-    document.getElementById("date").textContent =
-        now.toLocaleDateString('en-US', dateOptions);
-
-    document.getElementById("clock").textContent =
-        now.toLocaleTimeString('en-US', timeOptions);
+  const now = new Date();
+  document.getElementById("clock").textContent =
+    now.toLocaleTimeString('en-PH');
+  document.getElementById("date").textContent =
+    now.toLocaleDateString('en-PH',
+      { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 }
-
 setInterval(updateClock, 1000);
 updateClock();
 
-/* ===== ATTENDANCE LOGIC ===== */
-let lastAction = null;
-let countdownTimer;
-let seconds = 5;
+// MARK TIME
+window.mark = function(field) {
+  if (pendingField) return;
 
-async function recordTime(column) {
-    const now = new Date();
-    const isoTime = now.toISOString();
-    const displayTime = now.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-PH', { hour12:false });
+  document.getElementById(field).textContent = time;
+
+  pendingField = field;
+  document.getElementById("cancelBtn").disabled = false;
+
+  let seconds = 5;
+  document.getElementById("cancelBtn").textContent = `Cancel (${seconds}s)`;
+
+  timer = setInterval(async () => {
+    seconds--;
+    document.getElementById("cancelBtn").textContent = `Cancel (${seconds}s)`;
+
+    if (seconds === 0) {
+      clearInterval(timer);
+      await saveToDB(field, time);
+      resetCancel();
+    }
+  }, 1000);
+};
+
+// CANCEL
+window.cancelSave = function() {
+  if (!pendingField) return;
+  document.getElementById(pendingField).textContent = "--";
+  clearInterval(timer);
+  resetCancel();
+};
+
+function resetCancel() {
+  pendingField = null;
+  document.getElementById("cancelBtn").disabled = true;
+  document.getElementById("cancelBtn").textContent = "Cancel (5s)";
+}
+
+// SAVE TO DATABASE
+async function saveToDB(field, time) {
+  const today = new Date().toISOString().split('T')[0];
+
+  const { data: existing } = await supabase
+    .from('attendance')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('date', today)
+    .single();
+
+  if (existing) {
+    await supabase.from('attendance')
+      .update({ [field]: time })
+      .eq('id', existing.id);
+  } else {
+    await supabase.from('attendance').insert({
+      user_id: user.id,
+      email: user.email,
+      date: today,
+      [field]: time
     });
-
-    const map = {
-        time_in: "time_in",
-        lunch_break_out: "lbo",
-        lunch_break_in: "lbi",
-        coffee_break_out: "cbo",
-        coffee_break_in: "cbi",
-        time_out: "time_out"
-    };
-
-    document.getElementById(map[column]).textContent = displayTime;
-
-    pendingColumn = column;
-    pendingTime = isoTime;
-
-    seconds = 5;
-    document.getElementById("countdown").textContent = seconds;
-    document.getElementById("cancelBox").style.display = "block";
-
-    clearInterval(countdownTimer);
-    countdownTimer = setInterval(async () => {
-        seconds--;
-        document.getElementById("countdown").textContent = seconds;
-
-        if (seconds === 0) {
-            clearInterval(countdownTimer);
-            document.getElementById("cancelBox").style.display = "none";
-
-            await saveToSupabase();
-            pendingColumn = null;
-            pendingTime = null;
-        }
-    }, 1000);
+  }
 }
-async function saveToSupabase() {
-    const today = new Date().toISOString().split("T")[0];
-
-    const updateData = {};
-    updateData[pendingColumn] = pendingTime;
-
-    await supabaseClient
-        .from("attendance")
-        .update(updateData)
-        .eq("user_id", USER_ID)
-        .eq("attendance_date", today);
-
-    // 🔒 disable button permanently
-    disableButton(pendingColumn);
-}
-    function disableButton(column) {
-    const btnMap = {
-        time_in: "btn_time_in",
-        lunch_break_out: "btn_lbo",
-        lunch_break_in: "btn_lbi",
-        coffee_break_out: "btn_cbo",
-        coffee_break_in: "btn_cbi",
-        time_out: "btn_time_out"
-    };
-
-    const btn = document.getElementById(btnMap[column]);
-    if (btn) {
-        btn.disabled = true;
-        btn.style.opacity = 0.5;
-        btn.style.cursor = "not-allowed";
-    }
-}
-async function loadTodayAttendance() {
-    const today = new Date().toISOString().split("T")[0];
-
-    const { data, error } = await supabaseClient
-        .from("attendance")
-        .select("*")
-        .eq("user_id", USER_ID)
-        .eq("attendance_date", today)
-        .single();
-
-    if (!data) return;
-
-    // show saved times
-    if (data.time_in) {
-        document.getElementById("time_in").textContent = formatTime(data.time_in);
-        disableButton("time_in");
-    }
-    if (data.lunch_break_out) {
-        document.getElementById("lbo").textContent = formatTime(data.lunch_break_out);
-        disableButton("lunch_break_out");
-    }
-    if (data.lunch_break_in) {
-        document.getElementById("lbi").textContent = formatTime(data.lunch_break_in);
-        disableButton("lunch_break_in");
-    }
-    if (data.coffee_break_out) {
-        document.getElementById("cbo").textContent = formatTime(data.coffee_break_out);
-        disableButton("coffee_break_out");
-    }
-    if (data.coffee_break_in) {
-        document.getElementById("cbi").textContent = formatTime(data.coffee_break_in);
-        disableButton("coffee_break_in");
-    }
-    if (data.time_out) {
-        document.getElementById("time_out").textContent = formatTime(data.time_out);
-        disableButton("time_out");
-    }
-}
-function formatTime(iso) {
-    return new Date(iso).toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true
-    });
-}
-
-function cancelLast() {
-    if (!pendingColumn) return;
-
-    const map = {
-        time_in: "time_in",
-        lunch_break_out: "lbo",
-        lunch_break_in: "lbi",
-        coffee_break_out: "cbo",
-        coffee_break_in: "cbi",
-        time_out: "time_out"
-    };
-
-    document.getElementById(map[pendingColumn]).textContent = "--:--";
-
-    // enable button again
-    enableButton(pendingColumn);
-
-    pendingColumn = null;
-    pendingTime = null;
-    clearInterval(countdownTimer);
-    document.getElementById("cancelBox").style.display = "none";
-}
-
-function enableButton(column) {
-    const btnMap = {
-        time_in: "btn_time_in",
-        lunch_break_out: "btn_lbo",
-        lunch_break_in: "btn_lbi",
-        coffee_break_out: "btn_cbo",
-        coffee_break_in: "btn_cbi",
-        time_out: "btn_time_out"
-    };
-
-    const btn = document.getElementById(btnMap[column]);
-    if (btn) {
-        btn.disabled = false;
-        btn.style.opacity = 1;
-        btn.style.cursor = "pointer";
-    }
-}
-  
- ensureTodayRow();
-loadTodayAttendance();
 </script>
- 
+
 </body>
 </html>
