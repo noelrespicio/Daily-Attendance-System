@@ -73,12 +73,9 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let user, pendingField=null, pendingTime=null, countdown=null;
 let seconds=5, locationData={}, selfieURL=null;
 
-// Sequential order of attendance
+// Sequential workflow
 const sequence = ["time_in","lunch_break_out","lunch_break_in","coffee_break_out","coffee_break_in","time_out"];
-const fieldMap = {
-  time_in:"time_in", lunch_break_out:"lbo", lunch_break_in:"lbi",
-  coffee_break_out:"cbo", coffee_break_in:"cbi", time_out:"time_out"
-};
+const fieldMap = {time_in:"time_in",lunch_break_out:"lbo",lunch_break_in:"lbi",coffee_break_out:"cbo",coffee_break_in:"cbi",time_out:"time_out"};
 
 /* CLOCK */
 setInterval(()=>{
@@ -121,14 +118,22 @@ function getLocation(){
 
 /* RECORD */
 async function record(field, selfieRequired){
-  if(document.getElementById("btn_"+field).disabled) return;
+  // Only allow in sequence
+  const idx = sequence.indexOf(field);
+  for(let i=0;i<idx;i++){
+    if(document.getElementById(fieldMap[sequence[i]]).innerText=="--"){
+      alert(`Please complete ${sequence[i].replace(/_/g," ").toUpperCase()} first`);
+      return;
+    }
+  }
+
   pendingField = field;
   pendingTime = new Date().toISOString();
 
-  try{ locationData = await getLocation(); } 
-  catch(e){ alert(e); locationData={lat:null,lng:null}; }
+  if(field==="time_in" || field==="time_out"){
+    try{ locationData = await getLocation(); } 
+    catch(e){ alert(e); locationData={lat:null,lng:null}; }
 
-  if(selfieRequired){
     document.getElementById("selfieInput").click();
   } else {
     startCountdown(field);
@@ -175,16 +180,16 @@ async function save(){
     .eq("user_id", user.id)
     .eq("attendance_date", today);
 
-  // Disable current button
-  document.getElementById("btn_"+pendingField).disabled = true;
+  document.getElementById(fieldMap[pendingField]).innerText = new Date(pendingTime).toLocaleTimeString();
+  document.getElementById("btn_"+pendingField).disabled=true;
 
-  // Enable next in sequence
+  // Enable next button
   const idx = sequence.indexOf(pendingField);
-  if(idx !== -1 && idx < sequence.length-1){
-    document.getElementById("btn_"+sequence[idx+1]).disabled = false;
+  if(idx < sequence.length-1){
+    document.getElementById("btn_"+sequence[idx+1]).disabled=false;
   }
 
-  pendingField = null;
+  pendingField=null;
 }
 
 /* CANCEL */
@@ -197,7 +202,7 @@ function cancelSave(){
 
 /* LOAD TODAY */
 async function loadToday(){
-  const today=new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split("T")[0];
   const {data} = await supabaseClient.from("attendance")
     .select("*")
     .eq("user_id",user.id)
@@ -205,14 +210,15 @@ async function loadToday(){
     .maybeSingle();
   if(!data) return;
 
-  sequence.forEach(f=>{
+  sequence.forEach((f,i)=>{
     if(data[f]){
       document.getElementById(fieldMap[f]).innerText = new Date(data[f]).toLocaleTimeString();
-      document.getElementById("btn_"+f).disabled=true;
+      document.getElementById("btn_"+f).disabled = true;
 
-      // Enable next button if previous is done
-      const idx = sequence.indexOf(f);
-      if(idx !== -1 && idx < sequence.length-1) document.getElementById("btn_"+sequence[idx+1]).disabled=false;
+      // enable next button if previous is done
+      if(i<sequence.length-1){
+        document.getElementById("btn_"+sequence[i+1]).disabled = false;
+      }
     }
   });
 }
