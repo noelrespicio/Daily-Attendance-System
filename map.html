@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width">
+<title>Location</title>
+</head>
+<body>
+
+<h3>📍 Attendance Location</h3>
+<iframe id="map" width="100%" height="400"></iframe>
+
+<script>
+const params = new URLSearchParams(location.search);
+const lat = params.get("lat");
+const lng = params.get("lng");
+
+document.getElementById("map").src =
+`https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01},${lat-0.01},${lng+0.01},${lat+0.01}&marker=${lat},${lng}`;
+</script>
+
+</body>
+</html>
