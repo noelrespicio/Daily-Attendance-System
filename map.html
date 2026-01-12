@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,17 +10,20 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{margin:0;font-family:Arial}
-#map{height:100vh}
-.back{
-  position:absolute;
-  top:10px;left:10px;
-  z-index:1000;
-  background:#2563eb;
-  color:#fff;
-  padding:10px 15px;
-  border-radius:10px;
-  text-decoration:none;
+body {margin:0; font-family: Arial, sans-serif;}
+#map {height: 100vh; width: 100%;}
+.back {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 1000;
+  background: #2563eb;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 </style>
 </head>
@@ -32,27 +35,61 @@ body{margin:0;font-family:Arial}
 
 <script>
 const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"; // replace with your key
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// GET PARAMS
+// GET QUERY PARAMETERS
 const params = new URLSearchParams(window.location.search);
-const lat = params.get("lat");
-const lng = params.get("lng");
+const attendanceType = params.get("type") || "time_in"; // default to time_in
+const userId = params.get("user"); // must pass user ID
 
-if(!lat || !lng){
-  alert("No location data");
+if(!userId){
+  alert("User ID is missing in URL!");
+  throw new Error("User ID is required");
 }
 
-const map = L.map("map").setView([lat,lng],16);
+// Fetch attendance data
+async function loadAttendanceLocation() {
+  const today = new Date().toISOString().split("T")[0];
+  
+  const { data, error } = await supabase.from("attendance")
+    .select(`${attendanceType}, latitude, longitude, attendance_date`)
+    .eq("user_id", userId)
+    .eq("attendance_date", today)
+    .maybeSingle();
+  
+  if(error){
+    alert("Error fetching attendance: " + error.message);
+    return;
+  }
+  
+  let lat = data?.latitude;
+  let lng = data?.longitude;
+  
+  if(!lat || !lng){
+    alert("No location recorded for this attendance type.");
+    // fallback to default location (e.g., Manila)
+    lat = 14.5995;
+    lng = 120.9842;
+  }
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-  attribution:"© OpenStreetMap"
-}).addTo(map);
+  initMap(lat, lng, attendanceType);
+}
 
-L.marker([lat,lng]).addTo(map)
-  .bindPopup("📍 Time In Location")
-  .openPopup();
+// Initialize map
+function initMap(lat, lng, type){
+  const map = L.map("map").setView([lat,lng],16);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    attribution:"&copy; <a href='https://www.openstreetmap.org/'>OpenStreetMap</a> contributors"
+  }).addTo(map);
+
+  L.marker([lat,lng]).addTo(map)
+    .bindPopup(`<b>📍 ${type.replace(/_/g," ").toUpperCase()} Location</b><br>Latitude: ${lat.toFixed(6)}<br>Longitude: ${lng.toFixed(6)}`)
+    .openPopup();
+}
+
+loadAttendanceLocation();
 </script>
 
 </body>
