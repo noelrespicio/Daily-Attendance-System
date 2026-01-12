@@ -1,50 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Attendance</title>
 <style>
-body{font-family:Arial;background:#f4f6f8;padding:15px}
-.card{background:#fff;padding:15px;border-radius:10px;margin-bottom:12px}
-button{padding:8px;border:none;background:#007bff;color:#fff;border-radius:6px}
+body{font-family:Arial,sans-serif;background:#f4f6f8;padding:15px;}
+h2{text-align:center;margin-bottom:20px;}
+.date-picker{margin-bottom:15px;text-align:center;}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px;}
+th{background:#f7f7f7;}
+img.selfie{width:50px;height:50px;border-radius:50%;object-fit:cover;}
+button{padding:6px 10px;border:none;background:#007bff;color:#fff;border-radius:5px;cursor:pointer;}
+button:hover{background:#0056b3;}
 </style>
 </head>
 <body>
 
 <h2>📊 My Attendance</h2>
-<div id="list"></div>
-  <a href="map.html?lat=${row.latitude}&lng=${row.longitude}">
-🗺 View Map
-</a>
+
+<div class="date-picker">
+<label for="attendanceDate">Select Date: </label>
+<input type="date" id="attendanceDate">
+</div>
+
+<table id="attendanceTable">
+<thead>
+<tr>
+<th>Date</th>
+<th>Time In</th>
+<th>LB Out</th>
+<th>LB In</th>
+<th>CB Out</th>
+<th>CB In</th>
+<th>Time Out</th>
+<th>Selfie</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody>
+<tr><td colspan="9">Select a date to view attendance</td></tr>
+</tbody>
+</table>
+
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const supabase = createClient('https://wlthlwxcmltwescezjlk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o');
-const { data: session } = await supabase.auth.getSession();
-const user = session.session.user;
+const supabase = createClient(
+  "https://wlthlwxcmltwescezjlk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
+);
 
-const { data } = await supabase
-  .from('attendance')
-  .select('*')
-  .eq('user_id', user.id)
-  .order('date', { ascending: false });
+let user;
 
-const list = document.getElementById('list');
+(async ()=>{
+  const { data: session } = await supabase.auth.getSession();
+  if(!session?.session){
+    alert("Not logged in!"); location.href="login.html"; return;
+  }
+  user = session.session.user;
 
-data.forEach(a => {
-  list.innerHTML += `
-  <div class="card">
-    <b>${a.date}</b><br>
-    Time In: ${a.time_in || '--'}<br>
-    Time Out: ${a.time_out || '--'}<br><br>
-    <button onclick="viewMap(${a.latitude},${a.longitude})">📍 View Map</button>
-  </div>`;
-});
+  // Set default date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('attendanceDate').value = today;
+  loadAttendance(today);
+
+  // Listen to date change
+  document.getElementById('attendanceDate').addEventListener('change', e=>{
+    loadAttendance(e.target.value);
+  });
+})();
+
+async function loadAttendance(date){
+  const tbody = document.querySelector("#attendanceTable tbody");
+  tbody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
+
+  const { data, error } = await supabase
+    .from('attendance')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('attendance_date', date)
+    .order('attendance_date', { ascending: false })
+    .maybeSingle();
+
+  if(error || !data){
+    tbody.innerHTML = `<tr><td colspan="9">No attendance found for ${date}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = `
+    <tr>
+      <td>${data.attendance_date}</td>
+      <td>${data.time_in ? new Date(data.time_in).toLocaleTimeString() : '--'}</td>
+      <td>${data.lunch_break_out ? new Date(data.lunch_break_out).toLocaleTimeString() : '--'}</td>
+      <td>${data.lunch_break_in ? new Date(data.lunch_break_in).toLocaleTimeString() : '--'}</td>
+      <td>${data.coffee_break_out ? new Date(data.coffee_break_out).toLocaleTimeString() : '--'}</td>
+      <td>${data.coffee_break_in ? new Date(data.coffee_break_in).toLocaleTimeString() : '--'}</td>
+      <td>${data.time_out ? new Date(data.time_out).toLocaleTimeString() : '--'}</td>
+      <td>${data.selfie_url ? `<img src="${data.selfie_url}" class="selfie" />` : '--'}</td>
+      <td>${data.latitude && data.longitude ? `<button onclick="viewMap(${data.latitude},${data.longitude})">📍 Map</button>` : '--'}</td>
+    </tr>`;
+}
 
 window.viewMap = (lat,lng)=>{
-  location.href = `map.html?lat=${lat}&lng=${lng}`;
+  window.open(`map.html?lat=${lat}&lng=${lng}`, "_blank");
 };
-
 </script>
+
 </body>
 </html>
