@@ -133,170 +133,161 @@ button:disabled{
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ================= SUPABASE ================= */
-const SUPABASE_URL = 'https://wlthlwxcmltwescezjlk.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o';
+const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
 
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let user, pendingField=null, pendingTime=null;
-let countdown, secs=5;
-let locationData={}, selfieURL=null;
+let user, pendingField, pendingTime;
+let countdown, secs = 5;
+let locationData = {}, selfieURL = null;
 
-/* ================= CLOCK ================= */
-setInterval(()=>{
-  const now=new Date();
-  document.getElementById("clock").innerText=now.toLocaleTimeString();
-  document.getElementById("date").innerText=now.toDateString();
-},1000);
+const fieldMap = {
+  time_in: "time_in",
+  lunch_break_out: "lbo",
+  lunch_break_in: "lbi",
+  coffee_break_out: "cbo",
+  coffee_break_in: "cbi",
+  time_out: "time_out"
+};
 
-/* ================= AUTH ================= */
-(async()=>{
-  const {data}=await supabase.auth.getSession();
-  if(!data.session) location.href="login.html";
-  user=data.session.user;
+const buttonMap = {
+  time_in: "btn_time_in",
+  lunch_break_out: "btn_lbo",
+  lunch_break_in: "btn_lbi",
+  coffee_break_out: "btn_cbo",
+  coffee_break_in: "btn_cbi",
+  time_out: "btn_time_out"
+};
+
+/* AUTH */
+(async () => {
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) location.href = "login.html";
+  user = data.session.user;
   await ensureToday();
   await loadToday();
 })();
 
-/* ================= GEOLOCATION ================= */
-function getLocation(){
-  return new Promise((res,rej)=>{
-    navigator.geolocation.getCurrentPosition(
-      p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),
-      e=>rej(e)
-    );
-  });
-}
-
-/* ================= ENSURE ROW ================= */
-async function ensureToday(){
-  const today=new Date().toISOString().split("T")[0];
-  const {data}=await supabase.from("attendance")
+/* ENSURE TODAY */
+async function ensureToday() {
+  const today = new Date().toISOString().split("T")[0];
+  const { data } = await supabase
+    .from("attendance")
     .select("id")
-    .eq("user_id",user.id)
-    .eq("attendance_date",today)
-    .single();
+    .eq("user_id", user.id)
+    .eq("attendance_date", today)
+    .maybeSingle();
 
-  if(!data){
+  if (!data) {
     await supabase.from("attendance").insert({
-      user_id:user.id,
-      attendance_date:today
+      user_id: user.id,
+      attendance_date: today
     });
   }
 }
 
-/* ================= RECORD ================= */
-async function record(field){
-  if(field==="time_in"){
-    locationData=await getLocation();
+/* GEOLOCATION */
+function getLocation() {
+  return new Promise((res, rej) => {
+    navigator.geolocation.getCurrentPosition(
+      p => res({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      err => rej(err)
+    );
+  });
+}
+
+/* RECORD */
+async function record(field) {
+  if (field === "time_in") {
+    locationData = await getLocation();
     document.getElementById("selfieInput").click();
-    pendingField=field;
+    pendingField = field;
     return;
   }
   startCountdown(field);
 }
 
-/* ================= SELFIE ================= */
-document.getElementById("selfieInput").addEventListener("change",async e=>{
-  const file=e.target.files[0];
-  if(!file) return;
+/* SELFIE */
+document.getElementById("selfieInput").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  const name=`${user.id}/${Date.now()}.jpg`;
-  await supabase.storage.from("selfies").upload(name,file,{upsert:true});
-  selfieURL=supabase.storage.from("selfies").getPublicUrl(name).data.publicUrl;
+  const name = `${user.id}/${Date.now()}.jpg`;
+  await supabase.storage.from("selfies").upload(name, file, { upsert: true });
+  selfieURL = supabase.storage.from("selfies").getPublicUrl(name).data.publicUrl;
 
   startCountdown("time_in");
 });
 
-/* ================= COUNTDOWN ================= */
-function startCountdown(field){
-  pendingField=field;
-  pendingTime=new Date().toISOString();
+/* COUNTDOWN */
+function startCountdown(field) {
+  pendingField = field;
+  pendingTime = new Date().toISOString();
 
-  document.getElementById(fieldMap[field]).innerText=
+  document.getElementById(fieldMap[field]).innerText =
     new Date().toLocaleTimeString();
 
-  secs=5;
-  document.getElementById("count").innerText=secs;
-  document.getElementById("cancelBox").style.display="block";
+  secs = 5;
+  document.getElementById("cancelBox").style.display = "block";
 
-  countdown=setInterval(async()=>{
-    secs--;
-    document.getElementById("count").innerText=secs;
-    if(secs===0){
+  countdown = setInterval(async () => {
+    if (--secs === 0) {
       clearInterval(countdown);
-      document.getElementById("cancelBox").style.display="none";
+      document.getElementById("cancelBox").style.display = "none";
       await save();
     }
-  },1000);
+  }, 1000);
 }
 
-/* ================= SAVE ================= */
-async function save(){
-  const today=new Date().toISOString().split("T")[0];
-  const payload={
-    [pendingField]:pendingTime
-  };
+/* SAVE */
+async function save() {
+  const today = new Date().toISOString().split("T")[0];
+  const payload = { [pendingField]: pendingTime };
 
-  if(pendingField==="time_in"){
-    payload.latitude=locationData.lat;
-    payload.longitude=locationData.lng;
-    payload.selfie_url=selfieURL;
+  if (pendingField === "time_in") {
+    payload.latitude = locationData.lat;
+    payload.longitude = locationData.lng;
+    payload.selfie_url = selfieURL;
   }
 
   await supabase.from("attendance")
     .update(payload)
-    .eq("user_id",user.id)
-    .eq("attendance_date",today);
+    .eq("user_id", user.id)
+    .eq("attendance_date", today);
 
   disable(pendingField);
-  pendingField=null;
 }
 
-/* ================= CANCEL ================= */
-function cancel(){
-  clearInterval(countdown);
-  document.getElementById(fieldMap[pendingField]).innerText="--";
-  pendingField=null;
-  document.getElementById("cancelBox").style.display="none";
-}
-
-/* ================= LOAD TODAY ================= */
-async function loadToday(){
-  const today=new Date().toISOString().split("T")[0];
-  const {data}=await supabase.from("attendance")
+/* LOAD */
+async function loadToday() {
+  const today = new Date().toISOString().split("T")[0];
+  const { data } = await supabase
+    .from("attendance")
     .select("*")
-    .eq("user_id",user.id)
-    .eq("attendance_date",today)
-    .single();
+    .eq("user_id", user.id)
+    .eq("attendance_date", today)
+    .maybeSingle();
 
-  if(!data) return;
+  if (!data) return;
 
-  for(let k in fieldMap){
-    if(data[k]){
-      document.getElementById(fieldMap[k]).innerText=
+  for (let k in fieldMap) {
+    if (data[k]) {
+      document.getElementById(fieldMap[k]).innerText =
         new Date(data[k]).toLocaleTimeString();
       disable(k);
     }
   }
 }
 
-/* ================= HELPERS ================= */
-const fieldMap={
-  time_in:"time_in",
-  lunch_break_out:"lbo",
-  lunch_break_in:"lbi",
-  coffee_break_out:"cbo",
-  coffee_break_in:"cbi",
-  time_out:"time_out"
-};
-
-function disable(field){
-  document.getElementById("btn_"+field).disabled=true;
+/* DISABLE */
+function disable(field) {
+  document.getElementById(buttonMap[field]).disabled = true;
 }
 </script>
+
 
 </body>
 </html>
