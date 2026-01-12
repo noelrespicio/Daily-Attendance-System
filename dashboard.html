@@ -193,7 +193,7 @@ async function save(){
     return;
   }
 
-  document.getElementById(fieldMap[pendingField]).innerText = pendingTime.toLocaleTimeString('en-US',{hour24:true});
+  document.getElementById(fieldMap[pendingField]).innerText = pendingTime.toLocaleTimeString('en-US',{hour12:true});
   pendingField = null;
   selfieURL = null;
 }
@@ -219,7 +219,7 @@ async function loadToday(){
   Object.keys(fieldMap).forEach(f=>{
     if(data[f]){
       const d = new Date(data[f]);
-      document.getElementById(fieldMap[f]).innerText = d.toLocaleTimeString('en-US',{hour24:true});
+      document.getElementById(fieldMap[f]).innerText = d.toLocaleTimeString('en-US',{hour12:true});
     }
   });
 }
