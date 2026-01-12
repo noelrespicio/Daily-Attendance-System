@@ -1,33 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Selfie</title>
+<title>Selfie View</title>
 <style>
-body{margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#f4f6f8;}
-img{max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.3);}
-.back{
-  position:absolute; top:15px; left:15px;
-  background:#2563eb; color:#fff; padding:8px 12px;
-  border-radius:8px; text-decoration:none; font-weight:bold;
-}
+body {margin:0;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh;background:#f4f6f8;}
+img {max-width:90%;max-height:90%;border-radius:10px;box-shadow:0 4px 15px rgba(0,0,0,0.3);}
 </style>
 </head>
 <body>
-
-<a href="my_attendance.html" class="back">⬅ Back</a>
 <img id="selfieImg" src="" alt="Selfie">
 
 <script>
 const params = new URLSearchParams(window.location.search);
 const url = params.get("url");
-if(url){
+
+if(!url) {
+  alert("No selfie URL provided!");
+} else {
   document.getElementById("selfieImg").src = decodeURIComponent(url);
-}else{
-  document.getElementById("selfieImg").alt = "No selfie available";
 }
 </script>
-
 </body>
 </html>
