@@ -49,13 +49,14 @@ button:disabled{background:#aaa;cursor:not-allowed;}
 </table>
 
 <div class="buttons">
-<button id="btn_time_in" onclick="record('time_in',true)">Time In</button>
-<button id="btn_lbo" onclick="record('lunch_break_out',true">LB Out</button>
-<button id="btn_lbi" onclick="record('lunch_break_in',true)">LB In</button>
-<button id="btn_cbo" onclick="record('coffee_break_out',true)">CB Out</button>
-<button id="btn_cbi" onclick="record('coffee_break_in',true)">CB In</button>
-<button id="btn_time_out" onclick="record('time_out',true)">Time Out</button>
+  <button id="btn_time_in" onclick="record('time_in', true)">Time In</button>
+  <button id="btn_lbo" onclick="record('lunch_break_out', false)" disabled>LB Out</button>
+  <button id="btn_lbi" onclick="record('lunch_break_in', false)" disabled>LB In</button>
+  <button id="btn_cbo" onclick="record('coffee_break_out', false)" disabled>CB Out</button>
+  <button id="btn_cbi" onclick="record('coffee_break_in', false)" disabled>CB In</button>
+  <button id="btn_time_out" onclick="record('time_out', true)" disabled>Time Out</button>
 </div>
+
 
 <div class="cancel" id="cancelBox">
 <p>Saving in <span id="count">5</span> seconds</p>
@@ -76,6 +77,41 @@ let user, pendingField=null, pendingTime=null, countdown=null;
 let seconds=5, locationData={}, selfieURL=null;
 
 const fields=["time_in","lunch_break_out","lunch_break_in","coffee_break_out","coffee_break_in","time_out"];
+const sequence = [
+  "time_in",
+  "lunch_break_out",
+  "lunch_break_in",
+  "coffee_break_out",
+  "coffee_break_in",
+  "time_out"
+];
+
+async function save(){
+  const today = new Date().toISOString().split("T")[0];
+  const payload = {[pendingField]: pendingTime};
+  
+  if(pendingField === "time_in" || pendingField === "time_out"){
+    payload.latitude = locationData.lat;
+    payload.longitude = locationData.lng;
+    payload.selfie_url = selfieURL;
+  }
+
+  await supabaseClient.from("attendance")
+    .update(payload)
+    .eq("user_id", user.id)
+    .eq("attendance_date", today);
+
+  // disable this button
+  document.getElementById("btn_"+pendingField).disabled = true;
+
+  // enable next button in sequence
+  const idx = sequence.indexOf(pendingField);
+  if(idx !== -1 && idx < sequence.length - 1){
+    document.getElementById("btn_"+sequence[idx+1]).disabled = false;
+  }
+
+  pendingField = null;
+}
 
 /* CLOCK */
 setInterval(()=>{
