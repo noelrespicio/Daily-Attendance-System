@@ -48,11 +48,11 @@ button:disabled{background:#aaa;cursor:not-allowed;}
 
 <div class="buttons">
 <button id="btn_time_in" onclick="record('time_in',true)">Time In</button>
-<button id="btn_lbo" onclick="record('lunch_break_out',false)" disabled>LB Out</button>
-<button id="btn_lbi" onclick="record('lunch_break_in',false)" disabled>LB In</button>
-<button id="btn_cbo" onclick="record('coffee_break_out',false)" disabled>CB Out</button>
-<button id="btn_cbi" onclick="record('coffee_break_in',false)" disabled>CB In</button>
-<button id="btn_time_out" onclick="record('time_out',true)" disabled>Time Out</button>
+<button id="btn_lbo" onclick="record('lunch_break_out',false)">LB Out</button>
+<button id="btn_lbi" onclick="record('lunch_break_in',false)">LB In</button>
+<button id="btn_cbo" onclick="record('coffee_break_out',false)">CB Out</button>
+<button id="btn_cbi" onclick="record('coffee_break_in',false)">CB In</button>
+<button id="btn_time_out" onclick="record('time_out',true)">Time Out</button>
 </div>
 
 <div class="cancel" id="cancelBox">
@@ -72,13 +72,12 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let user, pendingField=null, pendingTime=null, countdown=null;
 let seconds=5, locationData={}, selfieURL=null;
 
-const sequence = ["time_in","lunch_break_out","lunch_break_in","coffee_break_out","coffee_break_in","time_out"];
 const fieldMap = {time_in:"time_in",lunch_break_out:"lbo",lunch_break_in:"lbi",coffee_break_out:"cbo",coffee_break_in:"cbi",time_out:"time_out"};
 
-/* CLOCK 24HR */
+/* CLOCK 12HR */
 setInterval(()=>{
   const now = new Date();
-  document.getElementById("clock").innerText = now.toLocaleTimeString("en-GB");
+  document.getElementById("clock").innerText = now.toLocaleTimeString('en-US',{hour12:true});
   document.getElementById("date").innerText = now.toDateString();
 },1000);
 
@@ -114,22 +113,14 @@ function getLocation(){
   });
 }
 
-/* RECORD */
+/* RECORD BUTTON CLICK */
 async function record(field, selfieRequired){
-  const idx = sequence.indexOf(field);
-  for(let i=0;i<idx;i++){
-    if(document.getElementById(fieldMap[sequence[i]]).innerText=="--"){
-      alert(`Please complete ${sequence[i].replace(/_/g," ").toUpperCase()} first`);
-      return;
-    }
-  }
-
   pendingField = field;
   pendingTime = new Date().toISOString();
 
   if(selfieRequired){
     try{ locationData = await getLocation(); } 
-    catch(e){ alert(e); locationData={lat:null,lng:null}; }
+    catch(e){ locationData={lat:null,lng:null}; }
     document.getElementById("selfieInput").click();
   } else {
     startCountdown(field);
@@ -148,7 +139,7 @@ document.getElementById("selfieInput").addEventListener("change",async e=>{
 
 /* COUNTDOWN */
 function startCountdown(field){
-  document.getElementById(fieldMap[field]).innerText = new Date(pendingTime).toLocaleTimeString("en-GB");
+  document.getElementById(fieldMap[field]).innerText = new Date(pendingTime).toLocaleTimeString('en-US',{hour12:true});
   seconds=5; document.getElementById("count").innerText=seconds;
   document.getElementById("cancelBox").style.display="block";
 
@@ -163,7 +154,7 @@ function startCountdown(field){
   },1000);
 }
 
-/* SAVE */
+/* SAVE DATA */
 async function save(){
   const today = new Date().toISOString().split("T")[0];
   const payload = {[pendingField]: pendingTime};
@@ -172,24 +163,18 @@ async function save(){
     payload.longitude = locationData.lng;
     payload.selfie_url = selfieURL;
   }
+
   await supabaseClient.from("attendance")
     .update(payload)
     .eq("user_id", user.id)
     .eq("attendance_date", today);
 
-  document.getElementById(fieldMap[pendingField]).innerText = new Date(pendingTime).toLocaleTimeString("en-GB");
-  document.getElementById("btn_"+pendingField).disabled=true;
-
-  // Enable next button
-  const idx = sequence.indexOf(pendingField);
-  if(idx < sequence.length-1){
-    document.getElementById("btn_"+sequence[idx+1]).disabled=false;
-  }
-
+  document.getElementById(fieldMap[pendingField]).innerText = new Date(pendingTime).toLocaleTimeString('en-US',{hour12:true});
   pendingField=null;
+  selfieURL=null;
 }
 
-/* CANCEL */
+/* CANCEL SAVE */
 function cancelSave(){
   clearInterval(countdown);
   if(pendingField) document.getElementById(fieldMap[pendingField]).innerText="--";
@@ -207,13 +192,9 @@ async function loadToday(){
     .maybeSingle();
   if(!data) return;
 
-  sequence.forEach((f,i)=>{
+  Object.keys(fieldMap).forEach(f=>{
     if(data[f]){
-      document.getElementById(fieldMap[f]).innerText = new Date(data[f]).toLocaleTimeString("en-GB");
-      document.getElementById("btn_"+f).disabled = true;
-      if(i<sequence.length-1 && document.getElementById(fieldMap[sequence[i+1]]).innerText=="--"){
-        document.getElementById("btn_"+sequence[i+1]).disabled=false;
-      }
+      document.getElementById(fieldMap[f]).innerText = new Date(data[f]).toLocaleTimeString('en-US',{hour12:true});
     }
   });
 }
