@@ -1,26 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Selfie View</title>
+<title>View Selfie</title>
 <style>
-body {margin:0;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh;background:#f4f6f8;}
-img {max-width:90%;max-height:90%;border-radius:10px;box-shadow:0 4px 15px rgba(0,0,0,0.3);}
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  height: 100vh;
+}
+h2 {
+  margin-bottom: 20px;
+}
+img {
+  max-width: 90%;
+  max-height: 80vh;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+button {
+  margin-top: 15px;
+  padding: 10px 15px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:hover {
+  background: #0056b3;
+}
 </style>
 </head>
 <body>
-<img id="selfieImg" src="" alt="Selfie">
+
+<h2>📸 My Selfie</h2>
+<img id="selfieImage" src="" alt="Selfie">
+<button onclick="goBack()">⬅ Back</button>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const url = params.get("url");
+// Get URL parameter "url"
+function getQueryParam(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
 
-if(!url) {
-  alert("No selfie URL provided!");
+const selfieUrl = getQueryParam("url");
+const imgEl = document.getElementById("selfieImage");
+
+if(selfieUrl) {
+  imgEl.src = decodeURIComponent(selfieUrl);
 } else {
-  document.getElementById("selfieImg").src = decodeURIComponent(url);
+  imgEl.alt = "No selfie found";
+}
+
+function goBack() {
+  window.history.back();
 }
 </script>
+
 </body>
 </html>
