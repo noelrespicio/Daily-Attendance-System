@@ -110,7 +110,7 @@ function getLocation() {
     navigator.geolocation.getCurrentPosition(
       pos => resolve({lat: pos.coords.latitude, lng: pos.coords.longitude}),
       err => reject(err.message),
-      {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+      {enableHighAccuracy:true, timeout:10, maximumAge:0}
     );
   });
 }
