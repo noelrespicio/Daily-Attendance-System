@@ -98,13 +98,17 @@ async function loadAttendance(date){
       <td>${data.coffee_break_out ? new Date(data.coffee_break_out).toLocaleTimeString() : '--'}</td>
       <td>${data.coffee_break_in ? new Date(data.coffee_break_in).toLocaleTimeString() : '--'}</td>
       <td>${data.time_out ? new Date(data.time_out).toLocaleTimeString() : '--'}</td>
-      <td>${data.selfie_url ? `<img src="${data.selfie_url}" class="selfie" />` : '--'}</td>
+      <td>${data.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(data.selfie_url)}')">📸 View</button>` : '--'}</td>
       <td>${data.latitude && data.longitude ? `<button onclick="viewMap(${data.latitude},${data.longitude})">📍 Map</button>` : '--'}</td>
     </tr>`;
 }
 
 window.viewMap = (lat,lng)=>{
   window.open(`map.html?lat=${lat}&lng=${lng}`, "_blank");
+};
+
+window.viewSelfie = (url)=>{
+  window.open(`selfie.html?url=${url}`, "_blank");
 };
 </script>
 
