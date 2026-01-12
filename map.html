@@ -5,13 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attendance Location</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- LEAFLET (FREE MAP) -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-body {margin:0; font-family: Arial;}
-#map {height: 100vh; width: 100%;}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+#map {
+  height: 100%;
+  width: 100%;
+}
 .back {
   position: absolute;
   top: 15px;
@@ -23,7 +33,6 @@ body {margin:0; font-family: Arial;}
   border-radius: 8px;
   text-decoration: none;
   font-weight: bold;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 </style>
 </head>
@@ -34,63 +43,34 @@ body {margin:0; font-family: Arial;}
 <div id="map"></div>
 
 <script>
-const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+document.addEventListener("DOMContentLoaded", () => {
 
-// GET QUERY PARAMETERS
-const params = new URLSearchParams(window.location.search);
-const attendanceType = params.get("type") || "time_in";
-const userId = params.get("user");
+  // GET LAT & LNG FROM URL
+  const params = new URLSearchParams(window.location.search);
+  let lat = parseFloat(params.get("lat"));
+  let lng = parseFloat(params.get("lng"));
 
-if(!userId){
-  alert("User ID is missing in URL!");
-  throw new Error("User ID is required");
-}
-
-// Initialize map with default location
-const map = L.map("map").setView([14.5995, 120.9842], 16); // Manila fallback
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "&copy; <a href='https://www.openstreetmap.org/'>OpenStreetMap</a> contributors"
-}).addTo(map);
-
-// Fetch attendance location
-async function loadAttendanceLocation() {
-  const today = new Date().toISOString().split("T")[0];
-  
-  const { data, error } = await supabase.from("attendance")
-    .select(`${attendanceType}, latitude, longitude`)
-    .eq("user_id", userId)
-    .eq("attendance_date", today)
-    .maybeSingle();
-  
-  if(error){
-    console.error(error);
-    alert("Error fetching attendance.");
-    return;
-  }
-  
-  if(!data){
-    alert("No attendance data found for today.");
-    return;
-  }
-
-  let lat = parseFloat(data.latitude);
-  let lng = parseFloat(data.longitude);
-
-  if(isNaN(lat) || isNaN(lng)){
-    alert("No location recorded for this attendance type.");
-    lat = 14.5995; // fallback
+  // FALLBACK LOCATION (Manila)
+  if (isNaN(lat) || isNaN(lng)) {
+    lat = 14.5995;
     lng = 120.9842;
   }
 
-  map.setView([lat, lng], 16);
-  L.marker([lat, lng]).addTo(map)
-    .bindPopup(`<b>📍 ${attendanceType.replace(/_/g," ").toUpperCase()} Location</b><br>Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`)
-    .openPopup();
-}
+  // INIT MAP
+  const map = L.map("map").setView([lat, lng], 16);
 
-loadAttendanceLocation();
+  // TILE LAYER (FREE)
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors"
+  }).addTo(map);
+
+  // MARKER
+  L.marker([lat, lng])
+    .addTo(map)
+    .bindPopup("📍 Attendance Location")
+    .openPopup();
+
+});
 </script>
 
 </body>
