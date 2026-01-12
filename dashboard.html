@@ -66,7 +66,7 @@ button:disabled{background:#aaa;cursor:not-allowed;}
 
 <script>
 const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"; 
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let user, pendingField=null, pendingTime=null, countdown=null;
@@ -74,7 +74,7 @@ let seconds=5, locationData={}, selfieURL=null;
 
 const fieldMap = {time_in:"time_in",lunch_break_out:"lbo",lunch_break_in:"lbi",coffee_break_out:"cbo",coffee_break_in:"cbi",time_out:"time_out"};
 
-/* CLOCK – LOCAL TIME */
+/* CLOCK */
 setInterval(()=>{
   const now = new Date();
   document.getElementById("clock").innerText = now.toLocaleTimeString('en-US',{hour12:true});
@@ -110,9 +110,15 @@ function getLocation() {
     navigator.geolocation.getCurrentPosition(
       pos => resolve({lat: pos.coords.latitude, lng: pos.coords.longitude}),
       err => reject(err.message),
-      {enableHighAccuracy:true, timeout:10, maximumAge:0}
+      {enableHighAccuracy:true, timeout:15000, maximumAge:0}
     );
   });
+}
+
+/* Convert local time to DB-friendly string (without changing hours) */
+function toLocalString(date){
+  const pad = n => n.toString().padStart(2,'0');
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
 /* RECORD BUTTON */
@@ -123,7 +129,7 @@ async function record(field, selfieRequired){
   if (selfieRequired) {
     try {
       locationData = await getLocation();
-      console.log("LOCATION:", locationData); // DEBUG
+      console.log("LOCATION:", locationData);
     } catch (err) {
       alert("Location is required!");
       return;
@@ -166,7 +172,7 @@ async function save(){
   const today = new Date().toISOString().split("T")[0];
 
   const payload = {
-    [pendingField]: pendingTime.toISOString() // save in ISO for database
+    [pendingField]: toLocalString(pendingTime)
   };
 
   if (pendingField === "time_in" || pendingField === "time_out") {
@@ -187,14 +193,12 @@ async function save(){
     return;
   }
 
-  // display local time in the field
   document.getElementById(fieldMap[pendingField]).innerText = pendingTime.toLocaleTimeString('en-US',{hour12:true});
-
   pendingField = null;
   selfieURL = null;
 }
 
-/* CANCEL SAVE */
+/* CANCEL */
 function cancelSave(){
   clearInterval(countdown);
   if(pendingField) document.getElementById(fieldMap[pendingField]).innerText="--";
@@ -214,7 +218,6 @@ async function loadToday(){
 
   Object.keys(fieldMap).forEach(f=>{
     if(data[f]){
-      // convert ISO saved in DB to local time
       const d = new Date(data[f]);
       document.getElementById(fieldMap[f]).innerText = d.toLocaleTimeString('en-US',{hour12:true});
     }
