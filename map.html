@@ -1,21 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width">
-<title>Location</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Location</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{margin:0;font-family:Arial}
+#map{height:100vh}
+.back{
+  position:absolute;
+  top:10px;left:10px;
+  z-index:1000;
+  background:#2563eb;
+  color:#fff;
+  padding:10px 15px;
+  border-radius:10px;
+  text-decoration:none;
+}
+</style>
 </head>
+
 <body>
 
-<h3>📍 Attendance Location</h3>
-<iframe id="map" width="100%" height="400"></iframe>
+<a href="view_attendance.html" class="back">⬅ Back</a>
+<div id="map"></div>
 
 <script>
-const params = new URLSearchParams(location.search);
+const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// GET PARAMS
+const params = new URLSearchParams(window.location.search);
 const lat = params.get("lat");
 const lng = params.get("lng");
 
-document.getElementById("map").src =
-`https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01},${lat-0.01},${lng+0.01},${lat+0.01}&marker=${lat},${lng}`;
+if(!lat || !lng){
+  alert("No location data");
+}
+
+const map = L.map("map").setView([lat,lng],16);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+  attribution:"© OpenStreetMap"
+}).addTo(map);
+
+L.marker([lat,lng]).addTo(map)
+  .bindPopup("📍 Time In Location")
+  .openPopup();
 </script>
 
 </body>
