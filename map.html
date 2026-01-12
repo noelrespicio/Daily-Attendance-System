@@ -10,7 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body {margin:0; font-family: Arial, sans-serif;}
+body {margin:0; font-family: Arial;}
 #map {height: 100vh; width: 100%;}
 .back {
   position: absolute;
@@ -35,57 +35,58 @@ body {margin:0; font-family: Arial, sans-serif;}
 
 <script>
 const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"; // replace with your key
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // GET QUERY PARAMETERS
 const params = new URLSearchParams(window.location.search);
-const attendanceType = params.get("type") || "time_in"; // default to time_in
-const userId = params.get("user"); // must pass user ID
+const attendanceType = params.get("type") || "time_in";
+const userId = params.get("user");
 
 if(!userId){
   alert("User ID is missing in URL!");
   throw new Error("User ID is required");
 }
 
-// Fetch attendance data
+// Initialize map with default location
+const map = L.map("map").setView([14.5995, 120.9842], 16); // Manila fallback
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; <a href='https://www.openstreetmap.org/'>OpenStreetMap</a> contributors"
+}).addTo(map);
+
+// Fetch attendance location
 async function loadAttendanceLocation() {
   const today = new Date().toISOString().split("T")[0];
   
   const { data, error } = await supabase.from("attendance")
-    .select(`${attendanceType}, latitude, longitude, attendance_date`)
+    .select(`${attendanceType}, latitude, longitude`)
     .eq("user_id", userId)
     .eq("attendance_date", today)
     .maybeSingle();
   
   if(error){
-    alert("Error fetching attendance: " + error.message);
+    console.error(error);
+    alert("Error fetching attendance.");
     return;
   }
   
-  let lat = data?.latitude;
-  let lng = data?.longitude;
-  
-  if(!lat || !lng){
+  if(!data){
+    alert("No attendance data found for today.");
+    return;
+  }
+
+  let lat = parseFloat(data.latitude);
+  let lng = parseFloat(data.longitude);
+
+  if(isNaN(lat) || isNaN(lng)){
     alert("No location recorded for this attendance type.");
-    // fallback to default location (e.g., Manila)
-    lat = 14.5995;
+    lat = 14.5995; // fallback
     lng = 120.9842;
   }
 
-  initMap(lat, lng, attendanceType);
-}
-
-// Initialize map
-function initMap(lat, lng, type){
-  const map = L.map("map").setView([lat,lng],16);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-    attribution:"&copy; <a href='https://www.openstreetmap.org/'>OpenStreetMap</a> contributors"
-  }).addTo(map);
-
-  L.marker([lat,lng]).addTo(map)
-    .bindPopup(`<b>📍 ${type.replace(/_/g," ").toUpperCase()} Location</b><br>Latitude: ${lat.toFixed(6)}<br>Longitude: ${lng.toFixed(6)}`)
+  map.setView([lat, lng], 16);
+  L.marker([lat, lng]).addTo(map)
+    .bindPopup(`<b>📍 ${attendanceType.replace(/_/g," ").toUpperCase()} Location</b><br>Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`)
     .openPopup();
 }
 
