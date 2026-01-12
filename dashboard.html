@@ -18,7 +18,7 @@ header {
 }
 
 #date {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
 }
 
@@ -78,7 +78,7 @@ button:disabled {
 <header>
   <div id="date"></div>
   <div id="clock"></div>
-  <p>Welcome, <strong id="userfisrtname"></strong></p>
+  <p>Welcome, <strong id="userEmail"></strong></p>
 </header>
 
 <!-- ATTENDANCE ROW -->
@@ -116,16 +116,22 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
 );
 
+/* 🔧 CONFIG */
+const OFFICE_LAT = 16.9333;
+const OFFICE_LNG = 121.7667;
+const ALLOWED_RADIUS = 100; // meters
+
 let pendingField = null;
 let timer = null;
+let currentLocation = null;
 
+/* AUTH */
 const { data: sessionData } = await supabase.auth.getSession();
 const user = sessionData.session?.user;
-
 if (!user) location.href = "index.html";
 document.getElementById("userEmail").textContent = user.email;
 
-// DATE & CLOCK
+/* DATE & CLOCK */
 function updateClock() {
   const now = new Date();
   document.getElementById("clock").textContent =
@@ -137,47 +143,96 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// MARK TIME
-window.mark = function(field) {
+/* GEOLOCATION */
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3;
+  const φ1 = lat1 * Math.PI/180;
+  const φ2 = lat2 * Math.PI/180;
+  const Δφ = (lat2-lat1) * Math.PI/180;
+  const Δλ = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(Δφ/2)**2 +
+            Math.cos(φ1)*Math.cos(φ2) *
+            Math.sin(Δλ/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function checkLocation() {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const { latitude, longitude } = pos.coords;
+      const distance = getDistance(latitude, longitude, OFFICE_LAT, OFFICE_LNG);
+      if (distance <= ALLOWED_RADIUS) {
+        currentLocation = { latitude, longitude };
+        resolve(true);
+      } else {
+        alert("❌ You are outside the allowed location");
+        reject();
+      }
+    }, () => {
+      alert("❌ Location access denied");
+      reject();
+    });
+  });
+}
+
+/* LOAD TODAY DATA (PERSIST AFTER REFRESH) */
+async function loadToday() {
+  const today = new Date().toISOString().split('T')[0];
+  const { data } = await supabase
+    .from('attendance')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('date', today)
+    .single();
+
+  if (data) {
+    ['time_in','time_out','lb_out','lb_in','cb_out','cb_in','final_out']
+      .forEach(f => {
+        if (data[f]) document.getElementById(f).textContent = data[f];
+      });
+  }
+}
+await loadToday();
+
+/* MARK TIME */
+window.mark = async function(field) {
   if (pendingField) return;
 
-  const now = new Date();
-  const time = now.toLocaleTimeString('en-PH', { hour12:false });
-  document.getElementById(field).textContent = time;
+  await checkLocation();
 
+  const time = new Date().toLocaleTimeString('en-PH',{hour12:false});
+  document.getElementById(field).textContent = time;
   pendingField = field;
-  document.getElementById("cancelBtn").disabled = false;
 
   let seconds = 5;
+  document.getElementById("cancelBtn").disabled = false;
   document.getElementById("cancelBtn").textContent = `Cancel (${seconds}s)`;
 
   timer = setInterval(async () => {
     seconds--;
     document.getElementById("cancelBtn").textContent = `Cancel (${seconds}s)`;
-
     if (seconds === 0) {
       clearInterval(timer);
       await saveToDB(field, time);
-      resetCancel();
+      reset();
     }
   }, 1000);
 };
 
-// CANCEL
+/* CANCEL */
 window.cancelSave = function() {
-  if (!pendingField) return;
   document.getElementById(pendingField).textContent = "--";
   clearInterval(timer);
-  resetCancel();
+  reset();
 };
 
-function resetCancel() {
+function reset() {
   pendingField = null;
   document.getElementById("cancelBtn").disabled = true;
   document.getElementById("cancelBtn").textContent = "Cancel (5s)";
 }
 
-// SAVE TO DATABASE
+/* SAVE */
 async function saveToDB(field, time) {
   const today = new Date().toISOString().split('T')[0];
 
@@ -188,16 +243,20 @@ async function saveToDB(field, time) {
     .eq('date', today)
     .single();
 
+  const payload = {
+    [field]: time,
+    latitude: currentLocation.latitude,
+    longitude: currentLocation.longitude
+  };
+
   if (existing) {
-    await supabase.from('attendance')
-      .update({ [field]: time })
-      .eq('id', existing.id);
+    await supabase.from('attendance').update(payload).eq('id', existing.id);
   } else {
     await supabase.from('attendance').insert({
       user_id: user.id,
       email: user.email,
       date: today,
-      [field]: time
+      ...payload
     });
   }
 }
