@@ -13,7 +13,9 @@ button{padding:8px;border:none;background:#007bff;color:#fff;border-radius:6px}
 
 <h2>📊 My Attendance</h2>
 <div id="list"></div>
-
+  <a href="map.html?lat=${row.latitude}&lng=${row.longitude}">
+🗺 View Map
+</a>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -42,9 +44,7 @@ data.forEach(a => {
 window.viewMap = (lat,lng)=>{
   location.href = `map.html?lat=${lat}&lng=${lng}`;
 };
-  <a href="map.html?lat=${row.latitude}&lng=${row.longitude}">
-🗺 View Map
-</a>
+
 </script>
 </body>
 </html>
