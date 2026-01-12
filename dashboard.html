@@ -73,14 +73,13 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let user, pendingField=null, pendingTime=null, countdown=null;
 let seconds=5, locationData={}, selfieURL=null;
 
-// Sequential workflow
 const sequence = ["time_in","lunch_break_out","lunch_break_in","coffee_break_out","coffee_break_in","time_out"];
 const fieldMap = {time_in:"time_in",lunch_break_out:"lbo",lunch_break_in:"lbi",coffee_break_out:"cbo",coffee_break_in:"cbi",time_out:"time_out"};
 
-/* CLOCK */
+/* CLOCK 24HR */
 setInterval(()=>{
-  const now=new Date();
-  document.getElementById("clock").innerText = now.toLocaleTimeString();
+  const now = new Date();
+  document.getElementById("clock").innerText = now.toLocaleTimeString("en-GB");
   document.getElementById("date").innerText = now.toDateString();
 },1000);
 
@@ -118,7 +117,7 @@ function getLocation(){
 
 /* RECORD */
 async function record(field, selfieRequired){
-  // Only allow in sequence
+  // Check sequential
   const idx = sequence.indexOf(field);
   for(let i=0;i<idx;i++){
     if(document.getElementById(fieldMap[sequence[i]]).innerText=="--"){
@@ -130,10 +129,10 @@ async function record(field, selfieRequired){
   pendingField = field;
   pendingTime = new Date().toISOString();
 
-  if(field==="time_in" || field==="time_out"){
+  // Only selfie for Time In & Time Out
+  if(selfieRequired){
     try{ locationData = await getLocation(); } 
     catch(e){ alert(e); locationData={lat:null,lng:null}; }
-
     document.getElementById("selfieInput").click();
   } else {
     startCountdown(field);
@@ -142,7 +141,8 @@ async function record(field, selfieRequired){
 
 /* SELFIE */
 document.getElementById("selfieInput").addEventListener("change",async e=>{
-  const file = e.target.files[0]; if(!file){pendingField=null; return;}
+  const file = e.target.files[0]; 
+  if(!file){pendingField=null; return;}
   const path=`${user.id}/${Date.now()}.jpg`;
   await supabaseClient.storage.from("selfies").upload(path,file,{upsert:true});
   selfieURL = supabaseClient.storage.from("selfies").getPublicUrl(path).data.publicUrl;
@@ -151,7 +151,7 @@ document.getElementById("selfieInput").addEventListener("change",async e=>{
 
 /* COUNTDOWN */
 function startCountdown(field){
-  document.getElementById(fieldMap[field]).innerText = new Date(pendingTime).toLocaleTimeString();
+  document.getElementById(fieldMap[field]).innerText = new Date(pendingTime).toLocaleTimeString("en-GB");
   seconds=5; document.getElementById("count").innerText=seconds;
   document.getElementById("cancelBox").style.display="block";
 
@@ -180,15 +180,14 @@ async function save(){
     .eq("user_id", user.id)
     .eq("attendance_date", today);
 
-  document.getElementById(fieldMap[pendingField]).innerText = new Date(pendingTime).toLocaleTimeString();
+  document.getElementById(fieldMap[pendingField]).innerText = new Date(pendingTime).toLocaleTimeString("en-GB");
   document.getElementById("btn_"+pendingField).disabled=true;
 
-  // Enable next button
+  // Enable next button in sequence
   const idx = sequence.indexOf(pendingField);
   if(idx < sequence.length-1){
     document.getElementById("btn_"+sequence[idx+1]).disabled=false;
   }
-
   pendingField=null;
 }
 
@@ -212,13 +211,11 @@ async function loadToday(){
 
   sequence.forEach((f,i)=>{
     if(data[f]){
-      document.getElementById(fieldMap[f]).innerText = new Date(data[f]).toLocaleTimeString();
+      document.getElementById(fieldMap[f]).innerText = new Date(data[f]).toLocaleTimeString("en-GB");
       document.getElementById("btn_"+f).disabled = true;
 
       // enable next button if previous is done
-      if(i<sequence.length-1){
-        document.getElementById("btn_"+sequence[i+1]).disabled = false;
-      }
+      if(i < sequence.length-1) document.getElementById("btn_"+sequence[i+1]).disabled = false;
     }
   });
 }
