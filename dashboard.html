@@ -4,76 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daily Attendance</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f2f4f7;
-  padding:15px;
-}
-.container{
-  max-width:480px;
-  margin:auto;
-  background:#fff;
-  padding:20px;
-  border-radius:15px;
-  box-shadow:0 10px 25px rgba(0,0,0,.1);
-}
+body{font-family:Arial,sans-serif;background:#f2f4f7;padding:15px;}
+.container{max-width:480px;margin:auto;background:#fff;padding:20px;border-radius:15px;box-shadow:0 10px 25px rgba(0,0,0,.1);}
 h2{text-align:center}
 .clock{font-size:28px;text-align:center;margin:10px 0}
 .date{text-align:center;color:#555}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin:15px 0;
-}
-th,td{
-  border:1px solid #ddd;
-  padding:8px;
-  text-align:center;
-  font-size:14px;
-}
+table{width:100%;border-collapse:collapse;margin:15px 0;}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px;}
 th{background:#f7f7f7}
-
-.buttons{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-button{
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  cursor:pointer;
-  background:#2563eb;
-  color:#fff;
-}
-button:disabled{
-  background:#aaa;
-  cursor:not-allowed;
-}
-
-.cancel{
-  text-align:center;
-  margin-top:10px;
-  display:none;
-}
-.cancel button{
-  background:#ef4444;
-}
-
-.view-btn{
-  width:100%;
-  background:#059669;
-  margin-top:10px;
-}
+.buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+button{padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;background:#2563eb;color:#fff;}
+button:disabled{background:#aaa;cursor:not-allowed;}
+.cancel{text-align:center;margin-top:10px;display:none;}
+.cancel button{background:#ef4444;}
+.view-btn{width:100%;background:#059669;margin-top:10px;}
 </style>
 </head>
-
 <body>
 <div class="container">
 
@@ -100,12 +49,12 @@ button:disabled{
 </table>
 
 <div class="buttons">
-<button id="btn_time_in" onclick="record('time_in')">Time In</button>
-<button id="btn_lbo" onclick="record('lunch_break_out')">LB Out</button>
-<button id="btn_lbi" onclick="record('lunch_break_in')">LB In</button>
-<button id="btn_cbo" onclick="record('coffee_break_out')">CB Out</button>
-<button id="btn_cbi" onclick="record('coffee_break_in')">CB In</button>
-<button id="btn_time_out" onclick="record('time_out')">Time Out</button>
+<button id="btn_time_in" onclick="record('time_in',true)">Time In</button>
+<button id="btn_lbo" onclick="record('lunch_break_out',false)">LB Out</button>
+<button id="btn_lbi" onclick="record('lunch_break_in',false)">LB In</button>
+<button id="btn_cbo" onclick="record('coffee_break_out',false)">CB Out</button>
+<button id="btn_cbi" onclick="record('coffee_break_in',false)">CB In</button>
+<button id="btn_time_out" onclick="record('time_out',true)">Time Out</button>
 </div>
 
 <div class="cancel" id="cancelBox">
@@ -114,118 +63,88 @@ button:disabled{
 </div>
 
 <input type="file" id="selfieInput" accept="image/*" capture="user" hidden>
-
-<button class="view-btn" onclick="location.href='view_attendance.html'">
-📊 View Attendance
-</button>
+<button class="view-btn" onclick="location.href='view_attendance.html'">📊 View Attendance</button>
 
 </div>
 
 <script>
-/* ================= SUPABASE ================= */
 const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
-
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let user;
-let pendingField = null;
-let pendingTime = null;
-let countdown;
-let seconds = 5;
-let locationData = {};
-let selfieURL = null;
+let user, pendingField=null, pendingTime=null, countdown=null;
+let seconds=5, locationData={}, selfieURL=null;
 
-/* ================= CLOCK ================= */
+const fields=["time_in","lunch_break_out","lunch_break_in","coffee_break_out","coffee_break_in","time_out"];
+
+/* CLOCK */
 setInterval(()=>{
   const now=new Date();
   document.getElementById("clock").innerText=now.toLocaleTimeString();
   document.getElementById("date").innerText=now.toDateString();
 },1000);
 
-/* ================= AUTH ================= */
+/* AUTH */
 (async()=>{
-  const { data } = await supabaseClient.auth.getSession();
-  if(!data.session){
-    alert("Please login first");
-    location.href="login.html";
-    return;
-  }
+  const {data} = await supabaseClient.auth.getSession();
+  if(!data.session){ location.href="login.html"; return;}
   user = data.session.user;
   await ensureToday();
   await loadToday();
 })();
 
-/* ================= ENSURE ROW ================= */
+/* ENSURE TODAY */
 async function ensureToday(){
   const today=new Date().toISOString().split("T")[0];
-  const { data } = await supabaseClient
-    .from("attendance")
+  const {data} = await supabaseClient.from("attendance")
     .select("id")
     .eq("user_id",user.id)
     .eq("attendance_date",today)
     .maybeSingle();
-
   if(!data){
-    await supabaseClient.from("attendance").insert({
-      user_id:user.id,
-      attendance_date:today
-    });
+    await supabaseClient.from("attendance").insert({user_id:user.id,attendance_date:today});
   }
 }
 
-/* ================= GEOLOCATION ================= */
+/* GET LOCATION */
 function getLocation(){
-  return new Promise((resolve,reject)=>{
+  return new Promise((res,rej)=>{
     navigator.geolocation.getCurrentPosition(
-      pos=>resolve({
-        lat:pos.coords.latitude,
-        lng:pos.coords.longitude
-      }),
-      err=>reject("Location permission denied")
+      pos=>res({lat:pos.coords.latitude,lng:pos.coords.longitude}),
+      err=>rej("Location permission denied")
     );
   });
 }
 
-/* ================= RECORD ================= */
-async function record(field){
-  if(document.getElementById("btn_"+field)?.disabled) return;
+/* RECORD */
+async function record(field, selfieRequired){
+  if(document.getElementById("btn_"+field).disabled) return;
+  pendingField = field;
+  pendingTime = new Date().toISOString();
+  
+  try{ locationData = await getLocation(); } 
+  catch(e){ alert(e); locationData={lat:null,lng:null}; }
 
-  if(field==="time_in"){
-    try{
-      locationData = await getLocation();
-      pendingField = field;
-      document.getElementById("selfieInput").click();
-    }catch(e){
-      alert(e);
-    }
-    return;
+  if(selfieRequired){
+    document.getElementById("selfieInput").click();
+  } else {
+    startCountdown(field);
   }
-  startCountdown(field);
 }
 
-/* ================= SELFIE ================= */
+/* SELFIE */
 document.getElementById("selfieInput").addEventListener("change",async e=>{
-  const file=e.target.files[0];
-  if(!file) return;
-
+  const file = e.target.files[0]; if(!file){pendingField=null; return;}
   const path=`${user.id}/${Date.now()}.jpg`;
   await supabaseClient.storage.from("selfies").upload(path,file,{upsert:true});
   selfieURL = supabaseClient.storage.from("selfies").getPublicUrl(path).data.publicUrl;
-
-  startCountdown("time_in");
+  startCountdown(pendingField);
 });
 
-/* ================= COUNTDOWN ================= */
+/* COUNTDOWN */
 function startCountdown(field){
-  pendingField = field;
-  pendingTime = new Date().toISOString();
-
-  document.getElementById(field).innerText =
-    new Date().toLocaleTimeString();
-
-  seconds = 5;
-  document.getElementById("count").innerText = seconds;
+  document.getElementById(field).innerText = new Date(pendingTime).toLocaleTimeString();
+  seconds=5; document.getElementById("count").innerText=seconds;
   document.getElementById("cancelBox").style.display="block";
 
   countdown = setInterval(async()=>{
@@ -239,53 +158,38 @@ function startCountdown(field){
   },1000);
 }
 
-/* ================= SAVE ================= */
+/* SAVE */
 async function save(){
   const today=new Date().toISOString().split("T")[0];
-  const payload={ [pendingField]: pendingTime };
-
-  if(pendingField==="time_in"){
-    payload.latitude=locationData.lat;
-    payload.longitude=locationData.lng;
-    payload.selfie_url=selfieURL;
+  const payload = {[pendingField]: pendingTime};
+  if(pendingField==="time_in" || pendingField==="time_out"){
+    payload.latitude = locationData.lat;
+    payload.longitude = locationData.lng;
+    payload.selfie_url = selfieURL;
   }
-
   await supabaseClient.from("attendance")
     .update(payload)
     .eq("user_id",user.id)
     .eq("attendance_date",today);
-
   document.getElementById("btn_"+pendingField).disabled=true;
   pendingField=null;
 }
 
-/* ================= CANCEL ================= */
-function cancelSave(){
-  clearInterval(countdown);
-  document.getElementById(pendingField).innerText="--";
-  pendingField=null;
-  document.getElementById("cancelBox").style.display="none";
-}
+/* CANCEL */
+function cancelSave(){ clearInterval(countdown); if(pendingField) document.getElementById(pendingField).innerText="--"; pendingField=null; document.getElementById("cancelBox").style.display="none"; }
 
-/* ================= LOAD ================= */
+/* LOAD TODAY */
 async function loadToday(){
   const today=new Date().toISOString().split("T")[0];
-  const { data } = await supabaseClient
-    .from("attendance")
-    .select("*")
-    .eq("user_id",user.id)
-    .eq("attendance_date",today)
-    .maybeSingle();
-
+  const {data} = await supabaseClient.from("attendance")
+    .select("*").eq("user_id",user.id).eq("attendance_date",today).maybeSingle();
   if(!data) return;
-
-  for(const key of ["time_in","lunch_break_out","lunch_break_in","coffee_break_out","coffee_break_in","time_out"]){
-    if(data[key]){
-      document.getElementById(key).innerText =
-        new Date(data[key]).toLocaleTimeString();
-      document.getElementById("btn_"+key).disabled=true;
+  fields.forEach(f=>{
+    if(data[f]){
+      document.getElementById(f).innerText = new Date(data[f]).toLocaleTimeString();
+      document.getElementById("btn_"+f).disabled=true;
     }
-  }
+  });
 }
 </script>
 </body>
