@@ -6,7 +6,6 @@
 <title>Daily Attendance</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  
 body{font-family:Arial,sans-serif;background:#f2f4f7;padding:15px;}
 .container{max-width:480px;margin:auto;background:#fff;padding:20px;border-radius:15px;box-shadow:0 10px 25px rgba(0,0,0,.1);}
 h2{text-align:center;margin-bottom:15px;}
@@ -21,25 +20,11 @@ button:disabled{background:#aaa;cursor:not-allowed;}
 .cancel{text-align:center;margin-top:10px;display:none;}
 .cancel button{background:#ef4444;color:#fff;padding:8px 15px;border:none;border-radius:6px;cursor:pointer;}
 .view-btn{width:100%;background:#059669;margin-top:15px;color:#fff;border:none;padding:12px;border-radius:8px;cursor:pointer;}
-  .header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-weight:bold;
-  margin-bottom:10px;
-  color:#333;
-}
-
 </style>
 </head>
 <body>
 <div class="container">
 <h2>📋 Daily Attendance</h2>
-  <div class="header">
-  <span id="welcomeUser">Welcome</span>
-  <span id="userId">ID:</span>
-</div>
-
 <div class="date" id="date"></div>
 <div class="clock" id="clock"></div>
 
@@ -100,16 +85,9 @@ setInterval(()=>{
 (async()=>{
   const { data } = await supabaseClient.auth.getSession();
   if(!data.session){ location.href="login.html"; return;}
- user = data.session.user;
-
-// SHOW USER INFO
-const firstName = user.user_metadata?.first_name || "User";
-document.getElementById("welcomeUser").innerText = `Welcome, ${firstname}`;
-document.getElementById("userId"").innerText = `ID: ${user.employee_id}`;
-
-await ensureToday();
-await loadToday();
-
+  user = data.session.user;
+  await ensureToday();
+  await loadToday();
 })();
 
 /* ENSURE TODAY */
