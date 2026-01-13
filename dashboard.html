@@ -103,9 +103,9 @@ setInterval(()=>{
  user = data.session.user;
 
 // SHOW USER INFO
-const firstName = users.user_metadata?.first_name || "User";
+const firstName = user.user_metadata?.first_name || "User";
 document.getElementById("welcomeUser").innerText = `Welcome, ${firstname}`;
-document.getElementById("userId"").innerText = `ID: ${users.employee_id}`;
+document.getElementById("userId"").innerText = `ID: ${user.employee_id}`;
 
 await ensureToday();
 await loadToday();
