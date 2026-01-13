@@ -105,7 +105,7 @@ setInterval(()=>{
 // SHOW USER INFO
 const firstName = user.user_metadata?.first_name || "User";
 document.getElementById("welcomeUser").innerText = `Welcome, ${firstname}`;
-document.getElementById("employee_id").innerText = `ID: ${user.id}`;
+document.getElementById("employee_id").innerText = `ID: ${users.employee_id}`;
 
 await ensureToday();
 await loadToday();
