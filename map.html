@@ -6,16 +6,8 @@
 <title>Attendance Location</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-  body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: Arial, sans-serif;
-  }
-  #map {
-    width: 100%;
-    height: 100%;
-  }
+  body, html{margin:0;padding:0;height:100%;}
+  #map{width:100%;height:100%;}
 </style>
 </head>
 <body>
@@ -28,17 +20,17 @@
   const lat = parseFloat(params.get('lat'));
   const lng = parseFloat(params.get('lng'));
 
+  console.log("LAT:", lat, "LNG:", lng);
+
   if(isNaN(lat) || isNaN(lng)){
     alert("Invalid coordinates!");
   } else {
     // Initialize map
     const map = L.map('map').setView([lat, lng], 16);
 
-    // Modern Carto tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 19
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
     // Add marker
@@ -47,4 +39,4 @@
   }
 </script>
 </body>
-</html>
+</html> wala namang mas updated ito map
