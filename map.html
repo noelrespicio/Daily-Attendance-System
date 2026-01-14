@@ -20,23 +20,33 @@
   const lat = parseFloat(params.get('lat'));
   const lng = parseFloat(params.get('lng'));
 
-  console.log("LAT:", lat, "LNG:", lng);
-
   if(isNaN(lat) || isNaN(lng)){
     alert("Invalid coordinates!");
   } else {
     // Initialize map
     const map = L.map('map').setView([lat, lng], 16);
 
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+    // Modern tile layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
     }).addTo(map);
 
-    // Add marker
-    const marker = L.marker([lat, lng]).addTo(map);
-    marker.bindPopup("📍 Attendance Location").openPopup();
+    // Array of markers: [lat, lng, label]
+    const locations = [
+      [lat, lng, "📍 Attendance Location"],
+      [10.7105, 122.5622, "🏬 SM Appliance"],        // Example coordinates
+      [10.7120, 122.5640, "🏫 Local School"],
+      [10.7080, 122.5600, "☕ Coffee Shop"]
+    ];
+
+    // Add all markers to map
+    locations.forEach(loc => {
+      const marker = L.marker([loc[0], loc[1]]).addTo(map);
+      marker.bindPopup(loc[2]);
+    });
   }
 </script>
 </body>
-</html> wala namang mas updated ito map
+</html>
