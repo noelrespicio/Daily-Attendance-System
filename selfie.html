@@ -55,44 +55,19 @@ img{
   Loading...
 </div>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-const supabase = createClient(
-  "https://wlthlwxcmltwescezjlk.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
-);
-
+<script>
 const params = new URLSearchParams(window.location.search);
-const attendanceId = params.get("id");
+const selfieUrl = params.get("url");
 
-if(!attendanceId){
-  document.getElementById("content").innerHTML = "Invalid attendance record.";
-  throw new Error("No attendance ID");
-}
+const content = document.getElementById("content");
 
-(async()=>{
-  const { data, error } = await supabase
-    .from("attendance")
-    .select("selfie_url")
-    .eq("id", attendanceId)
-    .single();
-
-  if(error || !data){
-    document.getElementById("content").innerHTML = "No record found.";
-    return;
-  }
-
-  if(!data.selfie_url){
-    document.getElementById("content").innerHTML =
-      `<div class="empty">No selfie recorded for this day.</div>`;
-    return;
-  }
-
-  document.getElementById("content").innerHTML = `
-    <img src="${data.selfie_url}" alt="Attendance Selfie">
+if(!selfieUrl){
+  content.innerHTML = `<div class="empty">No selfie available.</div>`;
+}else{
+  content.innerHTML = `
+    <img src="${decodeURIComponent(selfieUrl)}" alt="Attendance Selfie">
   `;
-})();
+}
 </script>
 
 </body>
