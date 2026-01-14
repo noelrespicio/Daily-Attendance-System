@@ -20,11 +20,33 @@ button:disabled{background:#aaa;cursor:not-allowed;}
 .cancel{text-align:center;margin-top:10px;display:none;}
 .cancel button{background:#ef4444;color:#fff;padding:8px 15px;border:none;border-radius:6px;cursor:pointer;}
 .view-btn{width:100%;background:#059669;margin-top:15px;color:#fff;border:none;padding:12px;border-radius:8px;cursor:pointer;}
+  .header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.logout-btn{
+  background:#ef4444;
+  border:none;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.logout-btn:hover{
+  background:#dc2626;
+}
+
 </style>
 </head>
 <body>
 <div class="container">
 <h2>📋 Daily Attendance</h2>
+  <button class="logout-btn" onclick="logout()">Logout</button>
 <div class="date" id="date"></div>
 <div class="clock" id="clock"></div>
 
@@ -223,6 +245,12 @@ async function loadToday(){
     }
   });
 }
+  async function logout(){
+  if(!confirm("Are you sure you want to logout?")) return;
+  await supabaseClient.auth.signOut();
+  location.href = "login.html";
+}
+
 </script>
 
 </body>
