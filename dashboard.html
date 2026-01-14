@@ -97,6 +97,14 @@ let seconds=5, locationData={}, selfieURL=null;
 
 const fieldMap = {time_in:"time_in",lunch_break_out:"lbo",lunch_break_in:"lbi",coffee_break_out:"cbo",coffee_break_in:"cbi",time_out:"time_out"};
 
+  function getLocalDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 /* CLOCK */
 setInterval(()=>{
   const now = new Date();
@@ -115,16 +123,23 @@ setInterval(()=>{
 
 /* ENSURE TODAY */
 async function ensureToday(){
-  const today = new Date().toISOString().split("T")[0];
-  const { data } = await supabaseClient.from("attendance")
+  const today = getLocalDate();
+
+  const { data } = await supabaseClient
+    .from("attendance")
     .select("id")
     .eq("user_id", user.id)
     .eq("attendance_date", today)
     .maybeSingle();
+
   if(!data){
-    await supabaseClient.from("attendance").insert({user_id:user.id,attendance_date:today});
+    await supabaseClient.from("attendance").insert({
+      user_id: user.id,
+      attendance_date: today
+    });
   }
 }
+
 
 /* GET LOCATION */
 function getLocation() {
@@ -192,7 +207,7 @@ function startCountdown(field){
 
 /* SAVE DATA */
 async function save(){
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDate();
 
   const payload = {
     [pendingField]: toLocalString(pendingTime)
@@ -216,10 +231,10 @@ async function save(){
     return;
   }
 
-  document.getElementById(fieldMap[pendingField]).innerText = pendingTime.toLocaleTimeString('en-US',{hour12:true});
   pendingField = null;
   selfieURL = null;
 }
+
 
 /* CANCEL */
 function cancelSave(){
@@ -235,18 +250,42 @@ async function logout(){
 }
 /* LOAD TODAY */
 async function loadToday(){
-  const today = new Date().toISOString().split("T")[0];
-  const {data} = await supabaseClient.from("attendance")
+  const today = getLocalDate();
+
+  const { data } = await supabaseClient
+    .from("attendance")
     .select("*")
-    .eq("user_id",user.id)
-    .eq("attendance_date",today)
+    .eq("user_id", user.id)
+    .eq("attendance_date", today)
     .maybeSingle();
+
   if(!data) return;
 
   Object.keys(fieldMap).forEach(f=>{
     if(data[f]){
       const d = new Date(data[f]);
-      document.getElementById(fieldMap[f]).innerText = d.toLocaleTimeString('en-US',{hour12:true});
+      document.getElementById(fieldMap[f]).innerText =
+        d.toLocaleTimeString('en-US',{hour12:true});
+    }
+  });
+}
+async function loadToday(){
+  const today = getLocalDate();
+
+  const { data } = await supabaseClient
+    .from("attendance")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("attendance_date", today)
+    .maybeSingle();
+
+  if(!data) return;
+
+  Object.keys(fieldMap).forEach(f=>{
+    if(data[f]){
+      const d = new Date(data[f]);
+      document.getElementById(fieldMap[f]).innerText =
+        d.toLocaleTimeString('en-US',{hour12:true});
     }
   });
 }
