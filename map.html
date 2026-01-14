@@ -25,8 +25,8 @@ body{margin:0;padding:0;font-family:Arial,sans-serif;}
 <script>
 // =================== GET LAT/LNG ===================ppp
 const urlParams = new URLSearchParams(window.location.search);
-const lat = parseFloat(urlParams.get('latitude'));
-const lng = parseFloat(urlParams.get('longitude'));
+const lat = parseFloat(urlParams.get('lat'));
+const lng = parseFloat(urlParams.get('lng'));
 
 if(!lat || !lng){
     alert("Invalid location data!");
