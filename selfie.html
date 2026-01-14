@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attendance Selfie</title>
-
 <style>
 body{
   font-family: Arial, sans-serif;
@@ -56,16 +55,23 @@ img{
 </div>
 
 <script>
+// Get URL parameter
 const params = new URLSearchParams(window.location.search);
-const selfieUrl = params.get("url");
+let selfieUrl = params.get("url");
 
+// Container div
 const content = document.getElementById("content");
 
-if(!selfieUrl){
+// If selfie URL is missing, NULL, or empty
+if(!selfieUrl || selfieUrl.toUpperCase() === "NULL"){
   content.innerHTML = `<div class="empty">No selfie available.</div>`;
 }else{
+  // Decode the URL if it was encoded
+  selfieUrl = decodeURIComponent(selfieUrl);
+
+  // Show the image
   content.innerHTML = `
-    <img src="${decodeURIComponent(selfieUrl)}" alt="Attendance Selfie">
+    <img src="${selfieUrl}" alt="Attendance Selfie" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x400?text=No+Image';">
   `;
 }
 </script>
