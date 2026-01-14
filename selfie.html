@@ -7,7 +7,7 @@
 
 <style>
 body{
-  font-family:Arial, sans-serif;
+  font-family: Arial, sans-serif;
   background:#f4f6f8;
   padding:20px;
 }
@@ -29,11 +29,6 @@ img{
   border-radius:10px;
   border:1px solid #ddd;
 }
-.info{
-  margin-top:10px;
-  font-size:14px;
-  color:#555;
-}
 .back{
   display:inline-block;
   margin-bottom:15px;
@@ -42,6 +37,10 @@ img{
   color:#fff;
   padding:8px 12px;
   border-radius:6px;
+}
+.empty{
+  color:#777;
+  font-size:14px;
 }
 </style>
 </head>
@@ -69,33 +68,29 @@ const attendanceId = params.get("id");
 
 if(!attendanceId){
   document.getElementById("content").innerHTML = "Invalid attendance record.";
-  throw new Error("No ID");
+  throw new Error("No attendance ID");
 }
 
 (async()=>{
   const { data, error } = await supabase
     .from("attendance")
-    .select("selfie_url, time_in, time_out")
+    .select("selfie_url")
     .eq("id", attendanceId)
     .single();
 
   if(error || !data){
-    document.getElementById("content").innerHTML = "Selfie not found.";
+    document.getElementById("content").innerHTML = "No record found.";
     return;
   }
 
   if(!data.selfie_url){
-    document.getElementById("content").innerHTML = "No selfie captured.";
+    document.getElementById("content").innerHTML =
+      `<div class="empty">No selfie recorded for this day.</div>`;
     return;
   }
 
   document.getElementById("content").innerHTML = `
     <img src="${data.selfie_url}" alt="Attendance Selfie">
-    <div class="info">
-      ${data.time_out 
-        ? "🔴 Captured during Final Out"
-        : "🟢 Captured during Time In"}
-    </div>
   `;
 })();
 </script>
