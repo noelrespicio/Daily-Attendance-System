@@ -23,16 +23,16 @@ body{margin:0;padding:0;font-family:Arial,sans-serif;}
  integrity="sha256-o9N1j+vHm8r6LxFgt3Vq5rjYF7RovJ6rHzPCp1t+F8A=" crossorigin=""></script>
 
 <script>
-// =================== GET LAT/LNG ===================ppp
+// =================== GET LAT/LNG FROM URL ===================
 const urlParams = new URLSearchParams(window.location.search);
 const lat = parseFloat(urlParams.get('lat'));
 const lng = parseFloat(urlParams.get('lng'));
 
-if(!lat || !lng){
-    alert("Invalid location data!");
+if (isNaN(lat) || isNaN(lng)) {
+    alert("Invalid location data from database!");
 } else {
     // =================== INIT MAP ===================
-    const map = L.map('map').setView([lat,lng], 16);
+    const map = L.map('map').setView([lat, lng], 16);
 
     // =================== TILE LAYER ===================
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -40,8 +40,8 @@ if(!lat || !lng){
     }).addTo(map);
 
     // =================== MARKER ===================
-    const marker = L.marker([lat,lng]).addTo(map);
-    marker.bindPopup("📍 Attendance Location").openPopup();
+    L.marker([lat, lng]).addTo(map)
+      .bindPopup("📍 Attendance Location").openPopup();
 }
 </script>
 
