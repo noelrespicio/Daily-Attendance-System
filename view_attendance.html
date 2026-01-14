@@ -3,46 +3,153 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attendance Location</title>
-
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
- integrity="sha256-sA+rqxk5u6i8+IJbJwRWvLv9Gl+bM5QokZbt+vG6vJs=" crossorigin=""/>
+<title>My Attendance</title>
 
 <style>
-body{margin:0;padding:0;font-family:Arial,sans-serif;}
-#map{height:100vh;width:100%;}
+body{font-family:Arial,sans-serif;background:#f4f6f8;padding:15px;}
+h2{text-align:center;margin-bottom:20px;}
+.date-picker{text-align:center;margin-bottom:15px;}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px;}
+th{background:#f7f7f7;}
+.cutoff{
+  background:#e5e7eb;
+  font-weight:bold;
+  text-align:left;
+}
+button{
+  padding:6px 10px;
+  border:none;
+  background:#2563eb;
+  color:#fff;
+  border-radius:5px;
+  cursor:pointer;
+}
+button:hover{background:#1e40af;}
 </style>
 </head>
+
 <body>
 
-<div id="map"></div>
+<h2>📊 My Attendance</h2>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
- integrity="sha256-o9N1j+vHm8r6LxFgt3Vq5rjYF7RovJ6rHzPCp1t+F8A=" crossorigin=""></script>
+<div class="date-picker">
+<label>Select Month: </label>
+<input type="month" id="monthPicker">
+</div>
 
-<script>
-// =================== GET LAT/LNG ===================
-const urlParams = new URLSearchParams(window.location.search);
-const lat = parseFloat(urlParams.get('lat'));
-const lng = parseFloat(urlParams.get('lng'));
+<table id="attendanceTable">
+<thead>
+<tr>
+<th>Date</th>
+<th>Time In</th>
+<th>LB Out</th>
+<th>LB In</th>
+<th>CB Out</th>
+<th>CB In</th>
+<th>Time Out</th>
+<th>Selfie</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody>
+<tr><td colspan="9">Select a month to view attendance</td></tr>
+</tbody>
+</table>
 
-if(!lat || !lng){
-    alert("Invalid location data!");
-} else {
-    // =================== INIT MAP ===================
-    const map = L.map('map').setView([lat,lng], 16);
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    // =================== TILE LAYER ===================
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+const supabase = createClient(
+  "https://wlthlwxcmltwescezjlk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
+);
 
-    // =================== MARKER ===================
-    const marker = L.marker([lat,lng]).addTo(map);
-    marker.bindPopup("📍 Attendance Location").openPopup();
+let user;
+
+/* ================= AUTH ================= */
+(async()=>{
+  const { data } = await supabase.auth.getSession();
+  if(!data.session){
+    alert("Not logged in!");
+    location.href="login.html";
+    return;
+  }
+  user = data.session.user;
+
+  // Default month = current month
+  const now = new Date();
+  document.getElementById("monthPicker").value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  loadAttendance(document.getElementById("monthPicker").value);
+})();
+
+document.getElementById("monthPicker").addEventListener("change",e=>{
+  loadAttendance(e.target.value);
+});
+
+/* ================= LOAD ATTENDANCE ================= */
+async function loadAttendance(month){
+  const tbody = document.querySelector("#attendanceTable tbody");
+  tbody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
+
+  const start = `${month}-01`;
+  const end = `${month}-31`;
+
+  const { data, error } = await supabase
+    .from("attendance")
+    .select("*")
+    .eq("user_id", user.id)
+    .gte("attendance_date", start)
+    .lte("attendance_date", end)
+    .order("attendance_date", { ascending: true });
+
+  if(error || !data.length){
+    tbody.innerHTML = `<tr><td colspan="9">No attendance found</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+
+  const firstCutoff = data.filter(d => new Date(d.attendance_date).getDate() <= 15);
+  const secondCutoff = data.filter(d => new Date(d.attendance_date).getDate() > 15);
+
+  if(firstCutoff.length){
+    tbody.innerHTML += `<tr class="cutoff"><td colspan="9">🟢 1st Cutoff (1–15)</td></tr>`;
+    firstCutoff.forEach(row => tbody.innerHTML += rowHTML(row));
+  }
+
+  if(secondCutoff.length){
+    tbody.innerHTML += `<tr class="cutoff"><td colspan="9">🔵 2nd Cutoff (16–End)</td></tr>`;
+    secondCutoff.forEach(row => tbody.innerHTML += rowHTML(row));
+  }
 }
+
+/* ================= ROW TEMPLATE ================= */
+function rowHTML(d){
+  const t = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:true}) : '--';
+  return `
+  <tr>
+    <td>${d.attendance_date}</td>
+    <td>${t(d.time_in)}</td>
+    <td>${t(d.lunch_break_out)}</td>
+    <td>${t(d.lunch_break_in)}</td>
+    <td>${t(d.coffee_break_out)}</td>
+    <td>${t(d.coffee_break_in)}</td>
+    <td>${t(d.time_out)}</td>
+    <td>${d.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>` : '--'}</td>
+    <td>${d.latitude ? `<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>` : '--'}</td>
+  </tr>`;
+}
+
+/* ================= VIEWERS ================= */
+window.viewMap = (lat,lng)=>{
+  window.open(`map.html?lat=${lat}&lng=${lng}`,"_blank");
+};
+window.viewSelfie = (url)=>{
+  window.open(`selfie.html?url=${url}`,"_blank");
+};
 </script>
 
 </body>
