@@ -4,25 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Attendance</title>
+
 <style>
 body{font-family:Arial,sans-serif;background:#f4f6f8;padding:15px;}
 h2{text-align:center;margin-bottom:20px;}
-.date-picker{margin-bottom:15px;text-align:center;}
+.date-picker{text-align:center;margin-bottom:15px;}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
 th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px;}
 th{background:#f7f7f7;}
-img.selfie{width:50px;height:50px;border-radius:50%;object-fit:cover;}
-button{padding:6px 10px;border:none;background:#007bff;color:#fff;border-radius:5px;cursor:pointer;}
-button:hover{background:#0056b3;}
+.cutoff{
+  background:#e5e7eb;
+  font-weight:bold;
+  text-align:left;
+}
+button{
+  padding:6px 10px;
+  border:none;
+  background:#2563eb;
+  color:#fff;
+  border-radius:5px;
+  cursor:pointer;
+}
+button:hover{background:#1e40af;}
 </style>
 </head>
+
 <body>
 
 <h2>📊 My Attendance</h2>
 
 <div class="date-picker">
-<label for="attendanceDate">Select Date: </label>
-<input type="date" id="attendanceDate">
+<label>Select Month: </label>
+<input type="month" id="monthPicker">
 </div>
 
 <table id="attendanceTable">
@@ -40,7 +53,7 @@ button:hover{background:#0056b3;}
 </tr>
 </thead>
 <tbody>
-<tr><td colspan="9">Select a date to view attendance</td></tr>
+<tr><td colspan="9">Select a month to view attendance</td></tr>
 </tbody>
 </table>
 
@@ -54,61 +67,88 @@ const supabase = createClient(
 
 let user;
 
-(async ()=>{
-  const { data: session } = await supabase.auth.getSession();
-  if(!session?.session){
-    alert("Not logged in!"); location.href="login.html"; return;
+/* ================= AUTH ================= */
+(async()=>{
+  const { data } = await supabase.auth.getSession();
+  if(!data.session){
+    alert("Not logged in!");
+    location.href="login.html";
+    return;
   }
-  user = session.session.user;
+  user = data.session.user;
 
-  // Set default date to today
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('attendanceDate').value = today;
-  loadAttendance(today);
+  // Default month = current month
+  const now = new Date();
+  document.getElementById("monthPicker").value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-  // Listen to date change
-  document.getElementById('attendanceDate').addEventListener('change', e=>{
-    loadAttendance(e.target.value);
-  });
+  loadAttendance(document.getElementById("monthPicker").value);
 })();
 
-async function loadAttendance(date){
+document.getElementById("monthPicker").addEventListener("change",e=>{
+  loadAttendance(e.target.value);
+});
+
+/* ================= LOAD ATTENDANCE ================= */
+async function loadAttendance(month){
   const tbody = document.querySelector("#attendanceTable tbody");
   tbody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
 
-  const { data, error } = await supabase
-    .from('attendance')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('attendance_date', date)
-    .order('attendance_date', { ascending: false })
-    .maybeSingle();
+  const start = `${month}-01`;
+  const end = `${month}-31`;
 
-  if(error || !data){
-    tbody.innerHTML = `<tr><td colspan="9">No attendance found for ${date}</td></tr>`;
+  const { data, error } = await supabase
+    .from("attendance")
+    .select("*")
+    .eq("user_id", user.id)
+    .gte("attendance_date", start)
+    .lte("attendance_date", end)
+    .order("attendance_date", { ascending: true });
+
+  if(error || !data.length){
+    tbody.innerHTML = `<tr><td colspan="9">No attendance found</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = `
-    <tr>
-      <td>${data.attendance_date}</td>
-      <td>${data.time_in ? new Date(data.time_in).toLocaleTimeString() : '--'}</td>
-      <td>${data.lunch_break_out ? new Date(data.lunch_break_out).toLocaleTimeString() : '--'}</td>
-      <td>${data.lunch_break_in ? new Date(data.lunch_break_in).toLocaleTimeString() : '--'}</td>
-      <td>${data.coffee_break_out ? new Date(data.coffee_break_out).toLocaleTimeString() : '--'}</td>
-      <td>${data.coffee_break_in ? new Date(data.coffee_break_in).toLocaleTimeString() : '--'}</td>
-      <td>${data.time_out ? new Date(data.time_out).toLocaleTimeString() : '--'}</td>
-      <td>${data.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(data.selfie_url)}')">📸 View</button>` : '--'}</td>
-      <td>${data.latitude && data.longitude ? `<button onclick="viewMap(${data.latitude},${data.longitude})">📍 Map</button>` : '--'}</td>
-    </tr>`;
+  tbody.innerHTML = "";
+
+  const firstCutoff = data.filter(d => new Date(d.attendance_date).getDate() <= 15);
+  const secondCutoff = data.filter(d => new Date(d.attendance_date).getDate() > 15);
+
+  if(firstCutoff.length){
+    tbody.innerHTML += `<tr class="cutoff"><td colspan="9">🟢 1st Cutoff (1–15)</td></tr>`;
+    firstCutoff.forEach(row => tbody.innerHTML += rowHTML(row));
+  }
+
+  if(secondCutoff.length){
+    tbody.innerHTML += `<tr class="cutoff"><td colspan="9">🔵 2nd Cutoff (16–End)</td></tr>`;
+    secondCutoff.forEach(row => tbody.innerHTML += rowHTML(row));
+  }
 }
 
-window.viewMap = (lat,lng)=>{
-  window.open(`map.html?lat=${lat}&lng=${lng}`, "_blank");
-};
+/* ================= ROW TEMPLATE ================= */
+function rowHTML(d){
+  const t = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:true}) : '--';
+  return `
+  <tr>
+    <td>${d.attendance_date}</td>
+    <td>${t(d.time_in)}</td>
+    <td>${t(d.lunch_break_out)}</td>
+    <td>${t(d.lunch_break_in)}</td>
+    <td>${t(d.coffee_break_out)}</td>
+    <td>${t(d.coffee_break_in)}</td>
+    <td>${t(d.time_out)}</td>
+    <td>${d.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>` : '--'}</td>
+    <td>${d.latitude ? `<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>` : '--'}</td>
+  </tr>`;
+}
 
+/* ================= VIEWERS ================= */
+window.viewMap = (lat,lng)=>{
+  window.open(`map.html?lat=${lat}&lng=${lng}`,"_blank");
+};
 window.viewSelfie = (url)=>{
-  window.open(`selfie.html?url=${url}`, "_blank");
+  window.open(`selfie.html?url=${url}`,"_blank");
 };
 </script>
 
