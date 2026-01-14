@@ -4,46 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attendance Location</title>
-
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
- integrity="sha256-sA+rqxk5u6i8+IJbJwRWvLv9Gl+bM5QokZbt+vG6vJs=" crossorigin=""/>
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-body{margin:0;padding:0;font-family:Arial,sans-serif;}
-#map{height:100vh;width:100%;}
+  body, html{margin:0;padding:0;height:100%;}
+  #map{width:100%;height:100%;}
 </style>
 </head>
 <body>
-
 <div id="map"></div>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
- integrity="sha256-o9N1j+vHm8r6LxFgt3Vq5rjYF7RovJ6rHzPCp1t+F8A=" crossorigin=""></script>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// =================== GET LAT/LNG FROM URL ===================
-const urlParams = new URLSearchParams(window.location.search);
-const lat = parseFloat(urlParams.get('lat'));
-const lng = parseFloat(urlParams.get('lng'));
+  // Get URL parameters
+  const params = new URLSearchParams(window.location.search);
+  const lat = parseFloat(params.get('lat'));
+  const lng = parseFloat(params.get('lng'));
 
-if (isNaN(lat) || isNaN(lng)) {
-    alert("Invalid location data from database!");
-} else {
-    // =================== INIT MAP ===================
+  console.log("LAT:", lat, "LNG:", lng);
+
+  if(isNaN(lat) || isNaN(lng)){
+    alert("Invalid coordinates!");
+  } else {
+    // Initialize map
     const map = L.map('map').setView([lat, lng], 16);
 
-    // =================== TILE LAYER ===================
+    // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // =================== MARKER ===================
-    L.marker([lat, lng]).addTo(map)
-      .bindPopup("📍 Attendance Location").openPopup();
-}
+    // Add marker
+    const marker = L.marker([lat, lng]).addTo(map);
+    marker.bindPopup("📍 Attendance Location").openPopup();
+  }
 </script>
-
 </body>
 </html>
