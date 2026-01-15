@@ -210,68 +210,7 @@ document.getElementById("selfieInput").addEventListener("change", async e=>{
 
   startCountdown(pendingField);
 });
-document.getElementById("selfieInput").addEventListener("change", async e=>{
-  const file = e.target.files[0];
-  if(!file){
-    pendingField = null;
-    return;
-  }
 
-  const filePath = `${user.id}/${Date.now()}.jpg`;
-
-  const { error: uploadError } = await supabaseClient
-    .storage
-    .from("selfies")
-    .upload(filePath, file, { upsert: true });
-
-  if (uploadError) {
-    alert("Failed to upload selfie");
-    console.error(uploadError);
-    return;
-  }
-
-  const { data } = supabaseClient
-    .storage
-    .from("selfies")
-    .getPublicUrl(filePath);
-
-  selfieURL = data.publicUrl;
-
-  console.log("✅ SELFIE URL:", selfieURL);
-
-  startCountdown(pendingField);
-});
-document.getElementById("selfieInput").addEventListener("change", async e=>{
-  const file = e.target.files[0];
-  if(!file){
-    pendingField = null;
-    return;
-  }
-
-  const filePath = `${user.id}/${Date.now()}.jpg`;
-
-  const { error: uploadError } = await supabaseClient
-    .storage
-    .from("selfies")
-    .upload(filePath, file, { upsert: true });
-
-  if (uploadError) {
-    alert("Failed to upload selfie");
-    console.error(uploadError);
-    return;
-  }
-
-  const { data } = supabaseClient
-    .storage
-    .from("selfies")
-    .getPublicUrl(filePath);
-
-  selfieURL = data.publicUrl;
-
-  console.log("✅ SELFIE URL:", selfieURL);
-
-  startCountdown(pendingField);
-});
 
 
 /* COUNTDOWN */
