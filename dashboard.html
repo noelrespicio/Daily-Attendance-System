@@ -179,23 +179,25 @@ async function record(field, selfieRequired){
 }
 
 /* SELFIE */
-document.getElementById("selfieInput").addEventListener("change", async e=>{
+document.getElementById("selfieInput").addEventListener("change", async e => {
   const file = e.target.files[0];
-  if(!file){
-    pendingField = null;
-    return;
-  }
+  if (!file) return;
+
+  console.log("FILE:", file);
 
   const filePath = `${user.id}/${Date.now()}.jpg`;
 
-  const { error: uploadError } = await supabaseClient
+  const { error } = await supabaseClient
     .storage
     .from("selfies")
-    .upload(filePath, file, { upsert: true });
+    .upload(filePath, file, {
+      upsert: true,
+      contentType: file.type
+    });
 
-  if (uploadError) {
-    alert("Failed to upload selfie");
-    console.error(uploadError);
+  if (error) {
+    console.error("UPLOAD ERROR:", error.message);
+    alert(error.message);
     return;
   }
 
@@ -205,8 +207,7 @@ document.getElementById("selfieInput").addEventListener("change", async e=>{
     .getPublicUrl(filePath);
 
   selfieURL = data.publicUrl;
-
-  console.log("✅ SELFIE URL:", selfieURL);
+  console.log("✅ SELFIE SAVED:", selfieURL);
 
   startCountdown(pendingField);
 });
