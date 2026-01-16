@@ -108,7 +108,7 @@ const fieldMap = {time_in:"time_in",lunch_break_out:"lbo",lunch_break_in:"lbi",c
 /* CLOCK */
 setInterval(()=>{
   const now = new Date();
-  document.getElementById("clock").innerText = now.toLocaleTimeString('en-US',{hour12:true});
+  document.getElementById("clock").innerText = now.toLocaleTimeString('en-US',{hour12:false});
   document.getElementById("date").innerText = now.toDateString();
 },1000);
 
