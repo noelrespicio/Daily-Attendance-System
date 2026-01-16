@@ -216,7 +216,7 @@ document.getElementById("selfieInput").addEventListener("change", async e => {
 
 /* COUNTDOWN */
 function startCountdown(field){
-  document.getElementById(fieldMap[field]).innerText = pendingTime.toLocaleTimeString('en-US',{hour12:true});
+  document.getElementById(fieldMap[field]).innerText = pendingTime.toLocaleTimeString('en-US',{hour12:false});
   seconds=5; document.getElementById("count").innerText=seconds;
   document.getElementById("cancelBox").style.display="block";
 
@@ -291,7 +291,7 @@ async function loadToday(){
     if(data[f]){
       const d = new Date(data[f]);
       document.getElementById(fieldMap[f]).innerText =
-        d.toLocaleTimeString('en-US',{hour12:true});
+        d.toLocaleTimeString('en-US',{hour12:false});
     }
   });
 }
@@ -311,7 +311,7 @@ async function loadToday(){
     if(data[f]){
       const d = new Date(data[f]);
       document.getElementById(fieldMap[f]).innerText =
-        d.toLocaleTimeString('en-US',{hour12:true});
+        d.toLocaleTimeString('en-US',{hour12:false});
     }
   });
 }
