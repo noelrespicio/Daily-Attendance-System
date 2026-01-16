@@ -56,132 +56,111 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
 );
 
-let user;
+let user, currentMonth;
 
-/* ================= AUTH ================= */
+/* AUTH */
 (async()=>{
   const { data } = await supabase.auth.getSession();
-  if(!data.session){
-    alert("Not logged in!");
-    location.href="login.html";
-    return;
-  }
+  if(!data.session){ location.href="login.html"; return; }
   user = data.session.user;
 
   const now = new Date();
-  document.getElementById("monthPicker").value =
-    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById("monthPicker").value = currentMonth;
 
-  loadAttendance(document.getElementById("monthPicker").value);
+  loadAttendance(currentMonth);
 })();
 
-document.getElementById("monthPicker").addEventListener("change",e=>{
-  loadAttendance(e.target.value);
-});
-
-/* ================= LOAD ATTENDANCE ================= */
+/* LOAD */
 async function loadAttendance(month){
+  currentMonth = month;
   const tbody = document.querySelector("#attendanceTable tbody");
-  tbody.innerHTML = `<tr><td colspan="10">Loading...</td></tr>`;
+  tbody.innerHTML = "Loading...";
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("attendance")
     .select("*")
     .eq("user_id", user.id)
     .gte("attendance_date", `${month}-01`)
     .lte("attendance_date", `${month}-31`)
-    .order("attendance_date",{ascending:true});
+    .order("attendance_date");
 
-  if(error || !data.length){
-    tbody.innerHTML = `<tr><td colspan="10">No attendance found</td></tr>`;
+  if(!data || !data.length){
+    tbody.innerHTML = `<tr><td colspan="10">No data</td></tr>`;
     return;
   }
-
-  let firstEdits = 0;
-  let secondEdits = 0;
-
-  data.forEach(d=>{
-    if(new Date(d.attendance_date).getDate() <= 15)
-      firstEdits += d.edit_count || 0;
-    else
-      secondEdits += d.edit_count || 0;
-  });
 
   tbody.innerHTML = "";
 
-  const first = data.filter(d=>new Date(d.attendance_date).getDate()<=15);
-  const second = data.filter(d=>new Date(d.attendance_date).getDate()>15);
+  for(const row of data){
+    const day = new Date(row.attendance_date).getDate();
+    const cutoff = day <= 15 ? 1 : 2;
 
-  if(first.length){
-    tbody.innerHTML += `
-      <tr class="cutoff">
-        <td colspan="10">🟢 1st Cutoff (1–15) — Edits used: ${firstEdits}/5</td>
-      </tr>`;
-    first.forEach(r=>tbody.innerHTML+=rowHTML(r,firstEdits,secondEdits));
-  }
+    const edits = await getCutoffEdits(cutoff);
+    const disabled = edits >= 5;
 
-  if(second.length){
     tbody.innerHTML += `
-      <tr class="cutoff">
-        <td colspan="10">🔵 2nd Cutoff (16–End) — Edits used: ${secondEdits}/5</td>
-      </tr>`;
-    second.forEach(r=>tbody.innerHTML+=rowHTML(r,firstEdits,secondEdits));
+      <tr>
+        <td>${row.attendance_date}</td>
+        <td>${fmt(row.time_in)}</td>
+        <td>${fmt(row.lunch_break_out)}</td>
+        <td>${fmt(row.lunch_break_in)}</td>
+        <td>${fmt(row.coffee_break_out)}</td>
+        <td>${fmt(row.coffee_break_in)}</td>
+        <td>${fmt(row.time_out)}</td>
+        <td>${row.selfie_url ? '📸' : '--'}</td>
+        <td>${row.latitude ? '📍' : '--'}</td>
+        <td>
+          <button ${disabled?'disabled':''}
+            onclick="editAttendance('${row.id}',${cutoff})">
+            Edit (${edits}/5)
+          </button>
+        </td>
+      </tr>
+    `;
   }
 }
 
-/* ================= ROW ================= */
-function rowHTML(d,firstTotal,secondTotal){
-  const t = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '--';
-  const isFirst = new Date(d.attendance_date).getDate() <= 15;
-  const disabled = isFirst ? firstTotal>=5 : secondTotal>=5;
+/* GET EDIT COUNT */
+async function getCutoffEdits(cutoff){
+  const { data } = await supabase
+    .from("attendance_cutoff_edits")
+    .select("edit_count")
+    .eq("user_id", user.id)
+    .eq("month", currentMonth)
+    .eq("cutoff", cutoff)
+    .maybeSingle();
 
-  return `
-  <tr>
-    <td>${d.attendance_date}</td>
-    <td>${t(d.time_in)}</td>
-    <td>${t(d.lunch_break_out)}</td>
-    <td>${t(d.lunch_break_in)}</td>
-    <td>${t(d.coffee_break_out)}</td>
-    <td>${t(d.coffee_break_in)}</td>
-    <td>${t(d.time_out)}</td>
-    <td>${d.selfie_url?`<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>`:'--'}</td>
-    <td>${d.latitude?`<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>`:'--'}</td>
-    <td>
-      <button ${disabled?"disabled":""}
-        onclick="editAttendance('${d.id}')">
-        ✏️
-      </button>
-    </td>
-  </tr>`;
+  return data ? data.edit_count : 0;
 }
 
-/* ================= EDIT ================= */
-window.editAttendance = async (id)=>{
-  if(!confirm("Edit this attendance?")) return;
-
-  const { error } = await supabase
-    .from("attendance")
-    .update({ edit_count: supabase.sql`edit_count + 1` })
-    .eq("id", id);
-
-  if(error){
-    alert("Edit failed");
-    console.error(error);
+/* EDIT */
+window.editAttendance = async (attendanceId, cutoff)=>{
+  const edits = await getCutoffEdits(cutoff);
+  if(edits >= 5){
+    alert("Edit limit reached for this cutoff");
     return;
   }
 
-  alert("Edited successfully");
-  location.reload();
+  // increment cutoff counter
+  await supabase
+    .from("attendance_cutoff_edits")
+    .upsert({
+      user_id: user.id,
+      month: currentMonth,
+      cutoff,
+      edit_count: edits + 1
+    });
+
+  alert("Edit recorded");
+  loadAttendance(currentMonth);
 };
 
-/* ================= VIEWERS ================= */
-window.viewMap=(lat,lng)=>{
-  window.open(`map.html?lat=${lat}&lng=${lng}`,"_blank");
-};
-window.viewSelfie=(url)=>{
-  window.open(`selfie.html?url=${url}`,"_blank");
-};
+function fmt(v){
+  return v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '--';
+}
 </script>
+
 
 </body>
 </html>
