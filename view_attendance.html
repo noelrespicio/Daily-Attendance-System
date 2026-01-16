@@ -128,7 +128,7 @@ async function loadAttendance(month){
 
 /* ================= ROW TEMPLATE ================= */
 function rowHTML(d){
-  const t = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:true}) : '--';
+  const t = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '--';
   return `
   <tr>
     <td>${d.attendance_date}</td>
