@@ -10,22 +10,17 @@ body{font-family:Arial,sans-serif;background:#f4f6f8;padding:15px;}
 h2{text-align:center;margin-bottom:20px;}
 .date-picker{text-align:center;margin-bottom:15px;}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
-th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px;}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:13px;}
 th{background:#f7f7f7;}
-.cutoff{
-  background:#e5e7eb;
-  font-weight:bold;
-  text-align:left;
-}
+.cutoff{background:#e5e7eb;font-weight:bold;text-align:left;}
 button{
-  padding:6px 10px;
+  padding:5px 8px;
   border:none;
-  background:#2563eb;
-  color:#fff;
   border-radius:5px;
   cursor:pointer;
 }
-button:hover{background:#1e40af;}
+.edit{background:#2563eb;color:#fff;}
+.locked{color:red;font-size:12px;}
 </style>
 </head>
 
@@ -42,23 +37,22 @@ button:hover{background:#1e40af;}
 <thead>
 <tr>
 <th>Date</th>
-<th>Time In</th>
-<th>LB Out</th>
-<th>LB In</th>
-<th>CB Out</th>
-<th>CB In</th>
-<th>Time Out</th>
-<th>Selfie</th>
-<th>Map</th>
+<th>IN</th>
+<th>LB OUT</th>
+<th>LB IN</th>
+<th>CB OUT</th>
+<th>CB IN</th>
+<th>OUT</th>
+<th>Edit</th>
 </tr>
 </thead>
 <tbody>
-<tr><td colspan="9">Select a month to view attendance</td></tr>
+<tr><td colspan="8">Select a month</td></tr>
 </tbody>
 </table>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const supabase = createClient(
   "https://wlthlwxcmltwescezjlk.supabase.co",
@@ -71,64 +65,66 @@ let user;
 (async()=>{
   const { data } = await supabase.auth.getSession();
   if(!data.session){
-    alert("Not logged in!");
     location.href="login.html";
     return;
   }
   user = data.session.user;
 
-  // Default month = current month
   const now = new Date();
-  document.getElementById("monthPicker").value =
-    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-
-  loadAttendance(document.getElementById("monthPicker").value);
+  monthPicker.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  loadAttendance(monthPicker.value);
 })();
 
-document.getElementById("monthPicker").addEventListener("change",e=>{
+monthPicker.addEventListener("change",e=>{
   loadAttendance(e.target.value);
 });
 
-/* ================= LOAD ATTENDANCE ================= */
+/* ================= HELPERS ================= */
+const t = v => v ? new Date(v).toLocaleTimeString('en-GB') : '--';
+
+function getCutoff(date){
+  return new Date(date).getDate() <= 15 ? "first" : "second";
+}
+
+/* ================= LOAD ================= */
 async function loadAttendance(month){
   const tbody = document.querySelector("#attendanceTable tbody");
-  tbody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="8">Loading...</td></tr>`;
 
-  const start = `${month}-01`;
-  const end = `${month}-31`;
-
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("attendance")
     .select("*")
     .eq("user_id", user.id)
-    .gte("attendance_date", start)
-    .lte("attendance_date", end)
-    .order("attendance_date", { ascending: true });
+    .gte("attendance_date", `${month}-01`)
+    .lte("attendance_date", `${month}-31`)
+    .order("attendance_date");
 
-  if(error || !data.length){
-    tbody.innerHTML = `<tr><td colspan="9">No attendance found</td></tr>`;
+  if(!data || !data.length){
+    tbody.innerHTML = `<tr><td colspan="8">No records</td></tr>`;
     return;
   }
 
   tbody.innerHTML = "";
 
-  const firstCutoff = data.filter(d => new Date(d.attendance_date).getDate() <= 15);
-  const secondCutoff = data.filter(d => new Date(d.attendance_date).getDate() > 15);
+  ["first","second"].forEach(cut=>{
+    const rows = data.filter(r => getCutoff(r.attendance_date) === cut);
+    if(!rows.length) return;
 
-  if(firstCutoff.length){
-    tbody.innerHTML += `<tr class="cutoff"><td colspan="9">🟢 1st Cutoff (1–15)</td></tr>`;
-    firstCutoff.forEach(row => tbody.innerHTML += rowHTML(row));
-  }
+    tbody.innerHTML += `
+      <tr class="cutoff">
+        <td colspan="8">${cut === "first" ? "🟢 1–15" : "🔵 16–End"}</td>
+      </tr>`;
 
-  if(secondCutoff.length){
-    tbody.innerHTML += `<tr class="cutoff"><td colspan="9">🔵 2nd Cutoff (16–End)</td></tr>`;
-    secondCutoff.forEach(row => tbody.innerHTML += rowHTML(row));
-  }
+    rows.forEach(r => tbody.innerHTML += rowHTML(r));
+  });
 }
 
-/* ================= ROW TEMPLATE ================= */
+/* ================= ROW ================= */
 function rowHTML(d){
-  const t = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '--';
+  const cutoff = getCutoff(d.attendance_date);
+  const used = cutoff === "first" ? d.edit_count_1st : d.edit_count_2nd;
+  const left = 5 - used;
+
   return `
   <tr>
     <td>${d.attendance_date}</td>
@@ -138,18 +134,48 @@ function rowHTML(d){
     <td>${t(d.coffee_break_out)}</td>
     <td>${t(d.coffee_break_in)}</td>
     <td>${t(d.time_out)}</td>
-    <td>${d.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>` : '--'}</td>
-    <td>${d.latitude ? `<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>` : '--'}</td>
+    <td>
+      ${left > 0
+        ? `<button class="edit" onclick="editTime(${d.id},'${cutoff}',${used})">Edit (${left})</button>`
+        : `<span class="locked">Locked</span>`
+      }
+    </td>
   </tr>`;
 }
 
-/* ================= VIEWERS ================= */
-window.viewMap = (lat,lng)=>{
-  window.open(`map.html?lat=${lat}&lng=${lng}`,"_blank");
-};
-window.viewSelfie = (url)=>{
-  window.open(`selfie.html?url=${url}`,"_blank");
+/* ================= EDIT ================= */
+window.editTime = async (id, cutoff, used)=>{
+  if(used >= 5){
+    alert("Edit limit reached");
+    return;
+  }
+
+  const field = prompt("Which field? (time_in, lunch_break_out, lunch_break_in, coffee_break_out, coffee_break_in, time_out)");
+  if(!field) return;
+
+  const newTime = prompt("Enter time (HH:MM:SS)");
+  if(!newTime) return;
+
+  const countCol = cutoff === "first" ? "edit_count_1st" : "edit_count_2nd";
+
+  const { error } = await supabase
+    .from("attendance")
+    .update({
+      [field]: newTime,
+      [countCol]: used + 1
+    })
+    .eq("id", id);
+
+  if(error){
+    alert("Update failed");
+    console.error(error);
+    return;
+  }
+
+  alert(`Saved! Remaining edits: ${4-used}`);
+  monthPicker.dispatchEvent(new Event("change"));
 };
 </script>
 
 </body>
+</html>
