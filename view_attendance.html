@@ -159,9 +159,25 @@ function rowHTML(d,firstTotal,secondTotal){
 window.editAttendance = async (id)=>{
   if(!confirm("Edit this attendance?")) return;
 
+  // First, get the current edit_count
+  const { data, error: fetchError } = await supabase
+    .from("attendance")
+    .select("edit_count")
+    .eq("id", id)
+    .single();
+
+  if(fetchError){
+    alert("Failed to fetch edit count");
+    console.error(fetchError);
+    return;
+  }
+
+  const currentCount = data.edit_count || 0;
+
+  // Update with increment
   const { error } = await supabase
     .from("attendance")
-    .update({ edit_count: supabase.sql`edit_count + 1` })
+    .update({ edit_count: currentCount + 1 })
     .eq("id", id);
 
   if(error){
@@ -174,13 +190,6 @@ window.editAttendance = async (id)=>{
   location.reload();
 };
 
-/* ================= VIEWERS ================= */
-window.viewMap=(lat,lng)=>{
-  window.open(`map.html?lat=${lat}&lng=${lng}`,"_blank");
-};
-window.viewSelfie=(url)=>{
-  window.open(`selfie.html?url=${url}`,"_blank");
-};
 </script>
 
 </body>
