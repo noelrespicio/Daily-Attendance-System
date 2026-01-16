@@ -164,21 +164,19 @@ async function record(field, selfieRequired){
   pendingField = field;
   pendingTime = new Date(); // store as local Date object
 
- if (selfieRequired) {
-  try {
-    locationData = await getLocation();
-  } catch {
-    alert("Location is required");
-    return;
-  }
-
-  if (confirm("Do you want to take a selfie?")) {
+  if (selfieRequired) {
+    try {
+      locationData = await getLocation();
+      console.log("LOCATION:", locationData);
+    } catch (err) {
+      alert("Location is required!");
+      return;
+    }
     document.getElementById("selfieInput").click();
   } else {
-    startCountdown(field); // continue without selfie
+    startCountdown(field);
   }
 }
-
 
 /* SELFIE */
 document.getElementById("selfieInput").addEventListener("change", async e => {
@@ -234,16 +232,16 @@ function startCountdown(field){
 }
 
 /* SAVE DATA */
-async function save() {
+async function save(){
   const today = getLocalDate();
 
   const payload = {
-    [pendingField]: toLocalString(pendingTime),
-    latitude: Number(locationData.lat),
-    longitude: Number(locationData.lng)
+    [pendingField]: toLocalString(pendingTime)
   };
 
-  if (selfieURL) {
+  if (pendingField === "time_in" || pendingField === "time_out") {
+    payload.latitude = Number(locationData.lat);
+    payload.longitude = Number(locationData.lng);
     payload.selfie_url = selfieURL;
   }
 
@@ -262,6 +260,7 @@ async function save() {
   pendingField = null;
   selfieURL = null;
 }
+
 
 /* CANCEL */
 function cancelSave(){
