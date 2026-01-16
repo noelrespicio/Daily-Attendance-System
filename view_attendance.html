@@ -12,20 +12,10 @@ h2{text-align:center;margin-bottom:20px;}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
 th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px;}
 th{background:#f7f7f7;}
-.cutoff{
-  background:#e5e7eb;
-  font-weight:bold;
-  text-align:left;
-}
-button{
-  padding:6px 10px;
-  border:none;
-  background:#2563eb;
-  color:#fff;
-  border-radius:5px;
-  cursor:pointer;
-}
+.cutoff{background:#e5e7eb;font-weight:bold;text-align:left;}
+button{padding:6px 10px;border:none;background:#2563eb;color:#fff;border-radius:5px;cursor:pointer;}
 button:hover{background:#1e40af;}
+button:disabled{background:#9ca3af;cursor:not-allowed;}
 </style>
 </head>
 
@@ -50,10 +40,11 @@ button:hover{background:#1e40af;}
 <th>Time Out</th>
 <th>Selfie</th>
 <th>Map</th>
+<th>Edit</th>
 </tr>
 </thead>
 <tbody>
-<tr><td colspan="9">Select a month to view attendance</td></tr>
+<tr><td colspan="10">Select a month</td></tr>
 </tbody>
 </table>
 
@@ -77,7 +68,6 @@ let user;
   }
   user = data.session.user;
 
-  // Default month = current month
   const now = new Date();
   document.getElementById("monthPicker").value =
     `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -92,43 +82,59 @@ document.getElementById("monthPicker").addEventListener("change",e=>{
 /* ================= LOAD ATTENDANCE ================= */
 async function loadAttendance(month){
   const tbody = document.querySelector("#attendanceTable tbody");
-  tbody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
-
-  const start = `${month}-01`;
-  const end = `${month}-31`;
+  tbody.innerHTML = `<tr><td colspan="10">Loading...</td></tr>`;
 
   const { data, error } = await supabase
     .from("attendance")
     .select("*")
     .eq("user_id", user.id)
-    .gte("attendance_date", start)
-    .lte("attendance_date", end)
-    .order("attendance_date", { ascending: true });
+    .gte("attendance_date", `${month}-01`)
+    .lte("attendance_date", `${month}-31`)
+    .order("attendance_date",{ascending:true});
 
   if(error || !data.length){
-    tbody.innerHTML = `<tr><td colspan="9">No attendance found</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10">No attendance found</td></tr>`;
     return;
   }
 
+  let firstEdits = 0;
+  let secondEdits = 0;
+
+  data.forEach(d=>{
+    if(new Date(d.attendance_date).getDate() <= 15)
+      firstEdits += d.edit_count || 0;
+    else
+      secondEdits += d.edit_count || 0;
+  });
+
   tbody.innerHTML = "";
 
-  const firstCutoff = data.filter(d => new Date(d.attendance_date).getDate() <= 15);
-  const secondCutoff = data.filter(d => new Date(d.attendance_date).getDate() > 15);
+  const first = data.filter(d=>new Date(d.attendance_date).getDate()<=15);
+  const second = data.filter(d=>new Date(d.attendance_date).getDate()>15);
 
-  if(firstCutoff.length){
-    tbody.innerHTML += `<tr class="cutoff"><td colspan="9">🟢 1st Cutoff (1–15)</td></tr>`;
-    firstCutoff.forEach(row => tbody.innerHTML += rowHTML(row));
+  if(first.length){
+    tbody.innerHTML += `
+      <tr class="cutoff">
+        <td colspan="10">🟢 1st Cutoff (1–15) — Edits used: ${firstEdits}/5</td>
+      </tr>`;
+    first.forEach(r=>tbody.innerHTML+=rowHTML(r,firstEdits,secondEdits));
   }
 
-  if(secondCutoff.length){
-    tbody.innerHTML += `<tr class="cutoff"><td colspan="9">🔵 2nd Cutoff (16–End)</td></tr>`;
-    secondCutoff.forEach(row => tbody.innerHTML += rowHTML(row));
+  if(second.length){
+    tbody.innerHTML += `
+      <tr class="cutoff">
+        <td colspan="10">🔵 2nd Cutoff (16–End) — Edits used: ${secondEdits}/5</td>
+      </tr>`;
+    second.forEach(r=>tbody.innerHTML+=rowHTML(r,firstEdits,secondEdits));
   }
 }
 
-/* ================= ROW TEMPLATE ================= */
-function rowHTML(d){
+/* ================= ROW ================= */
+function rowHTML(d,firstTotal,secondTotal){
   const t = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '--';
+  const isFirst = new Date(d.attendance_date).getDate() <= 15;
+  const disabled = isFirst ? firstTotal>=5 : secondTotal>=5;
+
   return `
   <tr>
     <td>${d.attendance_date}</td>
@@ -138,18 +144,44 @@ function rowHTML(d){
     <td>${t(d.coffee_break_out)}</td>
     <td>${t(d.coffee_break_in)}</td>
     <td>${t(d.time_out)}</td>
-    <td>${d.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>` : '--'}</td>
-    <td>${d.latitude ? `<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>` : '--'}</td>
+    <td>${d.selfie_url?`<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>`:'--'}</td>
+    <td>${d.latitude?`<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>`:'--'}</td>
+    <td>
+      <button ${disabled?"disabled":""}
+        onclick="editAttendance('${d.id}')">
+        ✏️
+      </button>
+    </td>
   </tr>`;
 }
 
+/* ================= EDIT ================= */
+window.editAttendance = async (id)=>{
+  if(!confirm("Edit this attendance?")) return;
+
+  const { error } = await supabase
+    .from("attendance")
+    .update({ edit_count: supabase.sql`edit_count + 1` })
+    .eq("id", id);
+
+  if(error){
+    alert("Edit failed");
+    console.error(error);
+    return;
+  }
+
+  alert("Edited successfully");
+  location.reload();
+};
+
 /* ================= VIEWERS ================= */
-window.viewMap = (lat,lng)=>{
+window.viewMap=(lat,lng)=>{
   window.open(`map.html?lat=${lat}&lng=${lng}`,"_blank");
 };
-window.viewSelfie = (url)=>{
+window.viewSelfie=(url)=>{
   window.open(`selfie.html?url=${url}`,"_blank");
 };
 </script>
 
 </body>
+</html>
