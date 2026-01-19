@@ -16,7 +16,6 @@ th{background:#f7f7f7;}
 button{padding:6px 10px;border:none;background:#2563eb;color:#fff;border-radius:5px;cursor:pointer;}
 button:hover{background:#1e40af;}
 button:disabled{background:#9ca3af;cursor:not-allowed;}
-input[type="time"]{width:90px;}
 </style>
 </head>
 
@@ -56,7 +55,6 @@ const supabase = createClient(
   "https://wlthlwxcmltwescezjlk.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
 );
-
 let user;
 
 /* ================= AUTH ================= */
@@ -70,31 +68,19 @@ let user;
   user = data.session.user;
 
   const now = new Date();
-  monthPicker.value =
+  document.getElementById("monthPicker").value =
     `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-  loadAttendance(monthPicker.value);
+  loadAttendance(document.getElementById("monthPicker").value);
 })();
 
-monthPicker.addEventListener("change", e => {
+document.getElementById("monthPicker").addEventListener("change", e => {
   loadAttendance(e.target.value);
 });
 
-/* ================= HELPERS ================= */
-const formatTime = v => {
-  if(!v) return '';
-  return new Date(v).toISOString().substring(11,16); // HH:MM
-};
-
-const toTimestamp = time => {
-  if(!time) return null;
-  const today = new Date().toISOString().split('T')[0];
-  return `${today}T${time}:00`;
-};
-
 /* ================= LOAD ATTENDANCE ================= */
 async function loadAttendance(month){
-  const tbody = attendanceTable.querySelector("tbody");
+  const tbody = document.querySelector("#attendanceTable tbody");
   tbody.innerHTML = `<tr><td colspan="10">Loading...</td></tr>`;
 
   const { data, error } = await supabase
@@ -110,88 +96,109 @@ async function loadAttendance(month){
     return;
   }
 
-  let firstEdits = 0, secondEdits = 0;
+  let firstEdits = 0;
+  let secondEdits = 0;
 
-  data.forEach(d=>{
-    (new Date(d.attendance_date).getDate()<=15)
-      ? firstEdits += (d.edit_count||0)
-      : secondEdits += (d.edit_count||0);
+  data.forEach(d => {
+    if(new Date(d.attendance_date).getDate() <= 15)
+      firstEdits += d.edit_count || 0;
+    else
+      secondEdits += d.edit_count || 0;
   });
 
   tbody.innerHTML = "";
 
-  const first = data.filter(d=>new Date(d.attendance_date).getDate()<=15);
-  const second = data.filter(d=>new Date(d.attendance_date).getDate()>15);
+  const first = data.filter(d => new Date(d.attendance_date).getDate() <= 15);
+  const second = data.filter(d => new Date(d.attendance_date).getDate() > 15);
 
   if(first.length){
     tbody.innerHTML += `<tr class="cutoff">
       <td colspan="10">🟢 1st Cutoff (1–15) — Edits used: ${firstEdits}/5</td>
     </tr>`;
-    first.forEach(r=>tbody.innerHTML+=rowHTML(r,firstEdits,secondEdits));
+    first.forEach(r => tbody.innerHTML += rowHTML(r, firstEdits, secondEdits));
   }
 
   if(second.length){
     tbody.innerHTML += `<tr class="cutoff">
       <td colspan="10">🔵 2nd Cutoff (16–End) — Edits used: ${secondEdits}/5</td>
     </tr>`;
-    second.forEach(r=>tbody.innerHTML+=rowHTML(r,firstEdits,secondEdits));
+    second.forEach(r => tbody.innerHTML += rowHTML(r, firstEdits, secondEdits));
   }
 }
 
-/* ================= ROW ================= */
+/* ================= ROW HTML ================= */
 function rowHTML(d, firstTotal, secondTotal){
-  const isFirst = new Date(d.attendance_date).getDate()<=15;
-  const disabled = isFirst ? firstTotal>=5 : secondTotal>=5;
+  const formatTime = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '';
+  const isFirst = new Date(d.attendance_date).getDate() <= 15;
+  const disabled = isFirst ? firstTotal >= 5 : secondTotal >= 5;
 
   return `
-<tr id="row-${d.id}">
-<td>${d.attendance_date}</td>
-<td class="editable">${formatTime(d.time_in)}</td>
-<td class="editable">${formatTime(d.lunch_break_out)}</td>
-<td class="editable">${formatTime(d.lunch_break_in)}</td>
-<td class="editable">${formatTime(d.coffee_break_out)}</td>
-<td class="editable">${formatTime(d.coffee_break_in)}</td>
-<td class="editable">${formatTime(d.time_out)}</td>
-<td>${d.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>`:'--'}</td>
-<td>${d.latitude ? `<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>`:'--'}</td>
-<td><button ${disabled?"disabled":""} onclick="startEdit('${d.id}')">✏️ Edit</button></td>
-</tr>`;
+  <tr id="row-${d.id}">
+    <td>${d.attendance_date}</td>
+    <td class="editable">${formatTime(d.time_in)}</td>
+    <td class="editable">${formatTime(d.lunch_break_out)}</td>
+    <td class="editable">${formatTime(d.lunch_break_in)}</td>
+    <td class="editable">${formatTime(d.coffee_break_out)}</td>
+    <td class="editable">${formatTime(d.coffee_break_in)}</td>
+    <td class="editable">${formatTime(d.time_out)}</td>
+    <td>${d.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>` : '--'}</td>
+    <td>${d.latitude ? `<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>` : '--'}</td>
+    <td>
+      <button ${disabled ? "disabled" : ""} onclick="startEdit('${d.id}')">✏️ Edit</button>
+    </td>
+  </tr>`;
 }
 
-/* ================= EDIT ================= */
-window.startEdit = id =>{
+/* ================= EDIT FUNCTIONS ================= */
+window.startEdit = (id) => {
   const row = document.getElementById(`row-${id}`);
-  row.querySelectorAll('.editable').forEach(c=>{
-    c.innerHTML = `<input type="time" value="${c.innerText.trim()}">`;
-  });
-  row.querySelector('td:last-child').innerHTML =
-    `<button onclick="saveEdit('${id}')">💾 Save</button>`;
-};
+  const cells = row.querySelectorAll('.editable');
 
-window.saveEdit = async id =>{
+  // Convert cells to input fields
+  cells.forEach(cell => {
+    const value = cell.innerText;
+    cell.innerHTML = `<input type="time" value="${value}">`;
+  });
+
+  // Replace edit button with save button
+  const btnCell = row.querySelector('td:last-child');
+  btnCell.innerHTML = `<button onclick="saveEdit('${id}')">💾 Save</button>`;
+}
+
+window.saveEdit = async (id) => {
   const row = document.getElementById(`row-${id}`);
   const inputs = row.querySelectorAll('input');
 
-  const values = Array.from(inputs).map(i=>toTimestamp(i.value));
+  const [time_in, lb_out, lb_in, cb_out, cb_in, time_out] = Array.from(inputs).map(i => i.value || null);
 
-  const { data } = await supabase
-    .from("attendance")
-    .select("edit_count")
-    .eq("id",id)
+  // Fetch current edit_count
+  const { data, error: fetchError } = await supabase
+    .from('attendance')
+    .select('edit_count')
+    .eq('id', id)
     .single();
 
+  if(fetchError){
+    alert("Failed to fetch edit count");
+    console.error(fetchError);
+    return;
+  }
+
+  const currentCount = data.edit_count || 0;
+
+  // Update the attendance
   const { error } = await supabase
-    .from("attendance")
+    .from('attendance')
     .update({
-      time_in: values[0],
-      lunch_break_out: values[1],
-      lunch_break_in: values[2],
-      coffee_break_out: values[3],
-      coffee_break_in: values[4],
-      time_out: values[5],
-      edit_count: (data.edit_count||0)+1
+      time_in,
+      lunch_break_out: lb_out,
+      lunch_break_in: lb_in,
+      coffee_break_out: cb_out,
+      coffee_break_in: cb_in,
+      time_out,
+      edit_count: currentCount + 1
     })
-    .eq("id",id);
+    .eq('id', id);
 
   if(error){
     alert("Failed to save attendance");
@@ -199,16 +206,16 @@ window.saveEdit = async id =>{
     return;
   }
 
-  alert("Attendance updated");
+  alert("Attendance updated successfully");
   location.reload();
-};
+}
 
-/* ================= VIEW ================= */
-window.viewMap = (lat,lng)=>{
-  window.open(`map.html?lat=${lat}&lng=${lng}`,"_blank");
+/* ================= VIEWERS ================= */
+window.viewMap = (lat,lng) => {
+  window.open(`map.html?lat=${lat}&lng=${lng}`, "_blank");
 };
-window.viewSelfie = url=>{
-  window.open(`selfie.html?url=${url}`,"_blank");
+window.viewSelfie = (url) => {
+  window.open(`selfie.html?url=${url}`, "_blank");
 };
 </script>
 
