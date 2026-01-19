@@ -12,6 +12,8 @@ h2{text-align:center;margin-bottom:20px;}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
 th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px;}
 th{background:#f7f7f7;}
+  .absent{background:#fee2e2;}
+.dayoff{background:#e0f2fe;}
 .cutoff{background:#e5e7eb;font-weight:bold;text-align:left;}
 button{padding:6px 10px;border:none;background:#2563eb;color:#fff;border-radius:5px;cursor:pointer;}
 button:hover{background:#1e40af;}
@@ -31,16 +33,17 @@ button:disabled{background:#9ca3af;cursor:not-allowed;}
 <table id="attendanceTable">
 <thead>
 <tr>
-<th>Date</th>
-<th>Time In</th>
-<th>LB Out</th>
-<th>LB In</th>
-<th>CB Out</th>
-<th>CB In</th>
-<th>Time Out</th>
-<th>Selfie</th>
-<th>Map</th>
-<th>Edit</th>
+  <th>Date</th>
+  <th>Time In</th>
+  <th>LB Out</th>
+  <th>LB In</th>
+  <th>CB Out</th>
+  <th>CB In</th>
+  <th>Time Out</th>
+  <th>Status / Reason</th>
+  <th>Selfie</th>
+  <th>Map</th>
+  <th>Edit</th>
 </tr>
 </thead>
 <tbody>
@@ -82,51 +85,74 @@ document.getElementById("monthPicker").addEventListener("change", e => {
 /* ================= LOAD ATTENDANCE ================= */
 async function loadAttendance(month){
   const tbody = document.querySelector("#attendanceTable tbody");
-  tbody.innerHTML = `<tr><td colspan="10">Loading...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="11">Loading...</td></tr>`;
 
-  const { data, error } = await supabase
+  const [year, mon] = month.split("-");
+  const totalDays = daysInMonth(year, mon);
+
+  const { data } = await supabase
     .from("attendance")
     .select("*")
     .eq("user_id", user.id)
     .gte("attendance_date", `${month}-01`)
-    .lte("attendance_date", `${month}-31`)
-    .order("attendance_date",{ascending:true});
+    .lte("attendance_date", `${month}-${totalDays}`);
 
-  if(error || !data.length){
-    tbody.innerHTML = `<tr><td colspan="10">No attendance found</td></tr>`;
-    return;
-  }
-
-  let firstEdits = 0;
-  let secondEdits = 0;
-
-  data.forEach(d => {
-    if(new Date(d.attendance_date).getDate() <= 15)
-      firstEdits += d.edit_count || 0;
-    else
-      secondEdits += d.edit_count || 0;
-  });
+  const map = {};
+  data?.forEach(d => map[d.attendance_date] = d);
 
   tbody.innerHTML = "";
 
-  const first = data.filter(d => new Date(d.attendance_date).getDate() <= 15);
-  const second = data.filter(d => new Date(d.attendance_date).getDate() > 15);
+  for(let day=1; day<=totalDays; day++){
+    const date = `${month}-${String(day).padStart(2,'0')}`;
+    const rec = map[date];
 
-  if(first.length){
-    tbody.innerHTML += `<tr class="cutoff">
-      <td colspan="10">🟢 1st Cutoff (1–15) — Edits used: ${firstEdits}/5</td>
-    </tr>`;
-    first.forEach(r => tbody.innerHTML += rowHTML(r, firstEdits, secondEdits));
-  }
-
-  if(second.length){
-    tbody.innerHTML += `<tr class="cutoff">
-      <td colspan="10">🔵 2nd Cutoff (16–End) — Edits used: ${secondEdits}/5</td>
-    </tr>`;
-    second.forEach(r => tbody.innerHTML += rowHTML(r, firstEdits, secondEdits));
+    if(rec){
+      tbody.innerHTML += rowHTML(rec);
+    }else{
+      tbody.innerHTML += absentRowHTML(date);
+    }
   }
 }
 
+  function absentRowHTML(date){
+  return `
+  <tr class="absent">
+    <td>${date}</td>
+    <td colspan="6">—</td>
+    <td>
+      <select onchange="saveReason('${date}', this.value)">
+        <option value="">Select</option>
+        <option value="Absent">Absent</option>
+        <option value="Day Off">Day Off</option>
+      </select>
+    </td>
+    <td>--</td>
+    <td>--</td>
+    <td>--</td>
+  </tr>`;
+  }
+
+  window.saveReason = async (date, status) => {
+  if(!status) return;
+
+  const { error } = await supabase
+    .from("attendance")
+    .insert({
+      user_id: user.id,
+      attendance_date: date,
+      status: status
+    });
+
+  if(error){
+    alert("Failed to save reason");
+    console.error(error);
+    return;
+  }
+
+  alert("Reason saved");
+  location.reload();
+};
+  
 /* ================= ROW HTML ================= */
 function rowHTML(d, firstTotal, secondTotal){
   const formatTime = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '';
