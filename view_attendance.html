@@ -52,172 +52,161 @@ button:disabled{background:#9ca3af;cursor:not-allowed;}
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const supabase = createClient(
-  "https://wlthlwxcmltwescezjlk.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
+  "https://wlthlwxcmltwescezjlk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
 );
-
 let user;
 
 /* ================= AUTH ================= */
 (async()=>{
-  const { data } = await supabase.auth.getSession();
-  if(!data.session){
-    alert("Not logged in!");
-    location.href="login.html";
-    return;
-  }
-  user = data.session.user;
+  const { data } = await supabase.auth.getSession();
+  if(!data.session){
+    alert("Not logged in!");
+    location.href="login.html";
+    return;
+  }
+  user = data.session.user;
 
-  const now = new Date();
-  document.getElementById("monthPicker").value =
-    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const now = new Date();
+  document.getElementById("monthPicker").value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-  loadAttendance(document.getElementById("monthPicker").value);
+  loadAttendance(document.getElementById("monthPicker").value);
 })();
 
 document.getElementById("monthPicker").addEventListener("change", e => {
-  loadAttendance(e.target.value);
+  loadAttendance(e.target.value);
 });
+
+/* ================= HELPERS ================= */
+function daysInMonth(y,m){
+  return new Date(y, m, 0).getDate();
+}
 
 /* ================= LOAD ATTENDANCE ================= */
 async function loadAttendance(month){
-  const tbody = document.querySelector("#attendanceTable tbody");
-  tbody.innerHTML = `<tr><td colspan="10">Loading...</td></tr>`;
+  const tbody = document.querySelector("#attendanceTable tbody");
+  tbody.innerHTML = `<tr><td colspan="10">Loading...</td></tr>`;
 
-  const { data, error } = await supabase
-    .from("attendance")
-    .select("*")
-    .eq("user_id", user.id)
-    .gte("attendance_date", `${month}-01`)
-    .lte("attendance_date", `${month}-31`)
-    .order("attendance_date",{ascending:true});
+  const [year, mon] = month.split("-");
+  const totalDays = daysInMonth(year, mon);
 
-  if(error || !data.length){
-    tbody.innerHTML = `<tr><td colspan="10">No attendance found</td></tr>`;
-    return;
-  }
+  const { data } = await supabase
+    .from("attendance")
+    .select("*")
+    .eq("user_id", user.id)
+    .gte("attendance_date", `${month}-01`)
+    .lte("attendance_date", `${month}-${totalDays}`);
 
-  let firstEdits = 0;
-  let secondEdits = 0;
+  const map = {};
+  data?.forEach(d => map[d.attendance_date] = d);
 
-  data.forEach(d => {
-    if(new Date(d.attendance_date).getDate() <= 15)
-      firstEdits += d.edit_count || 0;
-    else
-      secondEdits += d.edit_count || 0;
-  });
+  tbody.innerHTML = "";
 
-  tbody.innerHTML = "";
+  for(let day=1; day<=totalDays; day++){
+    const date = `${month}-${String(day).padStart(2,'0')}`;
+    const rec = map[date];
 
-  const first = data.filter(d => new Date(d.attendance_date).getDate() <= 15);
-  const second = data.filter(d => new Date(d.attendance_date).getDate() > 15);
-
-  if(first.length){
-    tbody.innerHTML += `<tr class="cutoff">
-      <td colspan="10">🟢 1st Cutoff (1–15) — Edits used: ${firstEdits}/5</td>
-    </tr>`;
-    first.forEach(r => tbody.innerHTML += rowHTML(r, firstEdits, secondEdits));
-  }
-
-  if(second.length){
-    tbody.innerHTML += `<tr class="cutoff">
-      <td colspan="10">🔵 2nd Cutoff (16–End) — Edits used: ${secondEdits}/5</td>
-    </tr>`;
-    second.forEach(r => tbody.innerHTML += rowHTML(r, firstEdits, secondEdits));
-  }
+    if(rec){
+      tbody.innerHTML += rowHTML(rec);
+    }else{
+      tbody.innerHTML += absentRowHTML(date);
+    }
+  }
 }
 
-/* ================= ROW HTML ================= */
-function rowHTML(d, firstTotal, secondTotal){
-  const formatTime = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '';
-  const isFirst = new Date(d.attendance_date).getDate() <= 15;
-  const disabled = isFirst ? firstTotal >= 5 : secondTotal >= 5;
+/* ================= ROWS ================= */
+function rowHTML(d){
+  const formatTime = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '';
 
-  return `
-  <tr id="row-${d.id}">
-    <td>${d.attendance_date}</td>
-    <td class="editable">${formatTime(d.time_in)}</td>
-    <td class="editable">${formatTime(d.lunch_break_out)}</td>
-    <td class="editable">${formatTime(d.lunch_break_in)}</td>
-    <td class="editable">${formatTime(d.coffee_break_out)}</td>
-    <td class="editable">${formatTime(d.coffee_break_in)}</td>
-    <td class="editable">${formatTime(d.time_out)}</td>
-    <td>${d.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>` : '--'}</td>
-    <td>${d.latitude ? `<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>` : '--'}</td>
-    <td>
-      <button ${disabled ? "disabled" : ""} onclick="startEdit('${d.id}')">✏️ Edit</button>
-    </td>
-  </tr>`;
+  return `
+  <tr id="row-${d.id}">
+    <td>${d.attendance_date}</td>
+    <td class="editable">${formatTime(d.time_in)}</td>
+    <td class="editable">${formatTime(d.lunch_break_out)}</td>
+    <td class="editable">${formatTime(d.lunch_break_in)}</td>
+    <td class="editable">${formatTime(d.coffee_break_out)}</td>
+    <td class="editable">${formatTime(d.coffee_break_in)}</td>
+    <td class="editable">${formatTime(d.time_out)}</td>
+    <td>${d.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>` : '--'}</td>
+    <td>${d.latitude ? `<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>` : '--'}</td>
+    <td>
+      <button onclick="startEdit('${d.id}')">✏️ Edit</button>
+    </td>
+  </tr>`;
 }
 
-/* ================= EDIT FUNCTIONS ================= */
+/* ===== ABSENT / DAY OFF ===== */
+function absentRowHTML(date){
+  return `
+  <tr style="background:#fee2e2">
+    <td>${date}</td>
+    <td colspan="6">—</td>
+    <td>
+      <select onchange="saveReason('${date}', this.value)">
+        <option value="">Select</option>
+        <option value="Absent">Absent</option>
+        <option value="Day Off">Day Off</option>
+      </select>
+    </td>
+    <td>--</td>
+    <td>--</td>
+  </tr>`;
+}
+
+/* ================= SAVE ABSENT ================= */
+window.saveReason = async (date, status) => {
+  if(!status) return;
+
+  const { error } = await supabase.from("attendance").insert({
+    user_id: user.id,
+    attendance_date: date,
+    status: status
+  });
+
+  if(error){
+    alert("Failed to save");
+    console.error(error);
+    return;
+  }
+  location.reload();
+};
+
+/* ================= EDIT ================= */
 window.startEdit = (id) => {
-  const row = document.getElementById(`row-${id}`);
-  const cells = row.querySelectorAll('.editable');
+  const row = document.getElementById(`row-${id}`);
+  const cells = row.querySelectorAll('.editable');
 
-  // Convert cells to input fields
-  cells.forEach(cell => {
-    const value = cell.innerText;
-    cell.innerHTML = `<input type="time" value="${value}">`;
-  });
+  cells.forEach(cell => {
+    cell.innerHTML = `<input type="time" value="${cell.innerText}">`;
+  });
 
-  // Replace edit button with save button
-  const btnCell = row.querySelector('td:last-child');
-  btnCell.innerHTML = `<button onclick="saveEdit('${id}')">💾 Save</button>`;
+  row.querySelector('td:last-child').innerHTML =
+    `<button onclick="saveEdit('${id}')">💾 Save</button>`;
 }
 
 window.saveEdit = async (id) => {
-  const row = document.getElementById(`row-${id}`);
-  const inputs = row.querySelectorAll('input');
+  const row = document.getElementById(`row-${id}`);
+  const inputs = row.querySelectorAll('input');
 
-  const [time_in, lb_out, lb_in, cb_out, cb_in, time_out] = Array.from(inputs).map(i => i.value || null);
+  const [time_in, lb_out, lb_in, cb_out, cb_in, time_out] =
+    [...inputs].map(i => i.value || null);
 
-  // Fetch current edit_count
-  const { data, error: fetchError } = await supabase
-    .from('attendance')
-    .select('edit_count')
-    .eq('id', id)
-    .single();
+  await supabase.from("attendance").update({
+    time_in,
+    lunch_break_out: lb_out,
+    lunch_break_in: lb_in,
+    coffee_break_out: cb_out,
+    coffee_break_in: cb_in,
+    time_out
+  }).eq("id", id);
 
-  if(fetchError){
-    alert("Failed to fetch edit count");
-    console.error(fetchError);
-    return;
-  }
-
-  const currentCount = data.edit_count || 0;
-
-  // Update the attendance
-  const { error } = await supabase
-    .from('attendance')
-    .update({
-      time_in,
-      lunch_break_out: lb_out,
-      lunch_break_in: lb_in,
-      coffee_break_out: cb_out,
-      coffee_break_in: cb_in,
-      time_out,
-      edit_count: currentCount + 1
-    })
-    .eq('id', id);
-
-  if(error){
-    alert("Failed to save attendance");
-    console.error(error);
-    return;
-  }
-
-  alert("Attendance updated successfully");
-  location.reload();
+  location.reload();
 }
 
 /* ================= VIEWERS ================= */
-window.viewMap = (lat,lng) => {
-  window.open(`map.html?lat=${lat}&lng=${lng}`, "_blank");
-};
-window.viewSelfie = (url) => {
-  window.open(`selfie.html?url=${url}`, "_blank");
-};
+window.viewMap = (lat,lng) => window.open(`map.html?lat=${lat}&lng=${lng}`,"_blank");
+window.viewSelfie = (url) => window.open(`selfie.html?url=${url}`,"_blank");
 </script>
 
 </body>
