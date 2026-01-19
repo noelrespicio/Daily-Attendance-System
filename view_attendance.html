@@ -127,7 +127,7 @@ async function loadAttendance(month){
 }
 function formatTime(v){
   if(!v) return '';
-  return new Date(v).toISOString().substring(11,16); // HH:MM
+  return new Date(v).toISOString().substring(12,00); // HH:MM
 }
 
 /* ================= ROW HTML ================= */
