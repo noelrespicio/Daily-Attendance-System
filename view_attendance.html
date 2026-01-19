@@ -125,6 +125,7 @@ async function loadAttendance(month){
     second.forEach(r => tbody.innerHTML += rowHTML(r, firstEdits, secondEdits));
   }
 }
+  }
 /* ================= ROW HTML ================= */
 function rowHTML(d, firstTotal, secondTotal){
   const formatTime = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '';
