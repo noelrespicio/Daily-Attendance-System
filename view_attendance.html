@@ -128,7 +128,7 @@ async function loadAttendance(month){
 
 /* ================= ROW HTML ================= */
 function rowHTML(d, firstTotal, secondTotal){
-  const formatTime = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '';
+ const formatTime = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '';
   const isFirst = new Date(d.attendance_date).getDate() <= 15;
   const disabled = isFirst ? firstTotal >= 5 : secondTotal >= 5;
 
@@ -148,28 +148,34 @@ function rowHTML(d, firstTotal, secondTotal){
     </td>
   </tr>`;
 }
+function toTimestamp(time){
+  if(!time) return null;
+  const today = new Date().toISOString().split('T')[0];
+  return `${today}T${time}:00`;
+}
 
 /* ================= EDIT FUNCTIONS ================= */
 window.startEdit = (id) => {
   const row = document.getElementById(`row-${id}`);
   const cells = row.querySelectorAll('.editable');
 
-  // Convert cells to input fields
   cells.forEach(cell => {
-    const value = cell.innerText;
+    const value = cell.innerText.trim();
     cell.innerHTML = `<input type="time" value="${value}">`;
   });
 
-  // Replace edit button with save button
-  const btnCell = row.querySelector('td:last-child');
-  btnCell.innerHTML = `<button onclick="saveEdit('${id}')">💾 Save</button>`;
-}
+  row.querySelector('td:last-child').innerHTML =
+    `<button onclick="saveEdit('${id}')">💾 Save</button>`;
+};
+
 
 window.saveEdit = async (id) => {
   const row = document.getElementById(`row-${id}`);
   const inputs = row.querySelectorAll('input');
 
-  const [time_in, lb_out, lb_in, cb_out, cb_in, time_out] = Array.from(inputs).map(i => i.value || null);
+ const [time_in, lb_out, lb_in, cb_out, cb_in, time_out] =
+  Array.from(inputs).map(i => toTimestamp(i.value));
+
 
   // Fetch current edit_count
   const { data, error: fetchError } = await supabase
