@@ -125,13 +125,10 @@ async function loadAttendance(month){
     second.forEach(r => tbody.innerHTML += rowHTML(r, firstEdits, secondEdits));
   }
 }
-function formatTime(v){
-  if(!v) return '';
-  return new Date(v).toISOString().substring(12,00); // HH:MM
-}
 
 /* ================= ROW HTML ================= */
 function rowHTML(d, firstTotal, secondTotal){
+ const formatTime = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '';
   const isFirst = new Date(d.attendance_date).getDate() <= 15;
   const disabled = isFirst ? firstTotal >= 5 : secondTotal >= 5;
 
@@ -151,7 +148,6 @@ function rowHTML(d, firstTotal, secondTotal){
     </td>
   </tr>`;
 }
-
 function toTimestamp(time){
   if(!time) return null;
   const today = new Date().toISOString().split('T')[0];
