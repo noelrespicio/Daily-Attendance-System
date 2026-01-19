@@ -75,6 +75,200 @@ let user;
   loadAttendance(document.getElementById("monthPicker").value);
 })();
 
+document.getElementById("monthPicker").addEventListener("change",e=>{
+  loadAttendance(e.target.value);
+});
+
+/* ================= LOAD ATTENDANCE ================= */
+async function loadAttendance(month){
+  const tbody = document.querySelector("#attendanceTable tbody");
+  tbody.innerHTML = `<tr><td colspan="10">Loading...</td></tr>`;
+
+  const { data, error } = await supabase
+    .from("attendance")
+    .select("*")
+    .eq("user_id", user.id)
+    .gte("attendance_date", `${month}-01`)
+    .lte("attendance_date", `${month}-31`)
+    .order("attendance_date",{ascending:true});
+
+  if(error || !data.length){
+    tbody.innerHTML = `<tr><td colspan="10">No attendance found</td></tr>`;
+    return;
+  }
+
+  let firstEdits = 0;
+  let secondEdits = 0;
+
+  data.forEach(d=>{
+    if(new Date(d.attendance_date).getDate() <= 15)
+      firstEdits += d.edit_count || 0;
+    else
+      secondEdits += d.edit_count || 0;
+  });
+
+  tbody.innerHTML = "";
+
+  const first = data.filter(d=>new Date(d.attendance_date).getDate()<=15);
+  const second = data.filter(d=>new Date(d.attendance_date).getDate()>15);
+
+  if(first.length){
+    tbody.innerHTML += `
+      <tr class="cutoff">
+        <td colspan="10">🟢 1st Cutoff (1–15) — Edits used: ${firstEdits}/5</td>
+      </tr>`;
+    first.forEach(r=>tbody.innerHTML+=rowHTML(r,firstEdits,secondEdits));
+  }
+
+  if(second.length){
+    tbody.innerHTML += `
+      <tr class="cutoff">
+        <td colspan="10">🔵 2nd Cutoff (16–End) — Edits used: ${secondEdits}/5</td>
+      </tr>`;
+    second.forEach(r=>tbody.innerHTML+=rowHTML(r,firstEdits,secondEdits));
+  }
+}
+
+/* ================= ROW ================= */
+function rowHTML(d,firstTotal,secondTotal){
+  const t = v => v ? new Date(v).toLocaleTimeString('en-US',{hour12:false}) : '--';
+  const isFirst = new Date(d.attendance_date).getDate() <= 15;
+  const disabled = isFirst ? firstTotal>=5 : secondTotal>=5;
+
+  return `
+  <tr>
+    <td>${d.attendance_date}</td>
+    <td>${t(d.time_in)}</td>
+    <td>${t(d.lunch_break_out)}</td>
+    <td>${t(d.lunch_break_in)}</td>
+    <td>${t(d.coffee_break_out)}</td>
+    <td>${t(d.coffee_break_in)}</td>
+    <td>${t(d.time_out)}</td>
+    <td>${d.selfie_url?`<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>`:'--'}</td>
+    <td>${d.latitude?`<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>`:'--'}</td>
+    <td>
+      <button ${disabled?"disabled":""}
+        onclick="editAttendance('${d.id}')">
+        ✏️
+      </button>
+    </td>
+  </tr>`;
+}
+
+/* ================= EDIT ================= */
+window.editAttendance = async (id)=>{
+  if(!confirm("Edit this attendance?")) return;
+
+  // First, get the current edit_count
+  const { data, error: fetchError } = await supabase
+    .from("attendance")
+    .select("edit_count")
+    .eq("id", id)
+    .single();
+
+  if(fetchError){
+    alert("Failed to fetch edit count");
+    console.error(fetchError);
+    return;
+  }
+
+  const currentCount = data.edit_count || 0;
+
+  // Update with increment
+  const { error } = await supabase
+    .from("attendance")
+    .update({ edit_count: currentCount + 1 })
+    .eq("id", id);
+
+  if(error){
+    alert("Edit failed");
+    console.error(error);
+    return;
+  }
+
+  alert("Edited successfully");
+  location.reload();
+};
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Attendance</title>
+
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;padding:15px;}
+h2{text-align:center;margin-bottom:20px;}
+.date-picker{text-align:center;margin-bottom:15px;}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px;}
+th{background:#f7f7f7;}
+.cutoff{background:#e5e7eb;font-weight:bold;text-align:left;}
+button{padding:6px 10px;border:none;background:#2563eb;color:#fff;border-radius:5px;cursor:pointer;}
+button:hover{background:#1e40af;}
+button:disabled{background:#9ca3af;cursor:not-allowed;}
+</style>
+</head>
+
+<body>
+
+<h2>📊 My Attendance</h2>
+
+<div class="date-picker">
+<label>Select Month: </label>
+<input type="month" id="monthPicker">
+</div>
+
+<table id="attendanceTable">
+<thead>
+<tr>
+<th>Date</th>
+<th>Time In</th>
+<th>LB Out</th>
+<th>LB In</th>
+<th>CB Out</th>
+<th>CB In</th>
+<th>Time Out</th>
+<th>Selfie</th>
+<th>Map</th>
+<th>Edit</th>
+</tr>
+</thead>
+<tbody>
+<tr><td colspan="10">Select a month</td></tr>
+</tbody>
+</table>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const supabase = createClient(
+  "https://wlthlwxcmltwescezjlk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
+);
+let user;
+
+/* ================= AUTH ================= */
+(async()=>{
+  const { data } = await supabase.auth.getSession();
+  if(!data.session){
+    alert("Not logged in!");
+    location.href="login.html";
+    return;
+  }
+  user = data.session.user;
+
+  const now = new Date();
+  document.getElementById("monthPicker").value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  loadAttendance(document.getElementById("monthPicker").value);
+})();
+
 document.getElementById("monthPicker").addEventListener("change", e => {
   loadAttendance(e.target.value);
 });
@@ -221,4 +415,4 @@ window.viewSelfie = (url) => {
 </script>
 
 </body>
-</html>
+</html> 
