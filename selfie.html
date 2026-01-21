@@ -7,35 +7,57 @@
 
 <style>
 body{
-  font-family:Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
+  font-family:Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
 }
-h2{text-align:center;margin-bottom:15px;}
+
+h2{
+  text-align:center;
+  margin-bottom:15px;
+}
+
 .container{
-  max-width:400px;
-  margin:auto;
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,.15);
-  text-align:center;
+  max-width:420px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 6px 16px rgba(0,0,0,.15);
+  text-align:center;
 }
+
+.img-wrapper{
+  position:relative;
+}
+
 img{
-  width:100%;
-  border-radius:10px;
-  border:1px solid #ddd;
+  width:100%;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  object-fit:cover;
 }
+
+.loading{
+  font-size:14px;
+  color:#666;
+}
+
+.empty{
+  color:#777;
+  font-size:14px;
+}
+
 .back{
-  display:inline-block;
-  margin-bottom:15px;
-  text-decoration:none;
-  background:#2563eb;
-  color:#fff;
-  padding:8px 12px;
-  border-radius:6px;
+  display:inline-block;
+  margin-bottom:15px;
+  text-decoration:none;
+  background:#2563eb;
+  color:#fff;
+  padding:8px 14px;
+  border-radius:8px;
 }
-.empty{color:#777;font-size:14px;}
+.back:hover{background:#1d4ed8;}
 </style>
 </head>
 
@@ -45,22 +67,33 @@ img{
 
 <h2>📸 Attendance Selfie</h2>
 
-<div class="container" id="content">Loading...</div>
+<div class="container" id="content">
+  <div class="loading">Loading image...</div>
+</div>
 
 <script>
 const params = new URLSearchParams(window.location.search);
 let selfieUrl = params.get("url");
+
 const content = document.getElementById("content");
 
 if(!selfieUrl || selfieUrl === "NULL"){
-  content.innerHTML = `<div class="empty">No selfie available.</div>`;
+  content.innerHTML = `<div class="empty">No selfie available.</div>`;
 }else{
-  selfieUrl = decodeURIComponent(selfieUrl);
-  content.innerHTML = `
-    <img src="${selfieUrl}" 
-         alt="Attendance Selfie"
-         onerror="this.onerror=null;this.src='https://via.placeholder.com/300x400?text=Image+Not+Found';">
-  `;
+  selfieUrl = decodeURIComponent(selfieUrl);
+
+  const img = new Image();
+  img.src = selfieUrl;
+  img.alt = "Attendance Selfie";
+
+  img.onerror = () => {
+    img.src = "https://via.placeholder.com/300x400?text=Image+Not+Found";
+  };
+
+  img.onload = () => {
+    content.innerHTML = "";
+    content.appendChild(img);
+  };
 }
 </script>
 
