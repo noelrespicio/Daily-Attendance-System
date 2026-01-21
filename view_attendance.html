@@ -214,12 +214,9 @@ window.saveEdit = async (id) => {
 window.viewMap = (lat,lng) => {
   window.open(`map.html?lat=${lat}&lng=${lng}`, "_blank");
 };
-window.viewSelfie = (timeInPic, timeOutPic) => {
-  window.open(
-    `selfie.html?timein=${encodeURIComponent(timeInPic)}&timeout=${encodeURIComponent(timeOutPic)}`,
-    "_blank"
-  );
-};
+window.viewSelfie = (url) => {
+  window.open(`selfie.html?url=${url}`, "_blank");
+ };
 
 </script>
 
