@@ -57,6 +57,9 @@ a{color:#fff;font-weight:bold}
 <body>
 
 <div class="register-container">
+    <div class="form-group" style="margin-bottom: 20px; text-align:center;">
+        <button type="button" id="registeredCompanyBtn" class="btn-register">Registered Company</button>
+    </div>
 <h1>Create Account</h1>
 <p>Register to access the Daily Time Attendance System</p>
 
@@ -164,6 +167,10 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     alert("Registration successful!");
     window.location.href = "login.html";
 });
+    document.getElementById("registeredCompanyBtn").addEventListener("click", () => {
+    alert("Please contact the admin to register your company.");
+});
+
 </script>
 
 
