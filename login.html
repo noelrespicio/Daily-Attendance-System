@@ -51,7 +51,8 @@
             display: block;
             margin-bottom: 6px;
         }
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 12px 14px;
             border-radius: 10px;
@@ -92,35 +93,47 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h1>Login</h1>
-        <p>Access your Daily Time Attendance account</p>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" id="email" placeholder="Enter your email" required>
-            </div>
+<div class="login-container">
+    <h1>Login</h1>
+    <p>Access your Daily Time Attendance account</p>
 
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="Enter your password" required>
-            </div>
+    <form id="loginForm">
 
-            <button type="submit" class="btn-login">Login</button>
-        </form>
-
-        <div class="register-link">
-            Don’t have an account? <a href="register.html">Register here</a>
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="email" placeholder="Enter your email" required>
         </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Enter your password" required>
+        </div>
+
+        <!-- ✅ BRANCH COLUMN -->
+        <div class="form-group">
+            <label>Branch</label>
+            <select id="branch" required>
+                <option value="">Select branch</option>
+                <option value="Main Office">Main Office</option>
+                <option value="Branch A">Branch A</option>
+                <option value="Branch B">Branch B</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-login">Login</button>
+    </form>
+
+    <div class="register-link">
+        Don’t have an account? <a href="register.html">Register here</a>
     </div>
+</div>
 
 <script>
 /* ===== SUPABASE CONFIG ===== */
 const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
 
-/* ===== CREATE SUPABASE CLIENT ===== */
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
@@ -132,6 +145,12 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
+    const branch = document.getElementById("branch").value;
+
+    if (!branch) {
+        alert("Please select a branch");
+        return;
+    }
 
     const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
@@ -142,6 +161,9 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         alert("Login failed: " + error.message);
         return;
     }
+
+    // Save branch for later use
+    localStorage.setItem("user_branch", branch);
 
     alert("Login successful!");
     window.location.href = "dashboard.html";
