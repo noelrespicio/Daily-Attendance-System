@@ -184,24 +184,22 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
 });
 
     
-    
-    
     document.getElementById("registeredCompanyBtn").addEventListener("click", () => {
     // Ask for password
     const password = prompt("Enter password to access company registration:");
 
     // Check password
     if (password === "adminattendance1298") {
-        // Redirect to registercompany.html
+        // ✅ Correct password → redirect to registercompany.html
         window.location.href = "registercompany.html";
     } else if (password === null || password === "") {
-        // User pressed cancel or left empty
+        // User pressed cancel or left it empty
         alert("Action cancelled.");
     } else {
-        alert("❌ Incorrect password! Contact admin for the correct password.");
+        // Wrong password
+        alert("❌ Incorrect password! Contact admin for the correct password.noelrespicio84@gmail.com");
     }
 });
-
 
 </script>
 
