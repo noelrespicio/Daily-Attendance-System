@@ -173,7 +173,7 @@ async function loadUsers(){
 // Invite employee
 async function inviteEmployee(userId){
   const { error } = await supabaseClient
-    .from("employees")
+    .from("users")
     .insert({
       company_id: companyId,
       user_id: userId,
@@ -194,7 +194,7 @@ async function loadEmployees(){
   tbody.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
 
   const { data } = await supabaseClient
-    .from("employees")
+    .from("users")
     .select(`status, users(email)`)
     .eq("company_id", companyId);
 
