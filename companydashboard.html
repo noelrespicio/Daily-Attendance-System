@@ -2,220 +2,158 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Company Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Dashboard | Daily Time Attendance</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma;}
 body{
-  font-family:Arial,sans-serif;
   background:#f4f6f8;
+  min-height:100vh;
+}
+.header{
+  background:#1e3c72;
+  color:#fff;
+  padding:15px 25px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.header h2{font-size:20px;}
+.header button{
+  background:#ef4444;
+  border:none;
+  color:#fff;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.layout{
+  display:flex;
+}
+.sidebar{
+  width:220px;
+  background:#1e293b;
+  min-height:calc(100vh - 60px);
   padding:20px;
+  color:#fff;
 }
-.container{
-  max-width:900px;
-  margin:auto;
+.sidebar h3{
+  font-size:14px;
+  margin-bottom:15px;
+  opacity:.8;
 }
-h2{
-  margin-bottom:10px;
+.sidebar a{
+  display:block;
+  padding:10px;
+  border-radius:6px;
+  color:#fff;
+  text-decoration:none;
+  margin-bottom:8px;
+  font-size:14px;
+}
+.sidebar a:hover{
+  background:#334155;
+}
+.content{
+  flex:1;
+  padding:25px;
 }
 .card{
   background:#fff;
   padding:20px;
   border-radius:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,.1);
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
   margin-bottom:20px;
 }
-input{
-  width:100%;
-  padding:10px;
+.card h3{
   margin-bottom:10px;
-  border:1px solid #ddd;
-  border-radius:8px;
 }
-table{
-  width:100%;
-  border-collapse:collapse;
+.info p{
+  font-size:14px;
+  margin-bottom:6px;
 }
-th,td{
-  padding:10px;
-  border-bottom:1px solid #eee;
-  text-align:left;
-}
-button{
-  padding:6px 12px;
-  border:none;
-  border-radius:6px;
-  background:#2563eb;
-  color:#fff;
-  cursor:pointer;
-}
-button:disabled{
-  background:#9ca3af;
-}
-.status{
-  font-size:13px;
-  padding:4px 8px;
-  border-radius:12px;
-}
-.invited{background:#fde68a;}
-.active{background:#bbf7d0;}
 </style>
 </head>
+
 <body>
 
-<div class="container">
-
+<div class="header">
   <h2>🏢 Company Dashboard</h2>
+  <button onclick="logout()">Logout</button>
+</div>
 
-  <!-- SEARCH USERS -->
-  <div class="card">
-    <h3>🔍 Search Users (Invite Employees)</h3>
-    <input type="text" id="searchEmail" placeholder="Search by email...">
-    <table>
-      <thead>
-        <tr>
-          <th>Email</th>
-          <th>Name</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="userResults">
-        <tr><td colspan="3">Type email to search</td></tr>
-      </tbody>
-    </table>
+<div class="layout">
+  <div class="sidebar">
+    <h3>MENU</h3>
+    <a href="#">📊 Dashboard</a>
+    <a href="#">👥 Employees</a>
+    <a href="#">🕒 Attendance</a>
+    <a href="#">📄 Reports</a>
+    <a href="#">⚙️ Settings</a>
   </div>
 
-  <!-- EMPLOYEES LIST -->
-  <div class="card">
-    <h3>👨‍💼 Employees</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Email</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="employeeList">
-        <tr><td colspan="2">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div class="content">
+    <div class="card">
+      <h3>Company Information</h3>
+      <div class="info">
+        <p><strong>Name:</strong> <span id="c_name">-</span></p>
+        <p><strong>Address:</strong> <span id="c_address">-</span></p>
+        <p><strong>Contact Person:</strong> <span id="c_contact">-</span></p>
+        <p><strong>Email:</strong> <span id="c_email">-</span></p>
+      </div>
+    </div>
 
+    <div class="card">
+      <h3>Quick Actions</h3>
+      <p>👉 You can now manage employees and attendance.</p>
+    </div>
+  </div>
 </div>
 
 <script>
-const supabase = supabase.createClient(
-  "YOUR_SUPABASE_URL",
-  "YOUR_SUPABASE_ANON_KEY"
+const supabaseClient = supabase.createClient(
+  "https://wlthlwxcmltwescezjlk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
 );
 
-let companyId;
+/* AUTH GUARD */
+(async()=>{
+  const { data } = await supabaseClient.auth.getSession();
+  if(!data.session){
+    location.href = "index.html";
+    return;
+  }
 
-// LOAD COMPANY
-async function loadCompany(){
-  const { data: { user } } = await supabase.auth.getUser();
+  loadCompany(data.session.user.id);
+})();
 
-  const { data } = await supabase
+/* LOAD COMPANY INFO */
+async function loadCompany(userId){
+  const { data, error } = await supabaseClient
     .from("companies")
-    .select("id")
-    .eq("user_id", user.id)
+    .select("*")
+    .eq("user_id", userId)
     .single();
 
-  companyId = data.id;
-  loadEmployees();
-}
-
-loadCompany();
-
-
-// SEARCH USERS
-document.getElementById("searchEmail").addEventListener("input", async (e)=>{
-  const keyword = e.target.value.trim();
-  const tbody = document.getElementById("userResults");
-
-  if(keyword.length < 2){
-    tbody.innerHTML = `<tr><td colspan="3">Type more letters...</td></tr>`;
-    return;
-  }
-
-  const { data } = await supabase
-    .from("users")
-    .select("id,email,full_name")
-    .ilike("email", `%${keyword}%`)
-    .limit(10);
-
-  if(!data.length){
-    tbody.innerHTML = `<tr><td colspan="3">No users found</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = "";
-  data.forEach(u=>{
-    tbody.innerHTML += `
-      <tr>
-        <td>${u.email}</td>
-        <td>${u.full_name ?? "-"}</td>
-        <td>
-          <button onclick="inviteEmployee('${u.id}')">Invite</button>
-        </td>
-      </tr>
-    `;
-  });
-});
-
-
-// INVITE EMPLOYEE
-async function inviteEmployee(userId){
-  const { error } = await supabase
-    .from("employees")
-    .insert({
-      company_id: companyId,
-      user_id: userId,
-      status: "invited"
-    });
-
   if(error){
-    alert("Already invited or error");
-  }else{
-    alert("Invitation sent ✅");
-    loadEmployees();
-  }
-}
-
-
-// LOAD EMPLOYEES
-async function loadEmployees(){
-  const tbody = document.getElementById("employeeList");
-  tbody.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
-
-  const { data } = await supabase
-    .from("employees")
-    .select(`
-      status,
-      users ( email )
-    `)
-    .eq("company_id", companyId);
-
-  if(!data.length){
-    tbody.innerHTML = `<tr><td colspan="2">No employees yet</td></tr>`;
+    alert("Failed to load company info");
+    console.error(error);
     return;
   }
 
-  tbody.innerHTML = "";
-  data.forEach(e=>{
-    tbody.innerHTML += `
-      <tr>
-        <td>${e.users.email}</td>
-        <td>
-          <span class="status ${e.status}">
-            ${e.status.toUpperCase()}
-          </span>
-        </td>
-      </tr>
-    `;
-  });
+  c_name.textContent = data.company_name;
+  c_address.textContent = data.company_address;
+  c_contact.textContent = data.contact_person;
+  c_email.textContent = data.contact_email;
+}
+
+/* LOGOUT */
+async function logout(){
+  await supabaseClient.auth.signOut();
+  location.href = "index.html";
 }
 </script>
 
