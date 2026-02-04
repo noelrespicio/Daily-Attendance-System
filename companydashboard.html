@@ -26,7 +26,7 @@ input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-ra
 table{width:100%;border-collapse:collapse;}
 th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;}
 button.action{padding:6px 12px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer;}
-button.action:disabled{background:#9ca3af;}
+button.action:disabled{background:#9ca3af;cursor:not-allowed;}
 .status{font-size:13px;padding:4px 8px;border-radius:12px;}
 .invited{background:#fde68a;}
 .active{background:#bbf7d0;}
@@ -55,7 +55,6 @@ button.action:disabled{background:#9ca3af;}
 </div>
 
 <script>
-// Supabase setup
 const supabaseClient = supabase.createClient(
   "https://wlthlwxcmltwescezjlk.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
@@ -88,7 +87,7 @@ let companyId;
   showDashboard(company);
 })();
 
-// Dashboard view
+// Dashboard
 function showDashboard(company){
   const content = document.getElementById("mainContent");
   content.innerHTML = `
@@ -142,7 +141,7 @@ function showEmployees(){
   loadEmployees();
 }
 
-// Search Auth users via RPC function
+// Load users from Auth (via RPC)
 async function loadUsers(){
   const keyword = document.getElementById("searchEmail").value.trim();
   const tbody = document.getElementById("userResults");
@@ -151,20 +150,28 @@ async function loadUsers(){
     return;
   }
 
-  // RPC function must exist in Supabase
   const { data, error } = await supabaseClient.rpc('search_auth_users', { keyword });
   if(error || !data.length){
     tbody.innerHTML = `<tr><td colspan="3">No users found</td></tr>`;
     return;
   }
 
+  // Fetch already invited employees
+  const { data: invited } = await supabaseClient
+    .from("employees")
+    .select("user_id");
+
+  const invitedIds = invited?.map(i=>i.user_id) ?? [];
+
   tbody.innerHTML = "";
   data.forEach(u=>{
+    const disabled = invitedIds.includes(u.id) ? "disabled" : "";
+    const statusText = invitedIds.includes(u.id) ? "Invited" : "";
     tbody.innerHTML += `
       <tr>
         <td>${u.email}</td>
         <td>${u.full_name ?? '-'}</td>
-        <td><button class="action" onclick="inviteEmployee('${u.id}')">Invite</button></td>
+        <td><button class="action" ${disabled} onclick="inviteEmployee('${u.id}')">${statusText || 'Invite'}</button></td>
       </tr>
     `;
   });
@@ -173,7 +180,7 @@ async function loadUsers(){
 // Invite employee
 async function inviteEmployee(userId){
   const { error } = await supabaseClient
-    .from("users")
+    .from("employees")
     .insert({
       company_id: companyId,
       user_id: userId,
@@ -184,6 +191,7 @@ async function inviteEmployee(userId){
     alert("Already invited or error");
   } else {
     alert("Invitation sent ✅");
+    loadUsers();
     loadEmployees();
   }
 }
@@ -194,8 +202,8 @@ async function loadEmployees(){
   tbody.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
 
   const { data } = await supabaseClient
-    .from("users")
-    .select(`status, users(email)`)
+    .from("employees")
+    .select("status, users(email)")
     .eq("company_id", companyId);
 
   if(!data.length){
