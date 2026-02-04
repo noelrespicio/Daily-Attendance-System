@@ -151,7 +151,7 @@ async function loadUsers(){
     return;
   }
 
-  // Call RPC function to search auth users
+  // RPC function must exist in Supabase
   const { data, error } = await supabaseClient.rpc('search_auth_users', { keyword });
   if(error || !data.length){
     tbody.innerHTML = `<tr><td colspan="3">No users found</td></tr>`;
