@@ -61,7 +61,7 @@ button{
   <!-- REGISTER -->
   <div id="registerBox">
     <h1>Register Company</h1>
-    <p>Create company account</p>
+    <p>Create company admin account</p>
 
     <form id="registerForm">
       <div class="form-group">
@@ -81,12 +81,12 @@ button{
 
       <div class="form-group">
         <label>Email</label>
-        <input type="email" id="email" required>
+        <input type="email" id="reg_email" required>
       </div>
 
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="password" required minlength="6">
+        <input type="password" id="reg_password" required minlength="6">
       </div>
 
       <button type="submit">Register</button>
@@ -124,7 +124,7 @@ button{
 </div>
 
 <script>
-const supabase = supabaseJs.createClient(
+const supabaseClient = supabase.createClient(
   "https://wlthlwxcmltwescezjlk.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
 );
@@ -139,10 +139,10 @@ function toggleForm(){
 document.getElementById("registerForm").addEventListener("submit", async e => {
   e.preventDefault();
 
-  const email = email.value;
-  const password = password.value;
+  const email = document.getElementById("reg_email").value;
+  const password = document.getElementById("reg_password").value;
 
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error } = await supabaseClient.auth.signUp({
     email,
     password
   });
@@ -152,16 +152,29 @@ document.getElementById("registerForm").addEventListener("submit", async e => {
     return;
   }
 
-  await supabase.from("companies").insert({
-    user_id: data.user.id,
-    company_name: company_name.value,
-    company_address: company_address.value,
-    contact_person: contact_person.value,
-    contact_email: email,
-    status: "pending"
-  });
+  const userId = data.user?.id;
+  if(!userId){
+    alert("Check your email to confirm your account.");
+    return;
+  }
 
-  alert("Company registered! Please wait for admin approval.");
+  const { error: insertError } = await supabaseClient
+    .from("companies")
+    .insert({
+      user_id: userId,
+      company_name: company_name.value,
+      company_address: company_address.value,
+      contact_person: contact_person.value,
+      contact_email: email,
+      status: "active"
+    });
+
+  if(insertError){
+    alert(insertError.message);
+    return;
+  }
+
+  alert("Company registered successfully! You can now login.");
   toggleForm();
 });
 
@@ -169,7 +182,7 @@ document.getElementById("registerForm").addEventListener("submit", async e => {
 document.getElementById("loginForm").addEventListener("submit", async e => {
   e.preventDefault();
 
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email: login_email.value,
     password: login_password.value
   });
@@ -179,7 +192,6 @@ document.getElementById("loginForm").addEventListener("submit", async e => {
     return;
   }
 
-  // Redirect after login
   window.location.href = "dashboard.html";
 });
 </script>
