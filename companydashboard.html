@@ -22,8 +22,7 @@ body{background:#f4f6f8;min-height:100vh;}
 .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:20px;}
 .card h3{margin-bottom:10px;}
 .info p{font-size:14px;margin-bottom:6px;}
-input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;}
-table{width:100%;border-collapse:collapse;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
 th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;}
 button.action{padding:6px 12px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer;}
 button.action:disabled{background:#9ca3af;cursor:not-allowed;}
@@ -50,7 +49,7 @@ button.action:disabled{background:#9ca3af;cursor:not-allowed;}
   </div>
 
   <div class="content" id="mainContent">
-    <!-- Dynamic content -->
+    <!-- Dynamic content goes here -->
   </div>
 </div>
 
@@ -62,10 +61,10 @@ const supabaseClient = supabase.createClient(
 
 let companyId;
 
-// AUTH GUARD + Load company info
-(async()=>{
+// AUTH GUARD + load company info
+(async () => {
   const { data: sessionData } = await supabaseClient.auth.getSession();
-  if(!sessionData.session){
+  if (!sessionData.session) {
     location.href = "index.html";
     return;
   }
@@ -77,7 +76,7 @@ let companyId;
     .eq("user_id", userId)
     .single();
 
-  if(error){
+  if (error) {
     alert("Failed to load company info");
     console.error(error);
     return;
@@ -87,8 +86,8 @@ let companyId;
   showDashboard(company);
 })();
 
-// Dashboard
-function showDashboard(company){
+// DASHBOARD VIEW
+function showDashboard(company) {
   const content = document.getElementById("mainContent");
   content.innerHTML = `
     <div class="card">
@@ -107,124 +106,84 @@ function showDashboard(company){
   `;
 }
 
-// Employees view
-function showEmployees(){
+// EMPLOYEES VIEW
+async function showEmployees() {
   const content = document.getElementById("mainContent");
   content.innerHTML = `
     <div class="card">
-      <h3>🔍 Search Users (Invite Employees)</h3>
-      <input type="text" id="searchEmail" placeholder="Search by email..." oninput="loadUsers()">
-      <table>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Name</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="userResults"><tr><td colspan="3">Type email to search</td></tr></tbody>
-      </table>
-    </div>
-    <div class="card">
-      <h3>👨‍💼 Employees</h3>
+      <h3>👥 Employees</h3>
       <table>
         <thead>
           <tr>
             <th>Email</th>
             <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
-        <tbody id="employeeList"><tr><td colspan="2">Loading...</td></tr></tbody>
+        <tbody id="employeeList"><tr><td colspan="3">Loading...</td></tr></tbody>
       </table>
     </div>
   `;
-  loadEmployees();
+  await loadEmployees();
 }
 
-// Load users from Auth (via RPC)
-async function loadUsers() {
-  const keyword = document.getElementById("searchEmail").value.trim();
-  const tbody = document.getElementById("userResults");
-  if(keyword.length < 2){
-    tbody.innerHTML = `<tr><td colspan="3">Type more letters...</td></tr>`;
-    return;
-  }
+// LOAD EMPLOYEES
+async function loadEmployees() {
+  const tbody = document.getElementById("employeeList");
 
-  const { data, error } = await supabaseClient.rpc('search_auth_users', { keyword });
+  // Get all auth users
+  const { data: authUsers, error: authError } = await supabaseClient
+    .from("users") // If you have a "users" table, else use RPC
+    .select("id,email,full_name");
 
-  if(error || !data.length){
+  if (authError || !authUsers.length) {
     tbody.innerHTML = `<tr><td colspan="3">No users found</td></tr>`;
     return;
   }
 
-  // Fetch already invited employees
-  const { data: invited } = await supabaseClient
+  // Get already invited employees
+  const { data: invited, error: invitedError } = await supabaseClient
     .from("employees")
-    .select("user_id");
+    .select("user_id,status")
+    .eq("company_id", companyId);
 
-  const invitedIds = invited?.map(i => i.user_id) ?? [];
+  const invitedMap = {};
+  invited?.forEach(i => invitedMap[i.user_id] = i.status);
 
   tbody.innerHTML = "";
-  data.forEach(u=>{
-    const disabled = invitedIds.includes(u.id) ? "disabled" : "";
-    const statusText = invitedIds.includes(u.id) ? "Invited" : "";
+
+  authUsers.forEach(u => {
+    const status = invitedMap[u.id] || "not invited";
+    const isDisabled = status !== "not invited" ? "disabled" : "";
+    const btnText = status === "not invited" ? "Invite" : status.charAt(0).toUpperCase() + status.slice(1);
+
     tbody.innerHTML += `
       <tr>
         <td>${u.email}</td>
-        <td>${u.full_name ?? '-'}</td>
-        <td><button class="action" ${disabled} onclick="inviteEmployee('${u.id}')">${statusText || 'Invite'}</button></td>
+        <td><span class="status ${status.replace(" ","")}">${status.toUpperCase()}</span></td>
+        <td><button class="action" ${isDisabled} onclick="inviteEmployee('${u.id}')">${btnText}</button></td>
       </tr>
     `;
   });
 }
 
-// Invite employee
-async function inviteEmployee(userId){
+// INVITE EMPLOYEE
+async function inviteEmployee(userId) {
   const { error } = await supabaseClient
     .from("employees")
-    .insert({
-      company_id: companyId,
-      user_id: userId,
-      status: "invited"
-    });
+    .insert({ company_id: companyId, user_id: userId, status: "invited" });
 
-  if(error){
+  if (error) {
     alert("Already invited or error");
-  } else {
-    alert("Invitation sent ✅");
-    loadUsers();
-    loadEmployees();
-  }
-}
-
-// Load employees list
-async function loadEmployees(){
-  const tbody = document.getElementById("employeeList");
-  tbody.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
-
-  const { data } = await supabaseClient
-    .from("employees")
-    .select("status, users(email)")
-    .eq("company_id", companyId);
-
-  if(!data.length){
-    tbody.innerHTML = `<tr><td colspan="2">No employees yet</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = "";
-  data.forEach(e=>{
-    tbody.innerHTML += `
-      <tr>
-        <td>${e.users.email}</td>
-        <td><span class="status ${e.status}">${e.status.toUpperCase()}</span></td>
-      </tr>
-    `;
-  });
+  alert("Invitation sent ✅");
+  showEmployees(); // Refresh the list
 }
 
-// Logout
-async function logout(){
+// LOGOUT
+async function logout() {
   await supabaseClient.auth.signOut();
   location.href = "index.html";
 }
