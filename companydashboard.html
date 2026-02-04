@@ -142,7 +142,7 @@ function showEmployees(){
 }
 
 // Load users from Auth (via RPC)
-async function loadUsers(){
+async function loadUsers() {
   const keyword = document.getElementById("searchEmail").value.trim();
   const tbody = document.getElementById("userResults");
   if(keyword.length < 2){
@@ -151,6 +151,7 @@ async function loadUsers(){
   }
 
   const { data, error } = await supabaseClient.rpc('search_auth_users', { keyword });
+
   if(error || !data.length){
     tbody.innerHTML = `<tr><td colspan="3">No users found</td></tr>`;
     return;
@@ -161,7 +162,7 @@ async function loadUsers(){
     .from("employees")
     .select("user_id");
 
-  const invitedIds = invited?.map(i=>i.user_id) ?? [];
+  const invitedIds = invited?.map(i => i.user_id) ?? [];
 
   tbody.innerHTML = "";
   data.forEach(u=>{
