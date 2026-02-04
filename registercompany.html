@@ -3,96 +3,185 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register Company | Daily Time Attendance</title>
+<title>Company Auth | Daily Time Attendance</title>
 
-<!-- Supabase JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-* {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-body {min-height:100vh; display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg,#1e3c72,#2a5298); color:#fff;}
-.register-container {background: rgba(255,255,255,0.12); backdrop-filter: blur(12px); padding:40px 35px; border-radius:20px; width:100%; max-width:480px; text-align:center;}
-h1,p {text-align:center;}
-p {margin-bottom:30px; font-size:14px;}
-.form-group {margin-bottom:18px; text-align:left;}
-label {font-size:13px; margin-bottom:6px; display:block;}
-input {width:100%; padding:12px; border-radius:10px; border:none;}
-.btn-register {width:100%; padding:14px; border-radius:30px; border:none; font-weight:600; cursor:pointer; margin-top:10px;}
-.login-link {text-align:center; margin-top:15px; font-size:13px;}
-a {color:#fff; font-weight:bold;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma;}
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#1e3c72,#2a5298);
+  color:#fff;
+}
+.container{
+  background:rgba(255,255,255,.12);
+  backdrop-filter:blur(12px);
+  padding:35px;
+  border-radius:20px;
+  width:100%;
+  max-width:480px;
+}
+h1{text-align:center;margin-bottom:10px;}
+p{text-align:center;font-size:14px;margin-bottom:20px;}
+.form-group{margin-bottom:15px;}
+label{font-size:13px;display:block;margin-bottom:6px;}
+input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+}
+button{
+  width:100%;
+  padding:14px;
+  border-radius:30px;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:10px;
+}
+.toggle{
+  text-align:center;
+  margin-top:15px;
+  font-size:13px;
+}
+.toggle a{color:#fff;font-weight:bold;cursor:pointer;}
+.hidden{display:none;}
 </style>
 </head>
+
 <body>
 
-<div class="register-container">
-    <h1>Register Your Company</h1>
-    <p>Fill out the form below to register your company in the system.</p>
+<div class="container">
 
-    <form id="companyForm">
-        <div class="form-group">
-            <label>Company Name</label>
-            <input type="text" id="company_name" required>
-        </div>
+  <!-- REGISTER -->
+  <div id="registerBox">
+    <h1>Register Company</h1>
+    <p>Create company account</p>
 
-        <div class="form-group">
-            <label>Company Address</label>
-            <input type="text" id="company_address" required>
-        </div>
+    <form id="registerForm">
+      <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" id="company_name" required>
+      </div>
 
-        <div class="form-group">
-            <label>Contact Person</label>
-            <input type="text" id="contact_person" required>
-        </div>
+      <div class="form-group">
+        <label>Company Address</label>
+        <input type="text" id="company_address" required>
+      </div>
 
-        <div class="form-group">
-            <label>Contact Email</label>
-            <input type="email" id="contact_email" required>
-        </div>
+      <div class="form-group">
+        <label>Contact Person</label>
+        <input type="text" id="contact_person" required>
+      </div>
 
-        <button type="submit" class="btn-register">Register Company</button>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" required>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" required minlength="6">
+      </div>
+
+      <button type="submit">Register</button>
     </form>
 
-    <div class="login-link">
-        <a href="index.html">Back to Home</a>
+    <div class="toggle">
+      Already have an account? <a onclick="toggleForm()">Login</a>
     </div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="loginBox" class="hidden">
+    <h1>Company Login</h1>
+    <p>Access your dashboard</p>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login_email" required>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login_password" required>
+      </div>
+
+      <button type="submit">Login</button>
+    </form>
+
+    <div class="toggle">
+      No account yet? <a onclick="toggleForm()">Register</a>
+    </div>
+  </div>
+
 </div>
 
 <script>
-    // Supabase credentials
-    const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = supabaseJs.createClient(
+  "https://wlthlwxcmltwescezjlk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
+);
 
-    // Form submit
-    document.getElementById("companyForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
+/* TOGGLE */
+function toggleForm(){
+  document.getElementById("registerBox").classList.toggle("hidden");
+  document.getElementById("loginBox").classList.toggle("hidden");
+}
 
-        const company_name = document.getElementById("company_name").value.trim();
-        const company_address = document.getElementById("company_address").value.trim();
-        const contact_person = document.getElementById("contact_person").value.trim();
-        const contact_email = document.getElementById("contact_email").value.trim();
+/* REGISTER */
+document.getElementById("registerForm").addEventListener("submit", async e => {
+  e.preventDefault();
 
-        // Insert into Supabase
-        const { data, error } = await supabase
-            .from("companies")
-            .insert({
-                company_name,
-                company_address,
-                contact_person,
-                contact_email
-            });
+  const email = email.value;
+  const password = password.value;
 
-        if (error) {
-            alert("Error: " + error.message);
-            console.error(error);
-            return;
-        }
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
 
-        alert(`Company "${company_name}" registered successfully!\nContact admin to activate your company.`);
+  if(error){
+    alert(error.message);
+    return;
+  }
 
-        // Optionally reset the form
-        document.getElementById("companyForm").reset();
-    });
+  await supabase.from("companies").insert({
+    user_id: data.user.id,
+    company_name: company_name.value,
+    company_address: company_address.value,
+    contact_person: contact_person.value,
+    contact_email: email,
+    status: "pending"
+  });
+
+  alert("Company registered! Please wait for admin approval.");
+  toggleForm();
+});
+
+/* LOGIN */
+document.getElementById("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: login_email.value,
+    password: login_password.value
+  });
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  // Redirect after login
+  window.location.href = "dashboard.html";
+});
 </script>
 
 </body>
