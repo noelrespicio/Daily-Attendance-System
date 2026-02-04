@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Dashboard | Daily Time Attendance</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma;}
+body{
+  background:#f4f6f8;
+  min-height:100vh;
+}
+.header{
+  background:#1e3c72;
+  color:#fff;
+  padding:15px 25px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.header h2{font-size:20px;}
+.header button{
+  background:#ef4444;
+  border:none;
+  color:#fff;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.layout{
+  display:flex;
+}
+.sidebar{
+  width:220px;
+  background:#1e293b;
+  min-height:calc(100vh - 60px);
+  padding:20px;
+  color:#fff;
+}
+.sidebar h3{
+  font-size:14px;
+  margin-bottom:15px;
+  opacity:.8;
+}
+.sidebar a{
+  display:block;
+  padding:10px;
+  border-radius:6px;
+  color:#fff;
+  text-decoration:none;
+  margin-bottom:8px;
+  font-size:14px;
+}
+.sidebar a:hover{
+  background:#334155;
+}
+.content{
+  flex:1;
+  padding:25px;
+}
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  margin-bottom:20px;
+}
+.card h3{
+  margin-bottom:10px;
+}
+.info p{
+  font-size:14px;
+  margin-bottom:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>🏢 Company Dashboard</h2>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <h3>MENU</h3>
+    <a href="#">📊 Dashboard</a>
+    <a href="#">👥 Employees</a>
+    <a href="#">🕒 Attendance</a>
+    <a href="#">📄 Reports</a>
+    <a href="#">⚙️ Settings</a>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h3>Company Information</h3>
+      <div class="info">
+        <p><strong>Name:</strong> <span id="c_name">-</span></p>
+        <p><strong>Address:</strong> <span id="c_address">-</span></p>
+        <p><strong>Contact Person:</strong> <span id="c_contact">-</span></p>
+        <p><strong>Email:</strong> <span id="c_email">-</span></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Quick Actions</h3>
+      <p>👉 You can now manage employees and attendance.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const supabaseClient = supabase.createClient(
+  "https://wlthlwxcmltwescezjlk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o"
+);
+
+/* AUTH GUARD */
+(async()=>{
+  const { data } = await supabaseClient.auth.getSession();
+  if(!data.session){
+    location.href = "index.html";
+    return;
+  }
+
+  loadCompany(data.session.user.id);
+})();
+
+/* LOAD COMPANY INFO */
+async function loadCompany(userId){
+  const { data, error } = await supabaseClient
+    .from("companies")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+
+  if(error){
+    alert("Failed to load company info");
+    console.error(error);
+    return;
+  }
+
+  c_name.textContent = data.company_name;
+  c_address.textContent = data.company_address;
+  c_contact.textContent = data.contact_person;
+  c_email.textContent = data.contact_email;
+}
+
+/* LOGOUT */
+async function logout(){
+  await supabaseClient.auth.signOut();
+  location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
