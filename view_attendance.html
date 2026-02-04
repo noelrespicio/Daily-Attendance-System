@@ -83,18 +83,21 @@ async function loadAttendance(month){
   const tbody = document.querySelector("#attendanceTable tbody");
   tbody.innerHTML = `<tr><td colspan="10">Loading...</td></tr>`;
 
-  const { data, error } = await supabase
-    .from("attendance")
-    .select("*")
-    .eq("user_id", user.id)
-    .gte("attendance_date", `${month}-01`)
-    .lte("attendance_date", `${month}-31`)
-    .order("attendance_date",{ascending:true});
+const startDate = `${month}-01`;
+const endDate = new Date(month + '-01');
+endDate.setMonth(endDate.getMonth() + 1);
+endDate.setDate(0); // last day of month
 
-  if(error || !data.length){
-    tbody.innerHTML = `<tr><td colspan="10">No attendance found</td></tr>`;
-    return;
-  }
+const end = endDate.toISOString().split('T')[0];
+
+const { data, error } = await supabase
+  .from("attendance")
+  .select("*")
+  .eq("user_id", user.id)
+  .gte("attendance_date", startDate)
+  .lte("attendance_date", end)
+  .order("attendance_date", { ascending: true });
+
 
 
   let firstEdits = 0;
