@@ -27,7 +27,10 @@ button:disabled{background:#aaa;cursor:not-allowed;}
   gap:10px;
   margin-bottom:10px;
 }
-
+.buttons button:last-child{
+  grid-column:span 2;
+  background:#f59e0b;
+}
 .logout-btn{
   background:#ef4444;
   border:none;
@@ -76,6 +79,7 @@ button:disabled{background:#aaa;cursor:not-allowed;}
 <button id="btn_cbo" onclick="record('coffee_break_out',false)">CB Out</button>
 <button id="btn_cbi" onclick="record('coffee_break_in',false)">CB In</button>
 <button id="btn_time_out" onclick="record('time_out',true)">Time Out</button>
+<button onclick="location.href='sellout_inventory.html'">📦 Sellout</button>
 </div>
 
 <div class="cancel" id="cancelBox">
