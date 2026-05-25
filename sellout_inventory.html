@@ -12,16 +12,16 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:Arial,sans-serif;
+  font-family:'Segoe UI',sans-serif;
 }
 
 body{
-  background:#f4f6f9;
+  background:#f1f5f9;
   padding:15px;
 }
 
 .container{
-  max-width:1000px;
+  max-width:700px;
   margin:auto;
 }
 
@@ -29,7 +29,7 @@ body{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:15px;
+  margin-bottom:20px;
 }
 
 .header h2{
@@ -41,94 +41,92 @@ body{
   color:#fff;
   border:none;
   padding:10px 15px;
-  border-radius:8px;
+  border-radius:10px;
   cursor:pointer;
+  font-weight:bold;
 }
 
 .card{
   background:#fff;
-  padding:20px;
-  border-radius:15px;
-  box-shadow:0 5px 15px rgba(0,0,0,.08);
-  margin-bottom:20px;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
 }
 
 .card h3{
-  margin-bottom:15px;
+  margin-bottom:20px;
+  color:#111827;
 }
 
 .form-group{
-  margin-bottom:15px;
+  margin-bottom:16px;
 }
 
 label{
   display:block;
-  margin-bottom:5px;
+  margin-bottom:6px;
   font-size:14px;
-  font-weight:bold;
+  font-weight:600;
+  color:#374151;
 }
 
 input{
   width:100%;
-  padding:12px;
-  border:1px solid #ddd;
-  border-radius:10px;
-}
-
-button.save-btn{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#059669;
-  color:#fff;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-button.save-btn:hover{
-  background:#047857;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  border-bottom:1px solid #eee;
-  padding:10px;
-  text-align:left;
+  padding:13px;
+  border:1px solid #d1d5db;
+  border-radius:12px;
+  outline:none;
   font-size:14px;
 }
 
-th{
-  background:#f3f4f6;
+input:focus{
+  border-color:#2563eb;
 }
 
-.delete-btn{
-  background:#ef4444;
-  color:#fff;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  cursor:pointer;
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
 }
 
-.toggle-btn{
+.save-btn{
   width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#059669;
+  color:#fff;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+.save-btn:hover{
+  background:#047857;
+}
+
+.records-btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
   background:#1e3a8a;
   color:#fff;
-  border:none;
-  padding:12px;
-  border-radius:10px;
-  cursor:pointer;
+  font-size:15px;
   font-weight:bold;
-  margin-bottom:15px;
+  cursor:pointer;
+  margin-top:12px;
 }
 
-.hidden{
-  display:none;
+.records-btn:hover{
+  background:#172554;
+}
+
+@media(max-width:600px){
+  .row{
+    grid-template-columns:1fr;
+  }
 }
 </style>
 </head>
@@ -138,92 +136,98 @@ th{
 
   <div class="header">
     <h2>📦 Sellout Inventory</h2>
-    <button class="back-btn" onclick="location.href='attendance.html'">
+
+    <button class="back-btn"
+      onclick="location.href='attendance.html'">
       ← Back
     </button>
   </div>
 
-  <!-- FORM -->
   <div class="card">
 
     <h3>Add Sellout Item</h3>
 
-    <!-- DATE FIRST -->
+    <!-- DATE -->
     <div class="form-group">
       <label>Sellout Date</label>
       <input type="date" id="sellout_date">
     </div>
 
+    <!-- MODEL -->
     <div class="form-group">
       <label>Model</label>
-      <input type="text" id="model" placeholder="Enter model">
+      <input type="text"
+        id="model"
+        placeholder="Enter model">
     </div>
 
-    <div class="form-group">
-      <label>SN IN</label>
-      <input type="text" id="sn_in" placeholder="Enter SN IN">
+    <!-- SERIALS -->
+    <div class="row">
+
+      <div class="form-group">
+        <label>SN IN</label>
+        <input type="text"
+          id="sn_in"
+          placeholder="Enter SN IN">
+      </div>
+
+      <div class="form-group">
+        <label>SN OUT</label>
+        <input type="text"
+          id="sn_out"
+          placeholder="Enter SN OUT">
+      </div>
+
     </div>
 
-    <div class="form-group">
-      <label>SN OUT</label>
-      <input type="text" id="sn_out" placeholder="Enter SN OUT">
+    <!-- INVOICE + QTY -->
+    <div class="row">
+
+      <div class="form-group">
+        <label>Invoice No.</label>
+        <input type="text"
+          id="invoice_no"
+          placeholder="Invoice number">
+      </div>
+
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="number"
+          id="qty"
+          placeholder="0">
+      </div>
+
     </div>
 
-    <div class="form-group">
-      <label>Invoice No.</label>
-      <input type="text" id="invoice_no" placeholder="Enter invoice number">
-    </div>
+    <!-- SAVE -->
+    <button class="save-btn"
+      onclick="saveSellout()">
 
-    <div class="form-group">
-      <label>Quantity</label>
-      <input type="number" id="qty" placeholder="Enter quantity">
-    </div>
-
-    <button class="save-btn" onclick="saveSellout()">
       💾 Save Sellout
+
     </button>
 
-  </div>
+    <!-- RECORDS -->
+    <button class="records-btn"
+      onclick="location.href='sellout_records.html'">
 
-  <!-- BUTTON -->
-  <button class="toggle-btn" onclick="toggleRecords()">
-    📋 Sellout Records
-  </button>
+      📋 View Sellout Records
 
-  <!-- RECORDS -->
-  <div class="card hidden" id="recordsCard">
-
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Model</th>
-          <th>SN IN</th>
-          <th>SN OUT</th>
-          <th>Invoice No.</th>
-          <th>Qty</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-
-      <tbody id="selloutTable">
-        <tr>
-          <td colspan="7">Loading...</td>
-        </tr>
-      </tbody>
-    </table>
+    </button>
 
   </div>
 
 </div>
 
 <script>
-const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
+const SUPABASE_URL =
+"https://wlthlwxcmltwescezjlk.supabase.co";
 
 const SUPABASE_KEY =
 "YOUR_SUPABASE_KEY";
 
-const supabaseClient = supabase.createClient(
+const supabaseClient =
+supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
@@ -243,23 +247,11 @@ let user;
 
   user = data.session.user;
 
-  // AUTO DATE TODAY
+  // AUTO TODAY DATE
   document.getElementById("sellout_date").value =
     new Date().toISOString().split('T')[0];
 
-  loadSellouts();
-
 })();
-
-/* TOGGLE RECORDS */
-function toggleRecords(){
-
-  const card =
-    document.getElementById("recordsCard");
-
-  card.classList.toggle("hidden");
-
-}
 
 /* SAVE */
 async function saveSellout(){
@@ -294,7 +286,8 @@ async function saveSellout(){
     return;
   }
 
-  const { error } = await supabaseClient
+  const { error } =
+    await supabaseClient
     .from("sellout_inventory")
     .insert({
       user_id:user.id,
@@ -307,108 +300,23 @@ async function saveSellout(){
     });
 
   if(error){
-    alert("Failed to save");
     console.error(error);
+    alert("Failed to save");
     return;
   }
 
   alert("Sellout saved successfully ✅");
 
+  // RESET
   document.getElementById("model").value = "";
   document.getElementById("sn_in").value = "";
   document.getElementById("sn_out").value = "";
   document.getElementById("invoice_no").value = "";
   document.getElementById("qty").value = "";
 
-  loadSellouts();
-
-}
-
-/* LOAD */
-async function loadSellouts(){
-
-  const tbody =
-    document.getElementById("selloutTable");
-
-  tbody.innerHTML = `
-    <tr>
-      <td colspan="7">Loading...</td>
-    </tr>
-  `;
-
-  const { data, error } =
-    await supabaseClient
-    .from("sellout_inventory")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("sellout_date",{ascending:false});
-
-  if(error){
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7">Failed to load</td>
-      </tr>
-    `;
-
-    return;
-  }
-
-  if(!data.length){
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7">No records found</td>
-      </tr>
-    `;
-
-    return;
-  }
-
-  tbody.innerHTML = "";
-
-  data.forEach(item=>{
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${item.sellout_date ?? '-'}</td>
-        <td>${item.model}</td>
-        <td>${item.sn_in}</td>
-        <td>${item.sn_out}</td>
-        <td>${item.invoice_no}</td>
-        <td>${item.qty}</td>
-        <td>
-          <button
-            class="delete-btn"
-            onclick="deleteSellout('${item.id}')">
-            Delete
-          </button>
-        </td>
-      </tr>
-    `;
-
-  });
-
-}
-
-/* DELETE */
-async function deleteSellout(id){
-
-  if(!confirm("Delete this record?"))
-    return;
-
-  const { error } =
-    await supabaseClient
-    .from("sellout_inventory")
-    .delete()
-    .eq("id",id);
-
-  if(error){
-    alert("Delete failed");
-    return;
-  }
-
-  loadSellouts();
+  // AUTO DATE AGAIN
+  document.getElementById("sellout_date").value =
+    new Date().toISOString().split('T')[0];
 
 }
 </script>
