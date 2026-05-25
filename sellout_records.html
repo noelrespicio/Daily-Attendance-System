@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sellout Records</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#f4f6f9;
+  padding:15px;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.header h2{
+  color:#1e3a8a;
+}
+
+.back-btn{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  padding:10px 15px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,.08);
+  margin-bottom:20px;
+}
+
+input[type="date"]{
+  width:100%;
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  margin-top:10px;
+}
+
+.date-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:15px;
+}
+
+.date-btn{
+  background:#1e40af;
+  color:#fff;
+  border:none;
+  padding:10px 15px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.date-btn:hover{
+  background:#1d4ed8;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+  font-size:14px;
+}
+
+th{
+  background:#f3f4f6;
+}
+
+.no-data{
+  text-align:center;
+  padding:20px;
+  color:#666;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h2>📋 Sellout Records</h2>
+    <button class="back-btn" onclick="location.href='sellout_inventory.html'">
+      ← Back
+    </button>
+  </div>
+
+  <!-- DATE FILTER -->
+  <div class="card">
+    <h3>Select Sellout Date</h3>
+
+    <input type="date" id="filterDate" onchange="filterByDate()">
+
+    <div class="date-list" id="dateList">
+      Loading dates...
+    </div>
+  </div>
+
+  <!-- RECORDS -->
+  <div class="card">
+    <h3 id="recordTitle">Sellout Items</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Model</th>
+          <th>SN IN</th>
+          <th>SN OUT</th>
+          <th>Invoice No.</th>
+          <th>Qty</th>
+        </tr>
+      </thead>
+
+      <tbody id="recordsTable">
+        <tr>
+          <td colspan="6" class="no-data">Loading...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
+const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let user;
+
+/* AUTH */
+(async()=>{
+
+  const { data } = await supabaseClient.auth.getSession();
+
+  if(!data.session){
+    location.href = "login.html";
+    return;
+  }
+
+  user = data.session.user;
+
+  loadAvailableDates();
+
+})();
+
+/* LOAD AVAILABLE DATES */
+async function loadAvailableDates(){
+
+  const dateList = document.getElementById("dateList");
+
+  const { data, error } = await supabaseClient
+    .from("sellout_inventory")
+    .select("sellout_date")
+    .eq("user_id", user.id)
+    .order("sellout_date",{ascending:false});
+
+  if(error){
+    dateList.innerHTML = "Failed to load dates";
+    return;
+  }
+
+  if(!data.length){
+    dateList.innerHTML = "No sellout records";
+    return;
+  }
+
+  // remove duplicates
+  const uniqueDates = [...new Set(data.map(d => d.sellout_date))];
+
+  dateList.innerHTML = "";
+
+  uniqueDates.forEach(date => {
+
+    dateList.innerHTML += `
+      <button class="date-btn"
+        onclick="loadRecords('${date}')">
+        ${date}
+      </button>
+    `;
+
+  });
+
+}
+
+/* FILTER DATE INPUT */
+function filterByDate(){
+
+  const date = document.getElementById("filterDate").value;
+
+  if(!date) return;
+
+  loadRecords(date);
+
+}
+
+/* LOAD RECORDS */
+async function loadRecords(date){
+
+  document.getElementById("recordTitle").innerText =
+    `Sellout Items - ${date}`;
+
+  const tbody = document.getElementById("recordsTable");
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="6" class="no-data">
+        Loading...
+      </td>
+    </tr>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from("sellout_inventory")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("sellout_date", date)
+    .order("created_at",{ascending:false});
+
+  if(error){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="no-data">
+          Failed to load
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  if(!data.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="no-data">
+          No records found
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = "";
+
+  data.forEach(item => {
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${item.sellout_date}</td>
+        <td>${item.model}</td>
+        <td>${item.sn_in}</td>
+        <td>${item.sn_out}</td>
+        <td>${item.invoice_no}</td>
+        <td>${item.qty}</td>
+      </tr>
+    `;
+
+  });
+
+}
+</script>
+
+</body>
+</html>
