@@ -21,7 +21,7 @@ body{
 }
 
 .container{
-  max-width:1100px;
+  max-width:1200px;
   margin:auto;
 }
 
@@ -61,14 +61,14 @@ input[type="month"]{
   margin-top:10px;
 }
 
-.date-list{
+.month-list{
   display:flex;
   flex-wrap:wrap;
   gap:10px;
   margin-top:15px;
 }
 
-.date-btn{
+.month-btn{
   background:#1e40af;
   color:#fff;
   border:none;
@@ -77,7 +77,7 @@ input[type="month"]{
   cursor:pointer;
 }
 
-.date-btn:hover{
+.month-btn:hover{
   background:#1d4ed8;
 }
 
@@ -104,17 +104,9 @@ th{
   color:#666;
 }
 
-.edit-input{
-  width:100%;
-  padding:8px;
-  border:1px solid #ddd;
-  border-radius:6px;
-}
-
-.save-msg{
-  margin-top:10px;
-  color:green;
-  font-size:14px;
+.serial{
+  font-size:12px;
+  word-break:break-all;
 }
 </style>
 </head>
@@ -133,17 +125,15 @@ th{
 
   <!-- MONTH FILTER -->
   <div class="card">
-
     <h3>Select Sellout Month</h3>
 
     <input type="month"
       id="filterMonth"
       onchange="filterByMonth()">
 
-    <div class="date-list" id="monthList">
+    <div class="month-list" id="monthList">
       Loading months...
     </div>
-
   </div>
 
   <!-- RECORDS -->
@@ -153,10 +143,7 @@ th{
       Sellout Items
     </h3>
 
-    <div class="save-msg" id="saveMsg"></div>
-
     <table>
-
       <thead>
         <tr>
           <th>Date</th>
@@ -175,7 +162,6 @@ th{
           </td>
         </tr>
       </tbody>
-
     </table>
 
   </div>
@@ -213,7 +199,7 @@ let user;
 
 })();
 
-/* LOAD AVAILABLE MONTHS */
+/* LOAD MONTHS */
 async function loadAvailableMonths(){
 
   const monthList =
@@ -239,17 +225,18 @@ async function loadAvailableMonths(){
   }
 
   const months =
-    data.map(d => d.sellout_date.substring(0,7));
-
-  const uniqueMonths =
-    [...new Set(months)];
+    [...new Set(
+      data.map(d =>
+        d.sellout_date.substring(0,7)
+      )
+    )];
 
   monthList.innerHTML = "";
 
-  uniqueMonths.forEach(month=>{
+  months.forEach(month => {
 
     monthList.innerHTML += `
-      <button class="date-btn"
+      <button class="month-btn"
         onclick="loadRecords('${month}')">
         ${month}
       </button>
@@ -329,93 +316,29 @@ async function loadRecords(month){
 
   tbody.innerHTML = "";
 
-  data.forEach(item=>{
+  data.forEach(item => {
 
     tbody.innerHTML += `
       <tr>
+        <td>${item.sellout_date}</td>
 
-        <td>
-          <input type="date"
-            class="edit-input"
-            value="${item.sellout_date || ''}"
-            onchange="updateRecord('${item.id}','sellout_date',this.value)">
+        <td>${item.model}</td>
+
+        <td class="serial">
+          ${item.sn_in}
         </td>
 
-        <td>
-          <input type="text"
-            class="edit-input"
-            value="${item.model || ''}"
-            onchange="updateRecord('${item.id}','model',this.value)">
+        <td class="serial">
+          ${item.sn_out}
         </td>
 
-        <td>
-          <input type="text"
-            class="edit-input"
-            value="${item.sn_in || ''}"
-            onchange="updateRecord('${item.id}','sn_in',this.value)">
-        </td>
+        <td>${item.invoice_no}</td>
 
-        <td>
-          <input type="text"
-            class="edit-input"
-            value="${item.sn_out || ''}"
-            onchange="updateRecord('${item.id}','sn_out',this.value)">
-        </td>
-
-        <td>
-          <input type="text"
-            class="edit-input"
-            value="${item.invoice_no || ''}"
-            onchange="updateRecord('${item.id}','invoice_no',this.value)">
-        </td>
-
-        <td>
-          <input type="number"
-            class="edit-input"
-            value="${item.qty || 0}"
-            onchange="updateRecord('${item.id}','qty',this.value)">
-        </td>
-
+        <td>${item.qty}</td>
       </tr>
     `;
 
   });
-
-}
-
-/* UPDATE RECORD */
-async function updateRecord(id, field, value){
-
-  const saveMsg =
-    document.getElementById("saveMsg");
-
-  const updateData = {};
-  updateData[field] = value;
-
-  const { error } =
-    await supabaseClient
-      .from("sellout_inventory")
-      .update(updateData)
-      .eq("id", id);
-
-  if(error){
-
-    saveMsg.style.color = "red";
-    saveMsg.innerText =
-      "❌ Update failed";
-
-    console.error(error);
-
-    return;
-  }
-
-  saveMsg.style.color = "green";
-  saveMsg.innerText =
-    "✅ Record updated successfully";
-
-  setTimeout(()=>{
-    saveMsg.innerText = "";
-  },2000);
 
 }
 </script>
