@@ -21,7 +21,7 @@ body{
 }
 
 .container{
-  max-width:900px;
+  max-width:1000px;
   margin:auto;
 }
 
@@ -93,7 +93,6 @@ button.save-btn:hover{
 table{
   width:100%;
   border-collapse:collapse;
-  overflow:auto;
 }
 
 th,td{
@@ -115,6 +114,22 @@ th{
   border-radius:6px;
   cursor:pointer;
 }
+
+.toggle-btn{
+  width:100%;
+  background:#1e3a8a;
+  color:#fff;
+  border:none;
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+.hidden{
+  display:none;
+}
 </style>
 </head>
 <body>
@@ -123,12 +138,21 @@ th{
 
   <div class="header">
     <h2>📦 Sellout Inventory</h2>
-    <button class="back-btn" onclick="location.href='attendance.html'">← Back</button>
+    <button class="back-btn" onclick="location.href='attendance.html'">
+      ← Back
+    </button>
   </div>
 
   <!-- FORM -->
   <div class="card">
+
     <h3>Add Sellout Item</h3>
+
+    <!-- DATE FIRST -->
+    <div class="form-group">
+      <label>Sellout Date</label>
+      <input type="date" id="sellout_date">
+    </div>
 
     <div class="form-group">
       <label>Model</label>
@@ -158,15 +182,21 @@ th{
     <button class="save-btn" onclick="saveSellout()">
       💾 Save Sellout
     </button>
+
   </div>
 
-  <!-- TABLE -->
-  <div class="card">
-    <h3>📋 Sellout Records</h3>
+  <!-- BUTTON -->
+  <button class="toggle-btn" onclick="toggleRecords()">
+    📋 Sellout Records
+  </button>
+
+  <!-- RECORDS -->
+  <div class="card hidden" id="recordsCard">
 
     <table>
       <thead>
         <tr>
+          <th>Date</th>
           <th>Model</th>
           <th>SN IN</th>
           <th>SN OUT</th>
@@ -178,17 +208,20 @@ th{
 
       <tbody id="selloutTable">
         <tr>
-          <td colspan="6">Loading...</td>
+          <td colspan="7">Loading...</td>
         </tr>
       </tbody>
     </table>
+
   </div>
 
 </div>
 
 <script>
 const SUPABASE_URL = "https://wlthlwxcmltwescezjlk.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o";
+
+const SUPABASE_KEY =
+"YOUR_SUPABASE_KEY";
 
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
@@ -199,7 +232,9 @@ let user;
 
 /* AUTH */
 (async()=>{
-  const { data } = await supabaseClient.auth.getSession();
+
+  const { data } =
+    await supabaseClient.auth.getSession();
 
   if(!data.session){
     location.href = "login.html";
@@ -208,19 +243,53 @@ let user;
 
   user = data.session.user;
 
+  // AUTO DATE TODAY
+  document.getElementById("sellout_date").value =
+    new Date().toISOString().split('T')[0];
+
   loadSellouts();
+
 })();
+
+/* TOGGLE RECORDS */
+function toggleRecords(){
+
+  const card =
+    document.getElementById("recordsCard");
+
+  card.classList.toggle("hidden");
+
+}
 
 /* SAVE */
 async function saveSellout(){
 
-  const model = document.getElementById("model").value.trim();
-  const sn_in = document.getElementById("sn_in").value.trim();
-  const sn_out = document.getElementById("sn_out").value.trim();
-  const invoice_no = document.getElementById("invoice_no").value.trim();
-  const qty = parseInt(document.getElementById("qty").value);
+  const sellout_date =
+    document.getElementById("sellout_date").value;
 
-  if(!model || !sn_in || !sn_out || !invoice_no || !qty){
+  const model =
+    document.getElementById("model").value.trim();
+
+  const sn_in =
+    document.getElementById("sn_in").value.trim();
+
+  const sn_out =
+    document.getElementById("sn_out").value.trim();
+
+  const invoice_no =
+    document.getElementById("invoice_no").value.trim();
+
+  const qty =
+    parseInt(document.getElementById("qty").value);
+
+  if(
+    !sellout_date ||
+    !model ||
+    !sn_in ||
+    !sn_out ||
+    !invoice_no ||
+    !qty
+  ){
     alert("Please complete all fields");
     return;
   }
@@ -229,6 +298,7 @@ async function saveSellout(){
     .from("sellout_inventory")
     .insert({
       user_id:user.id,
+      sellout_date,
       model,
       sn_in,
       sn_out,
@@ -251,40 +321,47 @@ async function saveSellout(){
   document.getElementById("qty").value = "";
 
   loadSellouts();
+
 }
 
 /* LOAD */
 async function loadSellouts(){
 
-  const tbody = document.getElementById("selloutTable");
+  const tbody =
+    document.getElementById("selloutTable");
 
   tbody.innerHTML = `
     <tr>
-      <td colspan="6">Loading...</td>
+      <td colspan="7">Loading...</td>
     </tr>
   `;
 
-  const { data, error } = await supabaseClient
+  const { data, error } =
+    await supabaseClient
     .from("sellout_inventory")
     .select("*")
     .eq("user_id", user.id)
-    .order("created_at",{ascending:false});
+    .order("sellout_date",{ascending:false});
 
   if(error){
+
     tbody.innerHTML = `
       <tr>
-        <td colspan="6">Failed to load</td>
+        <td colspan="7">Failed to load</td>
       </tr>
     `;
+
     return;
   }
 
   if(!data.length){
+
     tbody.innerHTML = `
       <tr>
-        <td colspan="6">No records found</td>
+        <td colspan="7">No records found</td>
       </tr>
     `;
+
     return;
   }
 
@@ -294,28 +371,34 @@ async function loadSellouts(){
 
     tbody.innerHTML += `
       <tr>
+        <td>${item.sellout_date ?? '-'}</td>
         <td>${item.model}</td>
         <td>${item.sn_in}</td>
         <td>${item.sn_out}</td>
         <td>${item.invoice_no}</td>
         <td>${item.qty}</td>
         <td>
-          <button class="delete-btn"
+          <button
+            class="delete-btn"
             onclick="deleteSellout('${item.id}')">
             Delete
           </button>
         </td>
       </tr>
     `;
+
   });
+
 }
 
 /* DELETE */
 async function deleteSellout(id){
 
-  if(!confirm("Delete this record?")) return;
+  if(!confirm("Delete this record?"))
+    return;
 
-  const { error } = await supabaseClient
+  const { error } =
+    await supabaseClient
     .from("sellout_inventory")
     .delete()
     .eq("id",id);
@@ -326,6 +409,7 @@ async function deleteSellout(id){
   }
 
   loadSellouts();
+
 }
 </script>
 
