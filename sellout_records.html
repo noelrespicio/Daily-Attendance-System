@@ -30,10 +30,12 @@ body{
   justify-content:space-between;
   align-items:center;
   margin-bottom:20px;
+  gap:10px;
 }
 
 .header h2{
   color:#1e3a8a;
+  font-size:22px;
 }
 
 .back-btn{
@@ -43,6 +45,7 @@ body{
   padding:10px 15px;
   border-radius:8px;
   cursor:pointer;
+  font-weight:bold;
 }
 
 .card{
@@ -75,27 +78,81 @@ input[type="month"]{
   padding:10px 15px;
   border-radius:8px;
   cursor:pointer;
+  font-weight:bold;
 }
 
 .month-btn:hover{
   background:#1d4ed8;
 }
 
+.table-wrapper{
+  overflow-x:auto;
+  width:100%;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
-  margin-top:15px;
+  table-layout:fixed;
+  min-width:900px;
 }
 
 th,td{
-  padding:10px;
+  padding:8px;
   border-bottom:1px solid #eee;
   text-align:left;
-  font-size:14px;
+  font-size:13px;
+  vertical-align:top;
 }
 
 th{
   background:#f3f4f6;
+  font-weight:bold;
+}
+
+th:nth-child(1),
+td:nth-child(1){
+  width:100px;
+}
+
+th:nth-child(2),
+td:nth-child(2){
+  width:140px;
+}
+
+th:nth-child(3),
+td:nth-child(3){
+  width:220px;
+}
+
+th:nth-child(4),
+td:nth-child(4){
+  width:220px;
+}
+
+th:nth-child(5),
+td:nth-child(5){
+  width:120px;
+}
+
+th:nth-child(6),
+td:nth-child(6){
+  width:70px;
+  text-align:center;
+}
+
+.model-text{
+  font-weight:600;
+  word-break:break-word;
+  white-space:normal;
+  line-height:1.4;
+}
+
+.serial{
+  font-size:11px;
+  word-break:break-word;
+  white-space:normal;
+  line-height:1.5;
 }
 
 .no-data{
@@ -104,9 +161,21 @@ th{
   color:#666;
 }
 
-.serial{
-  font-size:12px;
-  word-break:break-all;
+@media(max-width:768px){
+
+  .header{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .header h2{
+    font-size:20px;
+  }
+
+  .card{
+    padding:15px;
+  }
+
 }
 </style>
 </head>
@@ -125,15 +194,19 @@ th{
 
   <!-- MONTH FILTER -->
   <div class="card">
+
     <h3>Select Sellout Month</h3>
 
-    <input type="month"
+    <input
+      type="month"
       id="filterMonth"
-      onchange="filterByMonth()">
+      onchange="filterByMonth()"
+    >
 
     <div class="month-list" id="monthList">
       Loading months...
     </div>
+
   </div>
 
   <!-- RECORDS -->
@@ -143,26 +216,32 @@ th{
       Sellout Items
     </h3>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Model</th>
-          <th>SN IN</th>
-          <th>SN OUT</th>
-          <th>Invoice No.</th>
-          <th>Qty</th>
-        </tr>
-      </thead>
+    <div class="table-wrapper">
 
-      <tbody id="recordsTable">
-        <tr>
-          <td colspan="6" class="no-data">
-            Loading...
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <table>
+
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Model</th>
+            <th>SN IN</th>
+            <th>SN OUT</th>
+            <th>Invoice No.</th>
+            <th>Qty</th>
+          </tr>
+        </thead>
+
+        <tbody id="recordsTable">
+          <tr>
+            <td colspan="6" class="no-data">
+              Loading...
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
 
   </div>
 
@@ -236,7 +315,8 @@ async function loadAvailableMonths(){
   months.forEach(month => {
 
     monthList.innerHTML += `
-      <button class="month-btn"
+      <button
+        class="month-btn"
         onclick="loadRecords('${month}')">
         ${month}
       </button>
@@ -320,9 +400,14 @@ async function loadRecords(month){
 
     tbody.innerHTML += `
       <tr>
-        <td>${item.sellout_date}</td>
 
-        <td>${item.model}</td>
+        <td>
+          ${item.sellout_date}
+        </td>
+
+        <td class="model-text">
+          ${item.model}
+        </td>
 
         <td class="serial">
           ${item.sn_in}
@@ -332,9 +417,14 @@ async function loadRecords(month){
           ${item.sn_out}
         </td>
 
-        <td>${item.invoice_no}</td>
+        <td>
+          ${item.invoice_no}
+        </td>
 
-        <td>${item.qty}</td>
+        <td>
+          ${item.qty}
+        </td>
+
       </tr>
     `;
 
