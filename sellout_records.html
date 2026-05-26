@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,6 +84,27 @@ input[type="month"]{
 
 .month-btn:hover{
   background:#1d4ed8;
+}
+
+.summary-box{
+  margin-top:15px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  padding:15px;
+  border-radius:12px;
+}
+
+.summary-title{
+  font-size:14px;
+  color:#1e3a8a;
+  margin-bottom:5px;
+  font-weight:bold;
+}
+
+.summary-value{
+  font-size:28px;
+  color:#111827;
+  font-weight:bold;
 }
 
 .table-wrapper{
@@ -205,6 +227,19 @@ td:nth-child(6){
 
     <div class="month-list" id="monthList">
       Loading months...
+    </div>
+
+    <!-- TOTAL QTY -->
+    <div class="summary-box">
+
+      <div class="summary-title">
+        Total Sellout Quantity
+      </div>
+
+      <div class="summary-value" id="totalQty">
+        0
+      </div>
+
     </div>
 
   </div>
@@ -383,6 +418,9 @@ async function loadRecords(month){
 
   if(!data.length){
 
+    document.getElementById("totalQty")
+      .innerText = "0";
+
     tbody.innerHTML = `
       <tr>
         <td colspan="6" class="no-data">
@@ -393,6 +431,16 @@ async function loadRecords(month){
 
     return;
   }
+
+  /* TOTAL QTY */
+  let totalQty = 0;
+
+  data.forEach(item => {
+    totalQty += Number(item.qty || 0);
+  });
+
+  document.getElementById("totalQty")
+    .innerText = totalQty;
 
   tbody.innerHTML = "";
 
@@ -410,15 +458,15 @@ async function loadRecords(month){
         </td>
 
         <td class="serial">
-          ${item.sn_in}
+          ${item.sn_in || "-"}
         </td>
 
         <td class="serial">
-          ${item.sn_out}
+          ${item.sn_out || "-"}
         </td>
 
         <td>
-          ${item.invoice_no}
+          ${item.invoice_no || "-"}
         </td>
 
         <td>
