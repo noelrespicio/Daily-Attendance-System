@@ -488,8 +488,13 @@ async function loadRecords(month){
   `;
 
   const startDate = `${month}-01`;
-  const endDate = `${month}-31`;
 
+const endDate = new Date(
+  Number(month.split('-')[0]),
+  Number(month.split('-')[1]),
+  0
+).toISOString().split('T')[0];
+  
   const { data, error } =
     await supabaseClient
       .from("sellout_inventory")
