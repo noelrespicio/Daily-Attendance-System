@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Register | Daily Time Attendance</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register | Daily Time Attendance</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -12,100 +13,383 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
+
 body {
     min-height: 100vh;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    min-height: 100dvh;
+    padding: 24px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #172033;
+    background:
+        radial-gradient(circle at top left, #3b82f6 0, transparent 35%),
+        linear-gradient(135deg, #07152e, #163d72);
+}
+
+.register-container {
+    width: 100%;
+    max-width: 490px;
+    margin: auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, .30);
+}
+
+.company-button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 25px;
+    color: #1d4ed8;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.company-button:hover {
+    background: #dbeafe;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    border-radius: 18px;
+    color: white;
+    font-size: 27px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, .25);
 }
-.register-container {
-    background: rgba(255,255,255,0.12);
-    backdrop-filter: blur(12px);
-    padding: 40px 35px;
-    border-radius: 20px;
+
+h1 {
+    text-align: center;
+    font-size: 26px;
+    color: #14213d;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #718096;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.form-row {
+    display: flex;
+    gap: 14px;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 17px;
+}
+
+label {
+    display: block;
+    margin-bottom: 7px;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+input {
     width: 100%;
-    max-width: 480px;
+    min-width: 0;
+    padding: 13px 12px;
+    border: 1px solid #dce3ed;
+    border-radius: 11px;
+    background: #f8fafc;
+    color: #172033;
+    font-size: 13px;
+    outline: none;
+    transition: .2s;
 }
-h1,p{text-align:center}
-p{margin-bottom:30px;font-size:14px}
-.form-group{margin-bottom:18px}
-label{font-size:13px;margin-bottom:6px;display:block}
-input{
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    border:none;
+
+input:focus {
+    border-color: #2563eb;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
 }
-.form-row{display:flex;gap:12px}
-.btn-register{
-    width:100%;
-    padding:14px;
-    border-radius:30px;
-    border:none;
-    font-weight:600;
-    cursor:pointer;
+
+input::placeholder {
+    color: #94a3b8;
 }
-.login-link{text-align:center;margin-top:15px;font-size:13px}
-a{color:#fff;font-weight:bold}
+
+.btn-register {
+    width: 100%;
+    padding: 15px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, .22);
+    transition: .2s;
+}
+
+.btn-register:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 11px 24px rgba(37, 99, 235, .3);
+}
+
+.btn-register:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.message {
+    display: none;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.message.show {
+    display: block;
+}
+
+.error {
+    color: #be123c;
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+}
+
+.success {
+    color: #047857;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+}
+
+.company-access {
+    display: none;
+    margin: -10px 0 22px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #dce3ed;
+    border-radius: 14px;
+}
+
+.company-access.show {
+    display: block;
+}
+
+.company-access h3 {
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #14213d;
+}
+
+.company-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.company-actions button {
+    flex: 1;
+    padding: 11px 8px;
+    border: none;
+    border-radius: 9px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.company-submit {
+    color: white;
+    background: #2563eb;
+}
+
+.company-cancel {
+    color: #334155;
+    background: #e2e8f0;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 22px;
+    color: #718096;
+    font-size: 13px;
+}
+
+.login-link a {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 22px;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+@media (max-width: 480px) {
+    .register-container {
+        padding: 25px 20px;
+        border-radius: 21px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    .form-row {
+        gap: 10px;
+    }
+
+    input {
+        padding: 12px 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 350px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
 </style>
 </head>
 
 <body>
-<div class="register-container">
-<div class="form-group" style="margin-bottom: 20px; text-align:center;">
-    <button type="button" id="registeredCompanyBtn" class="btn-register">Registered Company</button>
-</div>
 
-<h1>Create Account</h1>
-<p>Register to access the Daily Time Attendance System</p>
+<main class="register-container">
 
-<form id="registerForm">
-    <div class="form-row">
-        <div class="form-group">
-            <label>First Name</label>
-            <input id="firstname" required>
+    <button type="button" id="registeredCompanyBtn"
+            class="company-button">
+        🏢 &nbsp; Registered Company
+    </button>
+
+    <section id="companyAccess" class="company-access">
+        <h3>Company Registration Access</h3>
+
+        <div id="companyMessage" class="message"
+             role="alert" aria-live="polite"></div>
+
+        <label for="companyPassword">Access Password</label>
+        <input type="password" id="companyPassword"
+               placeholder="Enter access password"
+               autocomplete="off">
+
+        <div class="company-actions">
+            <button type="button" id="companySubmit"
+                    class="company-submit">Continue</button>
+            <button type="button" id="companyCancel"
+                    class="company-cancel">Cancel</button>
         </div>
-        <div class="form-group">
-            <label>Last Name</label>
-            <input id="lastname" required>
+    </section>
+
+    <div class="logo">👤</div>
+
+    <h1>Create Account</h1>
+    <p class="subtitle">
+        Join the Daily Time Attendance System<br>
+        Fill in your information to get started.
+    </p>
+
+    <div id="errorMessage" class="message error"
+         role="alert" aria-live="polite"></div>
+
+    <div id="successMessage" class="message success"
+         role="status" aria-live="polite"></div>
+
+    <form id="registerForm">
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="firstname">First Name</label>
+                <input id="firstname" type="text"
+                       placeholder="First name"
+                       autocomplete="given-name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="lastname">Last Name</label>
+                <input id="lastname" type="text"
+                       placeholder="Last name"
+                       autocomplete="family-name" required>
+            </div>
         </div>
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input id="email" type="email"
+                   placeholder="Enter your email"
+                   autocomplete="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="employee_id">Employee ID</label>
+            <input id="employee_id" type="text"
+                   placeholder="Enter employee ID" required>
+        </div>
+
+        <div class="form-group">
+            <label for="branch_location">Branch Location</label>
+            <input id="branch_location" type="text"
+                   placeholder="Enter your branch location" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input id="password" type="password"
+                       placeholder="Create password"
+                       autocomplete="new-password"
+                       minlength="6" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input id="confirm_password" type="password"
+                       placeholder="Repeat password"
+                       autocomplete="new-password"
+                       minlength="6" required>
+            </div>
+        </div>
+
+        <button type="submit" id="registerButton"
+                class="btn-register">
+            Create Account
+        </button>
+    </form>
+
+    <div class="login-link">
+        Already have an account?
+        <a href="login.html">Login here</a>
     </div>
 
-    <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="email" required>
+    <div class="footer">
+        Daily Time Attendance System
     </div>
 
-    <div class="form-group">
-        <label>Employee ID</label>
-        <input id="employee_id" required>
-    </div>
-<div class="form-group">
-    <label>Branch Location</label>
-    <input id="branch_location" required>
-</div>
-    <div class="form-row">
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="password" required>
-        </div>
-        <div class="form-group">
-            <label>Confirm Password</label>
-            <input type="password" id="confirm_password" required>
-        </div>
-    </div>
-
-    <button class="btn-register">Register</button>
-</form>
-
-<div class="login-link">
-Already have an account? <a href="login.html">Login</a>
-</div>
-</div>
+</main>
 
 <script>
 const SUPABASE_URL = "https://oaorsmayfosxrfahkxgi.supabase.co";
@@ -116,78 +400,174 @@ const supabaseClient = window.supabase.createClient(
     SUPABASE_KEY
 );
 
-document.getElementById("registerForm").addEventListener("submit", async (e) => {
+const registerForm = document.getElementById("registerForm");
+const registerButton = document.getElementById("registerButton");
+const errorMessage = document.getElementById("errorMessage");
+const successMessage = document.getElementById("successMessage");
+
+function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.classList.add("show");
+    successMessage.classList.remove("show");
+}
+
+function showSuccess(message) {
+    successMessage.textContent = message;
+    successMessage.classList.add("show");
+    errorMessage.classList.remove("show");
+}
+
+function clearMessages() {
+    errorMessage.textContent = "";
+    errorMessage.classList.remove("show");
+    successMessage.textContent = "";
+    successMessage.classList.remove("show");
+}
+
+registerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    clearMessages();
 
     const firstname = document.getElementById("firstname").value.trim();
     const lastname = document.getElementById("lastname").value.trim();
     const email = document.getElementById("email").value.trim();
     const employee_id = document.getElementById("employee_id").value.trim();
+    const branch_location = document.getElementById("branch_location").value.trim();
     const password = document.getElementById("password").value;
     const confirm = document.getElementById("confirm_password").value;
 
     if (password !== confirm) {
-        alert("Passwords do not match");
+        showError("Passwords do not match. Please try again.");
         return;
     }
 
-    /* CREATE AUTH USER */
-    const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password
-    });
-
-    if (error) {
-        alert("Auth error: " + error.message);
+    if (password.length < 6) {
+        showError("Password must be at least 6 characters long.");
         return;
     }
 
-    if (!data.user) {
-        alert("User not created. Check email confirmation settings.");
-        return;
-    }
+    registerButton.disabled = true;
+    registerButton.textContent = "Creating account...";
 
-    /* INSERT USER PROFILE */
-    const { error: insertError } = await supabaseClient
-        .from("users")
-        .insert({
-            id: data.user.id,
-            firstname,
-            lastname,
+    try {
+        const { data, error } = await supabaseClient.auth.signUp({
             email,
-            employee_id,
-            branch_location
+            password
         });
 
-    if (insertError) {
-        alert("DB error: " + insertError.message);
-        return;
+        if (error) {
+            showError("Registration failed: " + error.message);
+            return;
+        }
+
+        if (!data.user) {
+            showError("The account could not be created. Please try again.");
+            return;
+        }
+
+        /*
+         * Supabase may return an existing user without a session
+         * when signup is repeated. Avoid treating that as a successful
+         * profile registration.
+         */
+        if (!data.session) {
+            showError(
+                "Account signup was received, but no active session was created. " +
+                "Check your email confirmation settings or whether this email is already registered. " +
+                "If the account already exists, please log in instead."
+            );
+            return;
+        }
+
+        const { error: insertError } = await supabaseClient
+            .from("users")
+            .insert({
+                id: data.user.id,
+                firstname,
+                lastname,
+                email,
+                employee_id,
+                branch_location
+            });
+
+        if (insertError) {
+            console.error("Profile insert error:", insertError);
+            showError(
+                "Your login account was created, but saving your profile failed: " +
+                insertError.message +
+                " Contact your administrator to resolve the profile issue."
+            );
+            return;
+        }
+
+        showSuccess("Registration successful! Redirecting to login...");
+
+        registerButton.textContent = "Registration Successful";
+
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1200);
+
+    } catch (err) {
+        console.error("Registration error:", err);
+        showError("Connection problem. Please check your internet and try again.");
+    } finally {
+        registerButton.disabled = false;
+
+        if (!successMessage.classList.contains("show")) {
+            registerButton.textContent = "Create Account";
+        }
     }
-
-    alert("Registration successful!");
-    window.location.href = "login.html";
 });
- 
 
-    document.getElementById("registeredCompanyBtn").addEventListener("click", () => {
-    // Ask for password
-    const password = prompt("Enter password to access company registration:");
+/* Company registration access panel */
+const companyAccess = document.getElementById("companyAccess");
+const companyPassword = document.getElementById("companyPassword");
+const companyMessage = document.getElementById("companyMessage");
 
-    // Check password
+document.getElementById("registeredCompanyBtn").addEventListener("click", () => {
+    companyAccess.classList.toggle("show");
+    companyMessage.classList.remove("show");
+
+    if (companyAccess.classList.contains("show")) {
+        companyPassword.focus();
+    }
+});
+
+document.getElementById("companyCancel").addEventListener("click", () => {
+    companyAccess.classList.remove("show");
+    companyPassword.value = "";
+    companyMessage.classList.remove("show");
+});
+
+document.getElementById("companySubmit").addEventListener("click", () => {
+    const password = companyPassword.value;
+
+    /*
+     * IMPORTANT:
+     * This client-side password check is not secure.
+     * Move verification to a server-side function before production.
+     */
     if (password === "adminattendance1298") {
-        // ✅ Correct password → redirect to registercompany.html
         window.location.href = "registercompany.html";
-    } else if (password === null || password === "") {
-        // User pressed cancel or left it empty
-        alert("Action cancelled.");
     } else {
-        // Wrong password
-        alert("❌ Incorrect password! Contact admin for the correct password.noelrespicio84@gmail.com");
+        companyMessage.textContent =
+            password.length === 0
+                ? "Please enter the access password."
+                : "Incorrect password. Please contact your administrator.";
+
+        companyMessage.classList.add("show");
     }
 });
 
+companyPassword.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("companySubmit").click();
+    }
+});
 </script>
-
 
 </body>
 </html>
+```
