@@ -6,16 +6,207 @@
 <title>My Attendance</title>
 
 <style>
-body{font-family:Arial,sans-serif;background:#f4f6f8;padding:15px;}
-h2{text-align:center;margin-bottom:20px;}
-.date-picker{text-align:center;margin-bottom:15px;}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
-th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px;}
-th{background:#f7f7f7;}
-.cutoff{background:#e5e7eb;font-weight:bold;text-align:left;}
-button{padding:6px 10px;border:none;background:#2563eb;color:#fff;border-radius:5px;cursor:pointer;}
-button:hover{background:#1e40af;}
-button:disabled{background:#9ca3af;cursor:not-allowed;}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    padding: 24px 16px;
+    color: #172033;
+    background:
+        radial-gradient(circle at top left, #3b82f6 0, transparent 35%),
+        linear-gradient(135deg, #07152e, #163d72);
+}
+
+/* PAGE TITLE */
+h2 {
+    text-align: center;
+    margin: 10px 0 25px;
+    color: #ffffff;
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: .3px;
+}
+
+/* DATE PICKER AREA */
+.date-picker {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    max-width: 600px;
+    margin: 0 auto 22px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+}
+
+.date-picker label {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.date-picker input,
+.date-picker select {
+    max-width: 100%;
+    padding: 11px 13px;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #172033;
+    font-size: 14px;
+    outline: none;
+    transition: .2s;
+}
+
+.date-picker input:focus,
+.date-picker select:focus {
+    border-color: #2563eb;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+/* BUTTONS */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s, background .2s;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px rgba(37, 99, 235, .22);
+}
+
+button:active:not(:disabled) {
+    transform: scale(.98);
+}
+
+button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* TABLE WRAPPER */
+.table-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-x: auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, .2);
+}
+
+/* ATTENDANCE TABLE */
+table {
+    width: 100%;
+    min-width: 750px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+}
+
+th,
+td {
+    padding: 13px 10px;
+    text-align: center;
+    font-size: 13px;
+    border-bottom: 1px solid #e5eaf1;
+    border-right: 1px solid #edf0f5;
+}
+
+th {
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+td {
+    color: #475569;
+    background: #ffffff;
+}
+
+tbody tr:hover td {
+    background: #f8fafc;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* CUTOFF SECTION ROW */
+.cutoff {
+    background: #dbeafe !important;
+    color: #1e40af !important;
+    font-weight: 800;
+    text-align: left;
+    padding: 13px 15px;
+    border-top: 2px solid #bfdbfe;
+    border-bottom: 1px solid #bfdbfe;
+}
+
+/* LINKS INSIDE TABLE */
+table a {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+table a:hover {
+    text-decoration: underline;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 600px) {
+    body {
+        padding: 16px 10px;
+    }
+
+    h2 {
+        font-size: 23px;
+        margin-bottom: 20px;
+    }
+
+    .date-picker {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 17px;
+        gap: 10px;
+        border-radius: 15px;
+    }
+
+    .date-picker input,
+    .date-picker select,
+    .date-picker button {
+        width: 100%;
+    }
+
+    .table-container {
+        border-radius: 12px;
+    }
+
+    th,
+    td {
+        padding: 11px 8px;
+        font-size: 12px;
+    }
+}
 </style>
 </head>
 
@@ -38,7 +229,6 @@ button:disabled{background:#9ca3af;cursor:not-allowed;}
 <th>CB Out</th>
 <th>CB In</th>
 <th>Time Out</th>
-<th>Selfie</th>
 <th>Map</th>
 <th>Edit</th>
 </tr>
@@ -145,7 +335,6 @@ function rowHTML(d, firstTotal, secondTotal){
     <td class="editable">${formatTime(d.coffee_break_out)}</td>
     <td class="editable">${formatTime(d.coffee_break_in)}</td>
     <td class="editable">${formatTime(d.time_out)}</td>
-    <td>${d.selfie_url ? `<button onclick="viewSelfie('${encodeURIComponent(d.selfie_url)}')">📸</button>` : '--'}</td>
     <td>${d.latitude ? `<button onclick="viewMap(${d.latitude},${d.longitude})">📍</button>` : '--'}</td>
     <td>
       <button ${disabled ? "disabled" : ""} onclick="startEdit('${d.id}')">✏️ Edit</button>
@@ -218,10 +407,6 @@ window.saveEdit = async (id) => {
 window.viewMap = (lat,lng) => {
   window.open(`map.html?lat=${lat}&lng=${lng}`, "_blank");
 };
-window.viewSelfie = (url) => {
-  window.open(`selfie.html?url=${url}`, "_blank");
- };
-
 </script>
 
 </body>
