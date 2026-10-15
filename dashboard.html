@@ -1,18 +1,17 @@
-\<!DOCTYPE html>
-\<html lang="en">
-\<head>
-\<meta charset="UTF-8">
-\<meta name="viewport" content="width=device-width, initial-scale=1.0">
-\<title>Daily Attendance\</title>
-\<script src="[https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2](https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2)">\</script>
-\<style>
-\* {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Attendance</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: "Segoe UI", Arial, sans-serif;
 }
-
 body {
     min-height: 100vh;
     min-height: 100dvh;
@@ -22,8 +21,7 @@ body {
         radial-gradient(circle at top left, #3b82f6 0, transparent 35%),
         linear-gradient(135deg, #07152e, #163d72);
 }
-
-/\* MAIN CARD \*/
+/* MAIN CARD */
 .container {
     width: 100%;
     max-width: 520px;
@@ -34,8 +32,7 @@ body {
     border-radius: 24px;
     box-shadow: 0 25px 60px rgba(0,0,0,.25);
 }
-
-/\* HEADER \*/
+/* HEADER */
 .header {
     display: flex;
     justify-content: space-between;
@@ -43,22 +40,19 @@ body {
     gap: 12px;
     margin-bottom: 25px;
 }
-
 .header h2 {
     margin: 0;
     color: #14213d;
     font-size: 21px;
     line-height: 1.35;
 }
-
 h2 {
     text-align: center;
     margin-bottom: 15px;
     color: #14213d;
     font-size: 23px;
 }
-
-/\* LOGOUT \*/
+/* LOGOUT */
 .logout-btn {
     flex-shrink: 0;
     padding: 9px 13px;
@@ -71,13 +65,11 @@ h2 {
     cursor: pointer;
     transition: .2s;
 }
-
-.logout-btn\:hover {
+.logout-btn:hover {
     background: #ffe4e6;
     transform: translateY(-1px);
 }
-
-/\* DIGITAL CLOCK \*/
+/* DIGITAL CLOCK */
 .clock {
     margin: 10px 0;
     padding: 22px 10px;
@@ -91,7 +83,6 @@ h2 {
     border: 1px solid #dbeafe;
     border-radius: 18px;
 }
-
 .date {
     margin-bottom: 22px;
     text-align: center;
@@ -99,8 +90,7 @@ h2 {
     font-size: 13px;
     font-weight: 500;
 }
-
-/\* ATTENDANCE TABLE \*/
+/* ATTENDANCE TABLE */
 table {
     width: 100%;
     border-collapse: separate;
@@ -110,46 +100,38 @@ table {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
 }
-
 th, td {
     padding: 12px 8px;
     text-align: center;
     font-size: 13px;
     border-bottom: 1px solid #e2e8f0;
 }
-
 th {
     color: #334155;
     background: #f1f5f9;
     font-weight: 700;
 }
-
 td {
     color: #475569;
     background: #ffffff;
     overflow-wrap: anywhere;
 }
-
-tr\:last-child td {
+tr:last-child td {
     border-bottom: none;
 }
-
-tbody tr\:hover td {
+tbody tr:hover td {
     background: #f8fafc;
 }
-
-/\* ACTION BUTTONS \*/
+/* ACTION BUTTONS */
 .buttons {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 11px;
     margin-top: 20px;
 }
-
 button {
     -webkit-tap-highlight-color: transparent;
 }
-
 .buttons button {
     min-width: 0;
     padding: 14px 8px;
@@ -164,32 +146,26 @@ button {
     box-shadow: 0 5px 12px rgba(37,99,235,.16);
     transition: transform .2s, box-shadow .2s, opacity .2s;
 }
-
-.buttons button\:hover\:not(\:disabled) {
+.buttons button:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(37,99,235,.22);
 }
-
-.buttons button\:active\:not(\:disabled) {
+.buttons button:active:not(:disabled) {
     transform: scale(.98);
 }
-
-.buttons button\:disabled {
+.buttons button:disabled {
     background: #cbd5e1;
     color: #64748b;
     box-shadow: none;
     cursor: not-allowed;
     opacity: .8;
 }
-
-/\* FINAL OUT BUTTON \*/
-.buttons button\:last-child {
+/* FINAL OUT BUTTON */
+.buttons button:last-child {
     grid-column: 1 / -1;
     background: linear-gradient(135deg, #f59e0b, #d97706);
     color: #ffffff;
 }
-
-/\* CANCEL ACTION \*/
 .cancel {
     display: none;
     margin-top: 15px;
@@ -201,7 +177,6 @@ button {
     color: #9a3412;
     font-size: 13px;
 }
-
 .cancel button {
     margin-top: 10px;
     padding: 10px 18px;
@@ -212,12 +187,10 @@ button {
     font-weight: 700;
     cursor: pointer;
 }
-
-.cancel button\:hover {
+.cancel button:hover {
     background: #dc2626;
 }
-
-/\* VIEW ATTENDANCE \*/
+/* VIEW ATTENDANCE */
 .view-btn {
     width: 100%;
     margin-top: 18px;
@@ -232,130 +205,116 @@ button {
     box-shadow: 0 6px 15px rgba(5,150,105,.18);
     transition: .2s;
 }
-
-.view-btn\:hover {
+.view-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 9px 18px rgba(5,150,105,.25);
 }
-
-/\* MOBILE \*/
+/* MOBILE */
 @media (max-width: 480px) {
     body {
         padding: 16px 12px;
     }
-
-    .container {
-        padding: 20px 16px;
-        border-radius: 20px;
-    }
-
-    .header {
-        margin-bottom: 20px;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .clock {
-        padding: 20px 8px;
-    }
-
-    th, td {
-        padding: 10px 5px;
-        font-size: 12px;
-    }
-
-    .buttons {
-        gap: 9px;
-    }
-
-    .buttons button {
-        padding: 13px 6px;
-        font-size: 12px;
-    }
+.container {
+    padding: 20px 16px;
+    border-radius: 20px;
 }
 
+.header {
+    margin-bottom: 20px;
+}
+
+.header h2 {
+    font-size: 18px;
+}
+
+.clock {
+    padding: 20px 8px;
+}
+
+th, td {
+    padding: 10px 5px;
+    font-size: 12px;
+}
+
+.buttons {
+    gap: 9px;
+}
+
+.buttons button {
+    padding: 13px 6px;
+    font-size: 12px;
+}
+}
 @media (max-width: 350px) {
     .container {
         padding: 17px 12px;
     }
-
-    .header h2 {
-        font-size: 16px;
-    }
-
-    .logout-btn {
-        padding: 8px 9px;
-    }
-
-    th, td {
-        font-size: 11px;
-        padding: 9px 3px;
-    }
+    
+.header h2 {
+    font-size: 16px;
 }
-\</style>
-\</head>
-\<body>
-\<div class="container">
-  \<button class="logout-btn" onclick="logout()">Logout\</button>
-\<h2>📋 Daily Attendance\</h2>
-\<div class="date" id="date">\</div>
-\<div class="clock" id="clock">\</div>
 
-\<table>
-\<tr>\<th>IN\</th>\<th>LB OUT\</th>\<th>LB IN\</th>\</tr>
-\<tr>
-\<td id="time_in">--\</td>
-\<td id="lbo">--\</td>
-\<td id="lbi">--\</td>
-\</tr>
-\</table>
+.logout-btn {
+    padding: 8px 9px;
+}
 
-\<table>
-\<tr>\<th>CB OUT\</th>\<th>CB IN\</th>\<th>OUT\</th>\</tr>
-\<tr>
-\<td id="cbo">--\</td>
-\<td id="cbi">--\</td>
-\<td id="time_out">--\</td>
-\</tr>
-\</table>
-
-\<div class="buttons">
-\<button id="btn_time_in" onclick="record('time_in',true)">Time In\</button>
-\<button id="btn_lbo" onclick="record('lunch_break_out',false)">LB Out\</button>
-\<button id="btn_lbi" onclick="record('lunch_break_in',false)">LB In\</button>
-\<button id="btn_cbo" onclick="record('coffee_break_out',false)">CB Out\</button>
-\<button id="btn_cbi" onclick="record('coffee_break_in',false)">CB In\</button>
-\<button id="btn_time_out" onclick="record('time_out',true)">Time Out\</button>
-\<button onclick="location.href='sellout_inventory.html'">📦 Sellout\</button>
-\</div>
-
-\<div class="cancel" id="cancelBox">
-\<p>Saving in \<span id="count">5\</span> seconds\</p>
-\<button onclick="cancelSave()">Cancel\</button>
-\</div>
-
-\<button class="view-btn" onclick="location.href='view_attendance.html'">📊 View Attendance\</button>
-\</div>
-
-
-
-\<script>
-const SUPABASE_URL = "[https://oaorsmayfosxrfahkxgi.supabase.co](https://oaorsmayfosxrfahkxgi.supabase.co)";
+th, td {
+    font-size: 11px;
+    padding: 9px 3px;
+}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <button class="logout-btn" onclick="logout()">Logout</button>
+<h2>📋 Daily Attendance</h2>
+<div class="date" id="date"></div>
+<div class="clock" id="clock"></div>
+<table>
+<tr><th>IN</th><th>LB OUT</th><th>LB IN</th></tr>
+<tr>
+<td id="time_in">--</td>
+<td id="lbo">--</td>
+<td id="lbi">--</td>
+</tr>
+</table>
+<table>
+<tr><th>CB OUT</th><th>CB IN</th><th>OUT</th></tr>
+<tr>
+<td id="cbo">--</td>
+<td id="cbi">--</td>
+<td id="time_out">--</td>
+</tr>
+</table>
+<div class="buttons">
+<button id="btn_time_in" onclick="record('time_in',true)">Time In</button>
+<button id="btn_lbo" onclick="record('lunch_break_out',false)">LB Out</button>
+<button id="btn_lbi" onclick="record('lunch_break_in',false)">LB In</button>
+<button id="btn_cbo" onclick="record('coffee_break_out',false)">CB Out</button>
+<button id="btn_cbi" onclick="record('coffee_break_in',false)">CB In</button>
+<button id="btn_time_out" onclick="record('time_out',true)">Time Out</button>
+<button onclick="location.href='sellout_inventory.html'">📦 Sellout</button>
+</div>
+<div class="cancel" id="cancelBox">
+<p>Saving in <span id="count">5</span> seconds</p>
+<button onclick="cancelSave()">Cancel</button>
+</div>
+<button class="view-btn" onclick="location.href='view_attendance.html'">📊 View Attendance</button>
+</div>
+<script>
+const SUPABASE_URL = "https://oaorsmayfosxrfahkxgi.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Vx0EZwKgcNMQNLpmb6RtKw_wpwZ15Bz";
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
-
 let user = null;
 let pendingField = null;
 let pendingTime = null;
 let countdown = null;
 let seconds = 5;
 let locationData = {};
-
 const fieldMap = {
   time_in: "time_in",
   lunch_break_out: "lbo",
@@ -364,71 +323,58 @@ const fieldMap = {
   coffee_break_in: "cbi",
   time_out: "time_out"
 };
-
 function getLocalDate() {
   const now = new Date();
-  const year = now\.getFullYear();
-  const month = String(now\.getMonth() + 1).padStart(2, "0");
-  const day = String(now\.getDate()).padStart(2, "0");
-  return \`${year}-${month}-${day}\`;
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
-
 function toLocalString(date) {
   const pad = n => String(n).padStart(2, "0");
-  return \`${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}\`;
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
-
-/\* CLOCK \*/
+/* CLOCK */
 function updateClock() {
   const now = new Date();
   document.getElementById("clock").innerText =
-    now\.toLocaleTimeString("en-US", { hour12: false });
-  document.getElementById("date").innerText = now\.toDateString();
+    now.toLocaleTimeString("en-US", { hour12: false });
+  document.getElementById("date").innerText = now.toDateString();
 }
 updateClock();
 setInterval(updateClock, 1000);
-
-/\* AUTH \*/
+/* AUTH */
 (async function init() {
   const { data, error } = await supabaseClient.auth.getSession();
-
   if (error || !data.session) {
     location.href = "login.html";
     return;
   }
-
   user = data.session.user;
-
   const ok = await ensureToday();
   if (ok) await loadToday();
 })();
-
-/\* ENSURE TODAY'S ROW EXISTS \*/
+/* ENSURE TODAY'S ROW EXISTS */
 async function ensureToday() {
   const today = getLocalDate();
-
   const { data, error } = await supabaseClient
     .from("attendance")
     .select("id")
     .eq("user_id", user.id)
     .eq("attendance_date", today)
     .maybeSingle();
-
   if (error) {
     console.error("Attendance lookup error:", error);
     alert("Hindi mabasa ang attendance: " + error.message);
     return false;
   }
-
   if (data) return true;
-
   const { error: insertError } = await supabaseClient
     .from("attendance")
     .insert({
       user_id: user.id,
       attendance_date: today
     });
-
   if (insertError) {
     // If another request already created today's row, verify it.
     const { data: existing, error: checkError } = await supabaseClient
@@ -437,56 +383,48 @@ async function ensureToday() {
       .eq("user_id", user.id)
       .eq("attendance_date", today)
       .maybeSingle();
-
-    if (checkError || !existing) {
-      console.error("Create attendance error:", insertError);
-      alert("Hindi makagawa ng attendance record: " + insertError.message);
-      return false;
-    }
+if (checkError || !existing) {
+  console.error("Create attendance error:", insertError);
+  alert("Hindi makagawa ng attendance record: " + insertError.message);
+  return false;
+}
   }
-
   return true;
 }
-
-/\* GET GPS LOCATION \*/
+/* GET GPS LOCATION */
 function getLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new Error("Hindi supported ang GPS sa browser na ito."));
       return;
     }
-
-    navigator.geolocation.getCurrentPosition(
-      pos => resolve({
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
-      }),
-      err => reject(new Error(err.message)),
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0
-      }
-    );
+navigator.geolocation.getCurrentPosition(
+  pos => resolve({
+    lat: pos.coords.latitude,
+    lng: pos.coords.longitude
+  }),
+  err => reject(new Error(err.message)),
+  {
+    enableHighAccuracy: true,
+    timeout: 15000,
+    maximumAge: 0
+  }
+);
   });
 }
-
-/\* RECORD BUTTON \*/
+/* RECORD BUTTON */
 async function record(field, locationRequired) {
   if (!user) {
     alert("Hindi pa naka-login. Mag-login muna.");
     return;
   }
-
   if (countdown) {
     alert("May pending attendance action pa. I-cancel o hintaying matapos.");
     return;
   }
-
   pendingField = field;
   pendingTime = new Date();
   locationData = {};
-
   if (locationRequired) {
     try {
       locationData = await getLocation();
@@ -497,48 +435,38 @@ async function record(field, locationRequired) {
       return;
     }
   }
-
   startCountdown(field);
 }
-
-/\* COUNTDOWN \*/
+/* COUNTDOWN */
 function startCountdown(field) {
   document.getElementById(fieldMap[field]).innerText =
     pendingTime.toLocaleTimeString("en-US", { hour12: false });
-
   seconds = 5;
   document.getElementById("count").innerText = seconds;
   document.getElementById("cancelBox").style.display = "block";
-
   countdown = setInterval(async () => {
     seconds--;
     document.getElementById("count").innerText = seconds;
-
-    if (seconds <= 0) {
-      clearInterval(countdown);
-      countdown = null;
-      document.getElementById("cancelBox").style.display = "none";
-      await save();
-    }
+      if (seconds <= 0) {
+  clearInterval(countdown);
+  countdown = null;
+  document.getElementById("cancelBox").style.display = "none";
+  await save();
+}
   }, 1000);
 }
-
-/\* SAVE ATTENDANCE \*/
+/* SAVE ATTENDANCE */
 async function save() {
   if (!pendingField || !pendingTime || !user) return;
-
   const field = pendingField;
   const today = getLocalDate();
-
   const payload = {
     [field]: toLocalString(pendingTime)
   };
-
   if (field === "time_in" || field === "time_out") {
     payload.latitude = locationData.lat;
     payload.longitude = locationData.lng;
   }
-
   // Update today's existing row.
   const { data, error } = await supabaseClient
     .from("attendance")
@@ -546,7 +474,6 @@ async function save() {
     .eq("user_id", user.id)
     .eq("attendance_date", today)
     .select("id");
-
   if (error) {
     console.error("Attendance save error:", error);
     alert("Save failed: " + error.message);
@@ -556,7 +483,6 @@ async function save() {
     locationData = {};
     return;
   }
-
   if (!data || data.length === 0) {
     alert(
       "Walang attendance row na na-update. " +
@@ -568,49 +494,39 @@ async function save() {
     locationData = {};
     return;
   }
-
   await loadToday();
   alert("Attendance saved successfully!");
-
   pendingField = null;
   pendingTime = null;
   locationData = {};
 }
-
-/\* CANCEL \*/
+/* CANCEL */
 function cancelSave() {
   if (countdown) clearInterval(countdown);
   countdown = null;
-
   if (pendingField) {
     document.getElementById(fieldMap[pendingField]).innerText = "--";
   }
-
   pendingField = null;
   pendingTime = null;
   locationData = {};
   document.getElementById("cancelBox").style.display = "none";
 }
-
-/\* LOAD TODAY \*/
+/* LOAD TODAY */
 async function loadToday() {
   const today = getLocalDate();
-
   const { data, error } = await supabaseClient
     .from("attendance")
-    .select("\*")
+    .select("*")
     .eq("user_id", user.id)
     .eq("attendance_date", today)
     .maybeSingle();
-
   if (error) {
     console.error("Load attendance error:", error);
     alert("Hindi ma-load ang attendance: " + error.message);
     return;
   }
-
-  if (!data) return;
-
+    if (!data) return;
   Object.keys(fieldMap).forEach(field => {
     const value = data[field];
     document.getElementById(fieldMap[field]).innerText = value
@@ -620,15 +536,12 @@ async function loadToday() {
       : "--";
   });
 }
-
-/\* LOGOUT \*/
+/* LOGOUT */
 async function logout() {
   if (!confirm("Are you sure you want to logout?")) return;
-
   await supabaseClient.auth.signOut();
   location.href = "login.html";
 }
-\</script>
-
-\</body>
-\</html>
+</script>
+</body>
+</html>
