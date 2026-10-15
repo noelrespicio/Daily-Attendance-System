@@ -1,660 +1,467 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daily Time Attendance System</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-* {
-  box-sizing: border-box;
+\<!DOCTYPE html>
+\<html lang="en">
+\<head>
+\<meta charset="UTF-8">
+\<meta name="viewport" content="width=device-width, initial-scale=1.0">
+\<title>Daily Attendance\</title>
+\<script src="[https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2](https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2)">\</script>
+\<style>
+\* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
 body {
-  margin: 0;
-  padding: 16px;
-  font-family: Arial, sans-serif;
-  background: #f1f5f9;
-  color: #1e293b;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 24px 16px;
+    color: #172033;
+    background:
+        radial-gradient(circle at top left, #3b82f6 0, transparent 35%),
+        linear-gradient(135deg, #07152e, #163d72);
 }
 
+/\* MAIN CARD \*/
 .container {
-  max-width: 950px;
-  margin: auto;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 25px;
+    background: #ffffff;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 24px;
+    box-shadow: 0 25px 60px rgba(0,0,0,.25);
 }
 
+/\* HEADER \*/
 .header {
-  padding: 22px;
-  text-align: center;
-  color: white;
-  background: linear-gradient(135deg, #075985, #2563eb);
-  border-radius: 16px;
-  margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
 }
 
-.header h1 {
-  margin: 0 0 10px;
-  font-size: 25px;
-}
-
-.card {
-  background: white;
-  padding: 18px;
-  margin-bottom: 16px;
-  border-radius: 14px;
-  box-shadow: 0 3px 12px #0000000d;
-}
-
-.clock {
-  text-align: center;
-  font-size: 36px;
-  font-weight: bold;
-  color: #075985;
-  margin: 8px 0;
-}
-
-.date {
-  text-align: center;
-  color: #64748b;
-  margin-bottom: 12px;
-}
-
-.mode-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.mode-title {
-  font-size: 17px;
-  font-weight: bold;
-}
-
-.mode-description {
-  color: #64748b;
-  font-size: 13px;
-  margin-top: 5px;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 32px;
-  flex-shrink: 0;
-}
-
-.switch input {
-  display: none;
-}
-
-.slider {
-  position: absolute;
-  inset: 0;
-  background: #16a34a;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: 0.25s;
-}
-
-.slider:before {
-  content: "";
-  position: absolute;
-  height: 24px;
-  width: 24px;
-  left: 4px;
-  bottom: 4px;
-  background: white;
-  border-radius: 50%;
-  transition: 0.25s;
-}
-
-.switch input:checked + .slider {
-  background: #2563eb;
-}
-
-.switch input:checked + .slider:before {
-  transform: translateX(28px);
-}
-
-.mode-badge {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 7px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: bold;
-  background: #dcfce7;
-  color: #166534;
-}
-
-.mode-badge.manual {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.field label {
-  display: block;
-  font-size: 13px;
-  font-weight: bold;
-  margin-bottom: 7px;
-}
-
-.field input,
-.field select {
-  width: 100%;
-  padding: 11px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 15px;
-}
-
-.actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 15px;
-}
-
-button {
-  border: none;
-  border-radius: 9px;
-  padding: 13px 10px;
-  color: white;
-  background: #2563eb;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.in-btn { background: #16a34a; }
-.break-btn { background: #d97706; }
-.out-btn { background: #dc2626; }
-.cancel-btn { background: #64748b; }
-.secondary-btn { background: #475569; }
-
-.hidden {
-  display: none !important;
-}
-
-.notice {
-  padding: 12px;
-  border-radius: 9px;
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 14px;
-  margin-top: 12px;
-  overflow-wrap: anywhere;
-}
-
-.status {
-  margin-top: 12px;
-  font-size: 14px;
-  overflow-wrap: anywhere;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-th, td {
-  padding: 10px 8px;
-  border-bottom: 1px solid #e2e8f0;
-  text-align: left;
-  white-space: nowrap;
-}
-
-th {
-  background: #eff6ff;
-  color: #1e40af;
-}
-
-.table-wrap {
-  overflow-x: auto;
+.header h2 {
+    margin: 0;
+    color: #14213d;
+    font-size: 21px;
+    line-height: 1.35;
 }
 
 h2 {
-  font-size: 19px;
-  margin-top: 0;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #14213d;
+    font-size: 23px;
 }
 
+/\* LOGOUT \*/
+.logout-btn {
+    flex-shrink: 0;
+    padding: 9px 13px;
+    border: none;
+    border-radius: 10px;
+    background: #fff1f2;
+    color: #e11d48;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.logout-btn\:hover {
+    background: #ffe4e6;
+    transform: translateY(-1px);
+}
+
+/\* DIGITAL CLOCK \*/
+.clock {
+    margin: 10px 0;
+    padding: 22px 10px;
+    text-align: center;
+    font-size: clamp(30px, 8vw, 42px);
+    font-weight: 800;
+    letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
+    color: #2563eb;
+    background: linear-gradient(135deg, #eff6ff, #f8fafc);
+    border: 1px solid #dbeafe;
+    border-radius: 18px;
+}
+
+.date {
+    margin-bottom: 22px;
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/\* ATTENDANCE TABLE \*/
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 18px 0;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+th, td {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 13px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    color: #334155;
+    background: #f1f5f9;
+    font-weight: 700;
+}
+
+td {
+    color: #475569;
+    background: #ffffff;
+    overflow-wrap: anywhere;
+}
+
+tr\:last-child td {
+    border-bottom: none;
+}
+
+tbody tr\:hover td {
+    background: #f8fafc;
+}
+
+/\* ACTION BUTTONS \*/
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+    margin-top: 20px;
+}
+
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.buttons button {
+    min-width: 0;
+    padding: 14px 8px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+    cursor: pointer;
+    box-shadow: 0 5px 12px rgba(37,99,235,.16);
+    transition: transform .2s, box-shadow .2s, opacity .2s;
+}
+
+.buttons button\:hover\:not(\:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(37,99,235,.22);
+}
+
+.buttons button\:active\:not(\:disabled) {
+    transform: scale(.98);
+}
+
+.buttons button\:disabled {
+    background: #cbd5e1;
+    color: #64748b;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: .8;
+}
+
+/\* FINAL OUT BUTTON \*/
+.buttons button\:last-child {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+}
+
+/\* CANCEL ACTION \*/
+.cancel {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    text-align: center;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 14px;
+    color: #9a3412;
+    font-size: 13px;
+}
+
+.cancel button {
+    margin-top: 10px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 9px;
+    background: #ef4444;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cancel button\:hover {
+    background: #dc2626;
+}
+
+/\* VIEW ATTENDANCE \*/
+.view-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #10b981, #047857);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(5,150,105,.18);
+    transition: .2s;
+}
+
+.view-btn\:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 9px 18px rgba(5,150,105,.25);
+}
+
+/\* MOBILE \*/
 @media (max-width: 480px) {
-  body { padding: 9px; }
-  .header h1 { font-size: 21px; }
-  .clock { font-size: 30px; }
-  .card { padding: 14px; }
-  .grid, .actions { grid-template-columns: 1fr; }
-  th, td { padding: 8px 6px; }
+    body {
+        padding: 16px 12px;
+    }
+
+    .container {
+        padding: 20px 16px;
+        border-radius: 20px;
+    }
+
+    .header {
+        margin-bottom: 20px;
+    }
+
+    .header h2 {
+        font-size: 18px;
+    }
+
+    .clock {
+        padding: 20px 8px;
+    }
+
+    th, td {
+        padding: 10px 5px;
+        font-size: 12px;
+    }
+
+    .buttons {
+        gap: 9px;
+    }
+
+    .buttons button {
+        padding: 13px 6px;
+        font-size: 12px;
+    }
 }
-</style>
-</head>
 
-<body>
-<div class="container">
+@media (max-width: 350px) {
+    .container {
+        padding: 17px 12px;
+    }
 
-  <div class="header">
-    <h1>Daily Time Attendance System</h1>
-    <div>Employee Attendance Dashboard</div>
-  </div>
+    .header h2 {
+        font-size: 16px;
+    }
 
-  <div class="card">
-    <div class="date" id="todayDate">Loading date...</div>
-    <div class="clock" id="digitalClock">00:00:00</div>
-    <div class="date">Philippine local time</div>
-  </div>
+    .logout-btn {
+        padding: 8px 9px;
+    }
 
-  <!-- AUTOMATIC / MANUAL SWITCH -->
-  <div class="card">
-    <div class="mode-box">
-      <div>
-        <div class="mode-title" id="modeTitle">Automatic Mode</div>
-        <div class="mode-description" id="modeDescription">
-          Uses your current time. GPS is required for Time In and Time Out.
-        </div>
-      </div>
+    th, td {
+        font-size: 11px;
+        padding: 9px 3px;
+    }
+}
+\</style>
+\</head>
+\<body>
+\<div class="container">
+  \<button class="logout-btn" onclick="logout()">Logout\</button>
+\<h2>📋 Daily Attendance\</h2>
+\<div class="date" id="date">\</div>
+\<div class="clock" id="clock">\</div>
 
-      <label class="switch" aria-label="Switch attendance mode">
-        <input type="checkbox" id="manualSwitch">
-        <span class="slider"></span>
-      </label>
-    </div>
+\<table>
+\<tr>\<th>IN\</th>\<th>LB OUT\</th>\<th>LB IN\</th>\</tr>
+\<tr>
+\<td id="time_in">--\</td>
+\<td id="lbo">--\</td>
+\<td id="lbi">--\</td>
+\</tr>
+\</table>
 
-    <div class="mode-badge" id="modeBadge">
-      AUTOMATIC MODE
-    </div>
+\<table>
+\<tr>\<th>CB OUT\</th>\<th>CB IN\</th>\<th>OUT\</th>\</tr>
+\<tr>
+\<td id="cbo">--\</td>
+\<td id="cbi">--\</td>
+\<td id="time_out">--\</td>
+\</tr>
+\</table>
 
-    <div class="notice">
-      Automatic mode uses the current time. Manual mode lets you select
-      the time for each attendance action. Use manual entries only when
-      authorized by your company.
-    </div>
-  </div>
+\<div class="buttons">
+\<button id="btn_time_in" onclick="record('time_in',true)">Time In\</button>
+\<button id="btn_lbo" onclick="record('lunch_break_out',false)">LB Out\</button>
+\<button id="btn_lbi" onclick="record('lunch_break_in',false)">LB In\</button>
+\<button id="btn_cbo" onclick="record('coffee_break_out',false)">CB Out\</button>
+\<button id="btn_cbi" onclick="record('coffee_break_in',false)">CB In\</button>
+\<button id="btn_time_out" onclick="record('time_out',true)">Time Out\</button>
+\<button onclick="location.href='sellout_inventory.html'">📦 Sellout\</button>
+\</div>
 
-  <!-- AUTOMATIC MODE -->
-  <div class="card" id="automaticPanel">
-    <h2>Automatic Attendance</h2>
+\<div class="cancel" id="cancelBox">
+\<p>Saving in \<span id="count">5\</span> seconds\</p>
+\<button onclick="cancelSave()">Cancel\</button>
+\</div>
 
-    <div class="actions">
-      <button class="in-btn" data-field="time_in">IN</button>
-      <button class="break-btn" data-field="lunch_break_out">LB OUT</button>
-      <button class="break-btn" data-field="lunch_break_in">LB IN</button>
-      <button class="break-btn" data-field="coffee_break_out">CB OUT</button>
-      <button class="break-btn" data-field="coffee_break_in">CB IN</button>
-      <button class="out-btn" data-field="time_out">OUT</button>
-    </div>
+\<button class="view-btn" onclick="location.href='view_attendance.html'">📊 View Attendance\</button>
+\</div>
 
-    <div class="notice" id="countdownNotice">
-      Select an attendance action to record your time.
-    </div>
 
-    <button id="cancelButton" class="cancel-btn hidden"
-      style="width:100%; margin-top:10px">
-      Cancel Save
-    </button>
-  </div>
 
-  <!-- MANUAL MODE -->
-  <div class="card hidden" id="manualPanel">
-    <h2>Manual Attendance</h2>
-
-    <div class="notice">
-      Choose the attendance action and enter the time you want to record.
-      The date will be today's date.
-    </div>
-
-    <div class="grid" style="margin-top:15px">
-      <div class="field">
-        <label for="manualField">Attendance Action</label>
-        <select id="manualField">
-          <option value="time_in">IN</option>
-          <option value="lunch_break_out">LB OUT</option>
-          <option value="lunch_break_in">LB IN</option>
-          <option value="coffee_break_out">CB OUT</option>
-          <option value="coffee_break_in">CB IN</option>
-          <option value="time_out">OUT</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="manualTime">Select Time</label>
-        <input type="time" id="manualTime" required>
-      </div>
-    </div>
-
-    <button id="saveManualButton" class="in-btn"
-      style="width:100%; margin-top:15px">
-      Save Manual Attendance
-    </button>
-
-    <div class="status" id="manualStatus"></div>
-  </div>
-
-  <!-- TODAY'S ATTENDANCE -->
-  <div class="card">
-    <h2>Today's Attendance</h2>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Attendance</th>
-            <th>Recorded Time</th>
-          </tr>
-        </thead>
-        <tbody id="attendanceTable">
-          <tr><td colspan="2">Loading attendance...</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="status" id="pageStatus"></div>
-
-    <button class="secondary-btn" id="refreshButton"
-      style="width:100%; margin-top:15px">
-      Refresh Attendance
-    </button>
-  </div>
-
-  <div class="actions" style="margin-bottom:16px">
-    <button class="secondary-btn" id="selloutButton">Sellout</button>
-    <button class="secondary-btn" id="viewAttendanceButton">
-      View Attendance
-    </button>
-  </div>
-
-</div>
-
-<script>
-/* ================================================
-   SUPABASE CONFIGURATION
-   Replace the key below with your publishable key.
-================================================ */
-const SUPABASE_URL = "https://oaorsmayfosxrfahkxgi.supabase.co";
+\<script>
+const SUPABASE_URL = "[https://oaorsmayfosxrfahkxgi.supabase.co](https://oaorsmayfosxrfahkxgi.supabase.co)";
 const SUPABASE_KEY = "sb_publishable_Vx0EZwKgcNMQNLpmb6RtKw_wpwZ15Bz";
-const supabaseClient = window.supabase.createClient(
+const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
 
-/*
-Required table: public.attendance
+let user = null;
+let pendingField = null;
+let pendingTime = null;
+let countdown = null;
+let seconds = 5;
+let locationData = {};
 
-Expected columns:
-id
-user_id
-attendance_date
-time_in
-lunch_break_out
-lunch_break_in
-coffee_break_out
-coffee_break_in
-time_out
-latitude
-longitude
-
-The user_id column should reference the authenticated user's ID.
-*/
-
-const attendanceFields = {
-  time_in: "IN",
-  lunch_break_out: "LB OUT",
-  lunch_break_in: "LB IN",
-  coffee_break_out: "CB OUT",
-  coffee_break_in: "CB IN",
-  time_out: "OUT"
+const fieldMap = {
+  time_in: "time_in",
+  lunch_break_out: "lbo",
+  lunch_break_in: "lbi",
+  coffee_break_out: "cbo",
+  coffee_break_in: "cbi",
+  time_out: "time_out"
 };
 
-const manualSwitch = document.getElementById("manualSwitch");
-const automaticPanel = document.getElementById("automaticPanel");
-const manualPanel = document.getElementById("manualPanel");
-const countdownNotice = document.getElementById("countdownNotice");
-const cancelButton = document.getElementById("cancelButton");
-const pageStatus = document.getElementById("pageStatus");
-const manualStatus = document.getElementById("manualStatus");
-
-let currentUser = null;
-let pendingTimer = null;
-let pendingAction = null;
-let countdownInterval = null;
-
-/* ================================================
-   CLOCK AND DATE
-================================================ */
-
-function getLocalDateString() {
+function getLocalDate() {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+  const year = now\.getFullYear();
+  const month = String(now\.getMonth() + 1).padStart(2, "0");
+  const day = String(now\.getDate()).padStart(2, "0");
+  return \`${year}-${month}-${day}\`;
 }
 
-function getLocalTimeString() {
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
-
-  return `${hours}:${minutes}:${seconds}`;
+function toLocalString(date) {
+  const pad = n => String(n).padStart(2, "0");
+  return \`${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}\`;
 }
 
-function displayTime(value) {
-  if (!value) return "—";
-
-  const parts = String(value).split(":");
-  const hours = Number(parts[0]);
-  const minutes = parts[1] || "00";
-
-  if (Number.isNaN(hours)) return value;
-
-  const suffix = hours >= 12 ? "PM" : "AM";
-  const hour12 = hours % 12 || 12;
-
-  return `${hour12}:${minutes} ${suffix}`;
-}
-
+/\* CLOCK \*/
 function updateClock() {
   const now = new Date();
-
-  document.getElementById("digitalClock").textContent =
-    now.toLocaleTimeString("en-PH", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true
-    });
-
-  document.getElementById("todayDate").textContent =
-    now.toLocaleDateString("en-PH", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
+  document.getElementById("clock").innerText =
+    now\.toLocaleTimeString("en-US", { hour12: false });
+  document.getElementById("date").innerText = now\.toDateString();
 }
-
 updateClock();
 setInterval(updateClock, 1000);
 
-/* ================================================
-   MODE SWITCH
-================================================ */
+/\* AUTH \*/
+(async function init() {
+  const { data, error } = await supabaseClient.auth.getSession();
 
-function updateMode() {
-  const manual = manualSwitch.checked;
-
-  automaticPanel.classList.toggle("hidden", manual);
-  manualPanel.classList.toggle("hidden", !manual);
-
-  document.getElementById("modeTitle").textContent =
-    manual ? "Manual Mode" : "Automatic Mode";
-
-  document.getElementById("modeDescription").textContent =
-    manual
-      ? "Select the attendance action and choose a time manually."
-      : "Uses your current time. GPS is required for Time In and Time Out.";
-
-  const badge = document.getElementById("modeBadge");
-
-  badge.textContent = manual ? "MANUAL MODE" : "AUTOMATIC MODE";
-  badge.classList.toggle("manual", manual);
-
-  if (manual && pendingAction) {
-    cancelPendingAction();
-  }
-}
-
-manualSwitch.addEventListener("change", updateMode);
-
-/* ================================================
-   AUTHENTICATION
-================================================ */
-
-async function getCurrentUser() {
-  const { data, error } = await supabaseClient.auth.getUser();
-
-  if (error || !data.user) {
-    currentUser = null;
-    pageStatus.textContent =
-      "Please log in first before recording attendance.";
-    return null;
+  if (error || !data.session) {
+    location.href = "login.html";
+    return;
   }
 
-  currentUser = data.user;
-  pageStatus.textContent = "";
-  return currentUser;
-}
+  user = data.session.user;
 
-/* ================================================
-   ATTENDANCE DATABASE
-================================================ */
+  const ok = await ensureToday();
+  if (ok) await loadToday();
+})();
 
-async function getTodayAttendance() {
-  if (!currentUser) return null;
+/\* ENSURE TODAY'S ROW EXISTS \*/
+async function ensureToday() {
+  const today = getLocalDate();
 
   const { data, error } = await supabaseClient
     .from("attendance")
-    .select("*")
-    .eq("user_id", currentUser.id)
-    .eq("attendance_date", getLocalDateString())
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("attendance_date", today)
     .maybeSingle();
 
   if (error) {
-    throw error;
+    console.error("Attendance lookup error:", error);
+    alert("Hindi mabasa ang attendance: " + error.message);
+    return false;
   }
 
-  return data;
-}
+  if (data) return true;
 
-async function ensureTodayAttendance() {
-  const existing = await getTodayAttendance();
-
-  if (existing) return existing;
-
-  const { data, error } = await supabaseClient
+  const { error: insertError } = await supabaseClient
     .from("attendance")
     .insert({
-      user_id: currentUser.id,
-      attendance_date: getLocalDateString()
-    })
-    .select()
-    .single();
+      user_id: user.id,
+      attendance_date: today
+    });
 
-  if (error) {
-    /*
-      Another request may have created today's row.
-      Try reading it again before returning the error.
-    */
-    const retry = await getTodayAttendance();
-    if (retry) return retry;
-    throw error;
+  if (insertError) {
+    // If another request already created today's row, verify it.
+    const { data: existing, error: checkError } = await supabaseClient
+      .from("attendance")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("attendance_date", today)
+      .maybeSingle();
+
+    if (checkError || !existing) {
+      console.error("Create attendance error:", insertError);
+      alert("Hindi makagawa ng attendance record: " + insertError.message);
+      return false;
+    }
   }
 
-  return data;
+  return true;
 }
 
-async function saveAttendance(field, timeValue, location = null) {
-  if (!currentUser) {
-    throw new Error("Please log in first.");
-  }
-
-  if (!Object.prototype.hasOwnProperty.call(attendanceFields, field)) {
-    throw new Error("Invalid attendance action.");
-  }
-
-  const row = await ensureTodayAttendance();
-
-  const updateData = {
-    [field]: timeValue
-  };
-
-  if (location) {
-    updateData.latitude = location.latitude;
-    updateData.longitude = location.longitude;
-  }
-
-  const { error } = await supabaseClient
-    .from("attendance")
-    .update(updateData)
-    .eq("id", row.id)
-    .eq("user_id", currentUser.id)
-    .eq("attendance_date", getLocalDateString());
-
-  if (error) throw error;
-
-  await loadAttendance();
-}
-
-/* ================================================
-   AUTOMATIC MODE: GPS AND 5-SECOND COUNTDOWN
-================================================ */
-
+/\* GET GPS LOCATION \*/
 function getLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error("Geolocation is not supported by this device."));
+      reject(new Error("Hindi supported ang GPS sa browser na ito."));
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      position => {
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        });
-      },
-      error => {
-        let message = "Unable to get your location.";
-
-        if (error.code === 1) {
-          message = "Location permission denied. Please allow location access.";
-        } else if (error.code === 2) {
-          message = "Your location is currently unavailable.";
-        } else if (error.code === 3) {
-          message = "Location request timed out. Please try again.";
-        }
-
-        reject(new Error(message));
-      },
+      pos => resolve({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude
+      }),
+      err => reject(new Error(err.message)),
       {
         enableHighAccuracy: true,
         timeout: 15000,
@@ -664,259 +471,164 @@ function getLocation() {
   });
 }
 
-function cancelPendingAction() {
-  if (pendingTimer) {
-    clearTimeout(pendingTimer);
-    pendingTimer = null;
-  }
-
-  if (countdownInterval) {
-    clearInterval(countdownInterval);
-    countdownInterval = null;
-  }
-
-  pendingAction = null;
-  cancelButton.classList.add("hidden");
-  countdownNotice.textContent = "Attendance save cancelled.";
-}
-
-async function startAutomaticAttendance(field) {
-  if (manualSwitch.checked) return;
-
-  if (pendingAction) {
-    countdownNotice.textContent =
-      "Please finish or cancel the current attendance action first.";
+/\* RECORD BUTTON \*/
+async function record(field, locationRequired) {
+  if (!user) {
+    alert("Hindi pa naka-login. Mag-login muna.");
     return;
   }
 
-  try {
-    if (!currentUser) {
-      await getCurrentUser();
-    }
-
-    if (!currentUser) return;
-
-    let location = null;
-
-    if (field === "time_in" || field === "time_out") {
-      countdownNotice.textContent = "Getting your GPS location...";
-      location = await getLocation();
-    }
-
-    if (manualSwitch.checked) return;
-
-    const selectedTime = getLocalTimeString();
-
-    pendingAction = {
-      field,
-      time: selectedTime,
-      location
-    };
-
-    let seconds = 5;
-    cancelButton.classList.remove("hidden");
-
-    countdownNotice.textContent =
-      `${attendanceFields[field]}: ${displayTime(selectedTime)}. Saving in ${seconds} seconds...`;
-
-    countdownInterval = setInterval(() => {
-      seconds--;
-
-      if (seconds > 0) {
-        countdownNotice.textContent =
-          `${attendanceFields[field]}: ${displayTime(selectedTime)}. Saving in ${seconds} seconds...`;
-      }
-    }, 1000);
-
-    pendingTimer = setTimeout(async () => {
-      const action = pendingAction;
-
-      if (!action) return;
-
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-      }
-
-      pendingTimer = null;
-      pendingAction = null;
-      cancelButton.classList.add("hidden");
-
-      try {
-        await saveAttendance(
-          action.field,
-          action.time,
-          action.location
-        );
-
-        countdownNotice.textContent =
-          `${attendanceFields[action.field]} saved at ${displayTime(action.time)}.`;
-
-      } catch (error) {
-        countdownNotice.textContent = "Error: " + error.message;
-      }
-    }, 5000);
-
-  } catch (error) {
-    countdownNotice.textContent = error.message;
+  if (countdown) {
+    alert("May pending attendance action pa. I-cancel o hintaying matapos.");
+    return;
   }
-}
 
-document.querySelectorAll("[data-field]").forEach(button => {
-  button.addEventListener("click", () => {
-    startAutomaticAttendance(button.dataset.field);
-  });
-});
+  pendingField = field;
+  pendingTime = new Date();
+  locationData = {};
 
-cancelButton.addEventListener("click", cancelPendingAction);
-
-/* ================================================
-   MANUAL MODE: SELECT TIME AND SAVE
-================================================ */
-
-document.getElementById("manualTime").value =
-  getLocalTimeString().slice(0, 5);
-
-document.getElementById("saveManualButton").addEventListener(
-  "click",
-  async () => {
-    if (!manualSwitch.checked) {
-      manualStatus.textContent =
-        "Switch to Manual Mode before saving a manual entry.";
-      return;
-    }
-
-    const field = document.getElementById("manualField").value;
-    const time = document.getElementById("manualTime").value;
-
-    if (!time) {
-      manualStatus.textContent = "Please select a time.";
-      return;
-    }
-
-    const saveButton = document.getElementById("saveManualButton");
-    saveButton.disabled = true;
-    manualStatus.textContent = "Saving manual attendance...";
-
+  if (locationRequired) {
     try {
-      if (!currentUser) {
-        await getCurrentUser();
-      }
-
-      if (!currentUser) {
-        throw new Error("Please log in first.");
-      }
-
-      /*
-        HTML time input returns HH:MM.
-        Save it as HH:MM:00 for a PostgreSQL TIME column.
-      */
-      const timeValue = `${time}:00`;
-
-      await saveAttendance(field, timeValue);
-
-      manualStatus.textContent =
-        `${attendanceFields[field]} saved at ${displayTime(timeValue)}.`;
-
-    } catch (error) {
-      manualStatus.textContent = "Error: " + error.message;
-    } finally {
-      saveButton.disabled = false;
+      locationData = await getLocation();
+    } catch (err) {
+      pendingField = null;
+      pendingTime = null;
+      alert("Kailangan ang location para sa Time In/Out.\n" + err.message);
+      return;
     }
   }
-);
 
-/* ================================================
-   LOAD AND DISPLAY TODAY'S ATTENDANCE
-================================================ */
+  startCountdown(field);
+}
 
-async function loadAttendance() {
-  const tbody = document.getElementById("attendanceTable");
+/\* COUNTDOWN \*/
+function startCountdown(field) {
+  document.getElementById(fieldMap[field]).innerText =
+    pendingTime.toLocaleTimeString("en-US", { hour12: false });
 
-  if (!currentUser) {
-    tbody.innerHTML =
-      '<tr><td colspan="2">Please log in to view attendance.</td></tr>';
+  seconds = 5;
+  document.getElementById("count").innerText = seconds;
+  document.getElementById("cancelBox").style.display = "block";
+
+  countdown = setInterval(async () => {
+    seconds--;
+    document.getElementById("count").innerText = seconds;
+
+    if (seconds <= 0) {
+      clearInterval(countdown);
+      countdown = null;
+      document.getElementById("cancelBox").style.display = "none";
+      await save();
+    }
+  }, 1000);
+}
+
+/\* SAVE ATTENDANCE \*/
+async function save() {
+  if (!pendingField || !pendingTime || !user) return;
+
+  const field = pendingField;
+  const today = getLocalDate();
+
+  const payload = {
+    [field]: toLocalString(pendingTime)
+  };
+
+  if (field === "time_in" || field === "time_out") {
+    payload.latitude = locationData.lat;
+    payload.longitude = locationData.lng;
+  }
+
+  // Update today's existing row.
+  const { data, error } = await supabaseClient
+    .from("attendance")
+    .update(payload)
+    .eq("user_id", user.id)
+    .eq("attendance_date", today)
+    .select("id");
+
+  if (error) {
+    console.error("Attendance save error:", error);
+    alert("Save failed: " + error.message);
+    document.getElementById(fieldMap[field]).innerText = "--";
+    pendingField = null;
+    pendingTime = null;
+    locationData = {};
     return;
   }
 
-  try {
-    const row = await getTodayAttendance();
-
-    if (!row) {
-      tbody.innerHTML =
-        '<tr><td colspan="2">No attendance recorded today.</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = "";
-
-    for (const [field, label] of Object.entries(attendanceFields)) {
-      const tr = document.createElement("tr");
-      const nameCell = document.createElement("td");
-      const timeCell = document.createElement("td");
-
-      nameCell.textContent = label;
-      timeCell.textContent = row[field]
-        ? displayTime(row[field])
-        : "—";
-
-      tr.appendChild(nameCell);
-      tr.appendChild(timeCell);
-      tbody.appendChild(tr);
-    }
-
-  } catch (error) {
-    tbody.innerHTML =
-      '<tr><td colspan="2">Could not load attendance.</td></tr>';
-
-    pageStatus.textContent = "Error: " + error.message;
+  if (!data || data.length === 0) {
+    alert(
+      "Walang attendance row na na-update. " +
+      "Tingnan ang attendance table, user_id, petsa, at RLS policies."
+    );
+    document.getElementById(fieldMap[field]).innerText = "--";
+    pendingField = null;
+    pendingTime = null;
+    locationData = {};
+    return;
   }
+
+  await loadToday();
+  alert("Attendance saved successfully!");
+
+  pendingField = null;
+  pendingTime = null;
+  locationData = {};
 }
 
-/* ================================================
-   NAVIGATION BUTTONS
-================================================ */
+/\* CANCEL \*/
+function cancelSave() {
+  if (countdown) clearInterval(countdown);
+  countdown = null;
 
-document.getElementById("refreshButton").addEventListener(
-  "click",
-  async () => {
-    await getCurrentUser();
-    await loadAttendance();
+  if (pendingField) {
+    document.getElementById(fieldMap[pendingField]).innerText = "--";
   }
-);
 
-document.getElementById("viewAttendanceButton").addEventListener(
-  "click",
-  () => {
-    window.location.href = "view_attendance.html";
-  }
-);
-
-document.getElementById("selloutButton").addEventListener(
-  "click",
-  () => {
-    window.location.href = "sellout_inventory.html";
-  }
-);
-
-/* ================================================
-   INITIALIZE
-================================================ */
-
-async function initialize() {
-  updateMode();
-
-  const user = await getCurrentUser();
-
-  if (user) {
-    await loadAttendance();
-  } else {
-    document.getElementById("attendanceTable").innerHTML =
-      '<tr><td colspan="2">Please log in first.</td></tr>';
-  }
+  pendingField = null;
+  pendingTime = null;
+  locationData = {};
+  document.getElementById("cancelBox").style.display = "none";
 }
 
-initialize();
-</script>
-</body>
-</html>
+/\* LOAD TODAY \*/
+async function loadToday() {
+  const today = getLocalDate();
+
+  const { data, error } = await supabaseClient
+    .from("attendance")
+    .select("\*")
+    .eq("user_id", user.id)
+    .eq("attendance_date", today)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Load attendance error:", error);
+    alert("Hindi ma-load ang attendance: " + error.message);
+    return;
+  }
+
+  if (!data) return;
+
+  Object.keys(fieldMap).forEach(field => {
+    const value = data[field];
+    document.getElementById(fieldMap[field]).innerText = value
+      ? String(value).includes("T")
+        ? String(value).split("T")[1].substring(0, 8)
+        : value
+      : "--";
+  });
+}
+
+/\* LOGOUT \*/
+async function logout() {
+  if (!confirm("Are you sure you want to logout?")) return;
+
+  await supabaseClient.auth.signOut();
+  location.href = "login.html";
+}
+\</script>
+
+\</body>
+\</html>
