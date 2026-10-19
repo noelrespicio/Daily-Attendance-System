@@ -4,7 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register | Daily Time Attendance</title>
+<meta name="description" content="Create your employee account for the Daily Time Attendance System.">
+<title>Create Account | Daily Time Attendance System</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -18,16 +19,110 @@
 
 body {
     min-height: 100vh;
-    min-height: 100dvh;
-    width: 100%;
-    padding: 20px 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     color: #172033;
+    background: #f3f6fc;
+}
+
+.page-hero {
+    padding: 25px max(18px, calc((100% - 1160px) / 2)) 58px;
+    color: #fff;
     background:
-        radial-gradient(circle at top left, #3b82f6 0, transparent 35%),
-        linear-gradient(135deg, #07152e, #163d72);
+        radial-gradient(circle at 8% 0%, #3b82f6 0, transparent 32%),
+        linear-gradient(135deg, #07152e, #163d72 65%, #1d4ed8);
+}
+
+.navbar {
+    max-width: 1160px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: .3px;
+}
+
+.brand-mark {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #60a5fa, #2563eb);
+    font-size: 24px;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    border: 1px solid #ffffff66;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.hero-grid {
+    max-width: 1160px;
+    margin: 48px auto 0;
+    display: grid;
+    grid-template-columns: 1fr .9fr;
+    gap: 44px;
+    align-items: center;
+}
+
+.hero-copy .eyebrow {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 30px;
+    border: 1px solid #ffffff40;
+    background: #ffffff16;
+    color: #dbeafe;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.hero-copy h1 {
+    color: white;
+    font-size: clamp(34px, 4.2vw, 53px);
+    line-height: 1.08;
+    letter-spacing: -1px;
+    margin: 20px 0 17px;
+}
+
+.hero-copy h1 span {
+    color: #93c5fd;
+}
+
+.hero-copy p {
+    max-width: 600px;
+    color: #dbeafe;
+    font-size: 15px;
+    line-height: 1.85;
+}
+
+.hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+.hero-tags span {
+    padding: 8px 10px;
+    border-radius: 9px;
+    background: #ffffff15;
+    border: 1px solid #ffffff2b;
+    color: #eff6ff;
+    font-size: 11px;
 }
 
 .register-container {
@@ -38,6 +133,248 @@ body {
     background: #fff;
     border-radius: 24px;
     box-shadow: 0 25px 70px rgba(0, 0, 0, .30);
+}
+
+.content {
+    max-width: 1160px;
+    margin: -20px auto 0;
+    padding: 0 22px 46px;
+    position: relative;
+}
+
+.quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 13px;
+    margin-bottom: 50px;
+}
+
+.quick-card,
+.feature-card,
+.step-card {
+    background: #fff;
+    border: 1px solid #e5ebf4;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 7px 24px #0f172a08;
+}
+
+.quick-card {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.quick-icon,
+.feature-icon {
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    background: #eaf2ff;
+    font-size: 22px;
+}
+
+.quick-card h3 {
+    font-size: 14px;
+    margin: 2px 0 6px;
+}
+
+.quick-card p,
+.feature-card p,
+.step-card p {
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.75;
+}
+
+.info-section {
+    margin: 0 auto 52px;
+}
+
+.section-heading {
+    max-width: 730px;
+    text-align: center;
+    margin: 0 auto 26px;
+}
+
+.kicker {
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.section-heading h2 {
+    margin: 9px 0 10px;
+    font-size: clamp(25px, 3vw, 35px);
+    letter-spacing: -.5px;
+}
+
+.section-heading p {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.feature-card {
+    transition: transform .2s, box-shadow .2s;
+}
+
+.feature-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px #0f172a10;
+}
+
+.feature-icon {
+    margin-bottom: 14px;
+}
+
+.feature-card h3 {
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.benefit-panel {
+    display: grid;
+    grid-template-columns: .9fr 1.1fr;
+    gap: 25px;
+    padding: 28px;
+    border-radius: 21px;
+    border: 1px solid #dbeafe;
+    background: linear-gradient(135deg, #eaf2ff, #fff);
+}
+
+.benefit-panel h2 {
+    font-size: 26px;
+    line-height: 1.25;
+    margin: 9px 0 12px;
+}
+
+.benefit-panel p {
+    color: #52637a;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.benefit-list {
+    list-style: none;
+    display: grid;
+    gap: 12px;
+}
+
+.benefit-list li {
+    display: flex;
+    gap: 10px;
+    color: #334155;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.tick {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #15803d;
+    background: #dcfce7;
+    font-weight: 900;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 13px;
+}
+
+.step-number {
+    display: inline-block;
+    padding: 7px 9px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    background: #eaf2ff;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.step-card h3 {
+    font-size: 14px;
+    margin-bottom: 7px;
+}
+
+.privacy-note {
+    padding: 21px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+}
+
+.privacy-note h3 {
+    font-size: 15px;
+    margin-bottom: 9px;
+}
+
+.privacy-note p,
+.privacy-note li {
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.privacy-note ul {
+    padding-left: 18px;
+    margin-top: 7px;
+}
+
+.cta {
+    text-align: center;
+    padding: 30px 18px;
+    border-radius: 19px;
+    background: linear-gradient(130deg, #0b1f3a, #1d4ed8);
+    color: white;
+}
+
+.cta h2 {
+    font-size: 25px;
+    margin-bottom: 8px;
+}
+
+.cta p {
+    color: #dbeafe;
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+.cta a {
+    display: inline-block;
+    padding: 11px 16px;
+    border-radius: 10px;
+    background: white;
+    color: #1d4ed8;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.page-footer {
+    padding: 23px 15px;
+    text-align: center;
+    color: #8492a6;
+    font-size: 11px;
+    line-height: 1.8;
 }
 
 .company-button {
@@ -250,29 +587,103 @@ input::placeholder {
     font-size: 11px;
 }
 
-@media (max-width: 480px) {
-    body {
-        padding: 16px 12px;
-        align-items: center;
+@media (max-width: 850px) {
+    .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        margin-top: 38px;
     }
 
     .register-container {
-        max-width: 100%;
-        padding: 23px 18px;
-        border-radius: 21px;
+        max-width: 620px;
     }
 
-    h1 {
-        font-size: 24px;
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .form-row {
-        gap: 10px;
+    .steps-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    input {
-        padding: 11px 10px;
-        font-size: 12px;
+    .benefit-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 540px) {
+    .page-hero {
+        padding: 17px 14px 44px;
+    }
+
+    .brand {
+        font-size: 11px;
+    }
+
+    .brand-mark {
+        width: 39px;
+        height: 39px;
+    }
+
+    .nav-link {
+        padding: 8px 9px;
+        font-size: 10px;
+    }
+
+    .hero-grid {
+        margin-top: 31px;
+        gap: 24px;
+    }
+
+    .hero-copy h1 {
+        font-size: 35px;
+    }
+
+    .hero-copy p {
+        font-size: 13px;
+    }
+
+    .register-container {
+        padding: 22px 17px;
+        border-radius: 20px;
+    }
+
+    .content {
+        padding: 0 13px 30px;
+    }
+
+    .quick-grid,
+    .features-grid,
+    .steps-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-grid {
+        margin-bottom: 40px;
+    }
+
+    .quick-card {
+        padding: 15px;
+    }
+
+    .info-section {
+        margin-bottom: 40px;
+    }
+
+    .section-heading h2 {
+        font-size: 26px;
+    }
+
+    .benefit-panel {
+        padding: 21px 17px;
+    }
+
+    .benefit-panel h2 {
+        font-size: 23px;
+    }
+
+    .company-actions {
+        gap: 7px;
     }
 }
 
@@ -283,7 +694,7 @@ input::placeholder {
     }
 
     .register-container {
-        padding: 20px 16px;
+        padding: 20px 15px;
     }
 }
 </style>
@@ -291,10 +702,34 @@ input::placeholder {
 
 <body>
 
-<main class="register-container">
+<header class="page-hero" id="top">
+  <nav class="navbar">
+    <div class="brand">
+      <div class="brand-mark">⏱</div>
+      <span>DAILY TIME ATTENDANCE</span>
+    </div>
+    <a class="nav-link" href="#about">Explore the System ↓</a>
+  </nav>
 
-    <button type="button" id="registeredCompanyBtn"
-            class="company-button">
+  <div class="hero-grid">
+    <section class="hero-copy">
+      <span class="eyebrow">✦ YOUR WORKDAY, BETTER ORGANIZED</span>
+      <h1>Start your workday<br><span>the smarter way.</span></h1>
+      <p>
+        Create your employee account and access a digital attendance
+        experience designed to help keep daily time records, breaks, and
+        attendance history organized in one convenient place.
+      </p>
+      <div class="hero-tags">
+        <span>✓ Daily time records</span>
+        <span>✓ Break tracking</span>
+        <span>✓ Attendance history</span>
+      </div>
+    </section>
+
+    <main class="register-container">
+
+    <button type="button" id="registeredCompanyBtn" class="company-button">
         🏢 &nbsp; Registered Company
     </button>
 
@@ -332,7 +767,6 @@ input::placeholder {
          role="status" aria-live="polite"></div>
 
     <form id="registerForm">
-
         <div class="form-row">
             <div class="form-group">
                 <label for="firstname">First Name</label>
@@ -386,8 +820,7 @@ input::placeholder {
             </div>
         </div>
 
-        <button type="submit" id="registerButton"
-                class="btn-register">
+        <button type="submit" id="registerButton" class="btn-register">
             Create Account
         </button>
     </form>
@@ -397,11 +830,164 @@ input::placeholder {
         <a href="login.html">Login here</a>
     </div>
 
-    <div class="footer">
-        Daily Time Attendance System
+    <div class="footer">Daily Time Attendance System</div>
+    </main>
+  </div>
+</header>
+
+<main class="content" id="about">
+  <section class="quick-grid">
+    <article class="quick-card">
+      <div class="quick-icon">⏰</div>
+      <div>
+        <h3>Time In / Time Out</h3>
+        <p>Keep your daily work start and end entries organized.</p>
+      </div>
+    </article>
+
+    <article class="quick-card">
+      <div class="quick-icon">☕</div>
+      <div>
+        <h3>Break Tracking</h3>
+        <p>Record lunch and coffee breaks when the feature is available.</p>
+      </div>
+    </article>
+
+    <article class="quick-card">
+      <div class="quick-icon">📅</div>
+      <div>
+        <h3>Attendance Records</h3>
+        <p>Review recorded time entries and spot missing information.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="info-section">
+    <div class="section-heading">
+      <span class="kicker">About the platform</span>
+      <h2>One place for your daily attendance</h2>
+      <p>
+        The Daily Time Attendance System is a web-based tool intended to
+        make employee attendance easier to record and review. Digital
+        records can reduce reliance on paper logs and help employees keep
+        a clearer picture of their workday.
+      </p>
     </div>
 
+    <div class="features-grid">
+      <article class="feature-card">
+        <div class="feature-icon">🕒</div>
+        <h3>Daily Time Recording</h3>
+        <p>Record the start and end of your workday through the attendance dashboard.</p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">☕</div>
+        <h3>Lunch and Coffee Breaks</h3>
+        <p>Keep break entries grouped with the rest of your daily attendance record.</p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">🔁</div>
+        <h3>Automatic and Manual Mode</h3>
+        <p>If enabled in the dashboard, use the normal time-recording flow or select a time manually when authorized.</p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Attendance History</h3>
+        <p>Look back at saved attendance details and follow your workplace process to correct discrepancies.</p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">📍</div>
+        <h3>Location Support</h3>
+        <p>Some actions may request GPS permission. Location accuracy depends on the device and surroundings.</p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h3>Related Work Tools</h3>
+        <p>The broader app may also link to sellout or inventory pages, depending on your dashboard setup.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="info-section benefit-panel">
+    <div>
+      <span class="kicker">Everyday employee benefits</span>
+      <h2>Designed to make work routines easier</h2>
+      <p>
+        A consistent attendance routine helps employees stay organized
+        throughout the day. The system supports record keeping; it does
+        not replace company rules or supervisor verification.
+      </p>
+    </div>
+
+    <ul class="benefit-list">
+      <li><span class="tick">✓</span><span><strong>Saves time:</strong> enter attendance digitally instead of relying only on handwritten logs.</span></li>
+      <li><span class="tick">✓</span><span><strong>Improves organization:</strong> keep time-in, break, and time-out details together.</span></li>
+      <li><span class="tick">✓</span><span><strong>Helps self-checking:</strong> review saved entries and notice missing records sooner.</span></li>
+      <li><span class="tick">✓</span><span><strong>Supports daily planning:</strong> follow a clearer routine for starting work and taking breaks.</span></li>
+      <li><span class="tick">✓</span><span><strong>Convenient access:</strong> use a compatible phone, tablet, or computer with internet access.</span></li>
+    </ul>
+  </section>
+
+  <section class="info-section">
+    <div class="section-heading">
+      <span class="kicker">Getting started</span>
+      <h2>How to use the system</h2>
+      <p>Follow your company's attendance policies and use the options available in your account.</p>
+    </div>
+
+    <div class="steps-grid">
+      <article class="step-card">
+        <span class="step-number">STEP 01</span>
+        <h3>Create an account</h3>
+        <p>Fill in your name, email, employee ID, branch, and password.</p>
+      </article>
+
+      <article class="step-card">
+        <span class="step-number">STEP 02</span>
+        <h3>Sign in</h3>
+        <p>Use your registered email and password to access your dashboard.</p>
+      </article>
+
+      <article class="step-card">
+        <span class="step-number">STEP 03</span>
+        <h3>Record attendance</h3>
+        <p>Select the correct attendance action and allow permissions if required.</p>
+      </article>
+
+      <article class="step-card">
+        <span class="step-number">STEP 04</span>
+        <h3>Review records</h3>
+        <p>Check saved entries and report errors using your workplace process.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="info-section privacy-note">
+    <h3>Privacy and responsible use</h3>
+    <p>Attendance records may contain personal work information. Keep your password private and sign out when using a shared device.</p>
+    <ul>
+      <li>Enter manual times only when your workplace permits it.</li>
+      <li>Check the date and attendance action before saving.</li>
+      <li>GPS or camera functions require compatible hardware and browser permissions.</li>
+      <li>Available features depend on the deployed dashboard and organization settings.</li>
+    </ul>
+  </section>
+
+  <section class="cta">
+    <h2>Ready to get started?</h2>
+    <p>Create your account above and take the first step toward a more organized workday.</p>
+    <a href="#top">Back to Registration ↑</a>
+  </section>
 </main>
+
+<footer class="page-footer">
+  Daily Time Attendance System · Supporting a more organized workday.
+</footer>
 
 <script>
 const SUPABASE_URL = "https://oaorsmayfosxrfahkxgi.supabase.co";
@@ -477,11 +1063,6 @@ registerForm.addEventListener("submit", async (e) => {
             return;
         }
 
-        /*
-         * Supabase may return an existing user without a session
-         * when signup is repeated. Avoid treating that as a successful
-         * profile registration.
-         */
         if (!data.session) {
             showError(
                 "Account signup was received, but no active session was created. " +
@@ -513,7 +1094,6 @@ registerForm.addEventListener("submit", async (e) => {
         }
 
         showSuccess("Registration successful! Redirecting to login...");
-
         registerButton.textContent = "Registration Successful";
 
         setTimeout(() => {
@@ -556,8 +1136,7 @@ document.getElementById("companySubmit").addEventListener("click", () => {
     const password = companyPassword.value;
 
     /*
-     * IMPORTANT:
-     * This client-side password check is not secure.
+     * This browser-side password check is not secure.
      * Move verification to a server-side function before production.
      */
     if (password === "adminattendance1298") {
