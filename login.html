@@ -1,402 +1,1200 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Daily Time Attendance</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1f3a">
+<meta name="description" content="Daily Time Attendance System helps employees record attendance, track breaks, and review attendance records in one convenient place.">
+<title>Daily Time Attendance System | Login</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Segoe UI", Arial, sans-serif;
-        }
+<style>
+:root {
+  --navy: #081a33;
+  --blue: #2563eb;
+  --blue2: #3b82f6;
+  --ink: #15243b;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --light: #f5f8ff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
-    min-height: 100vh;
-    min-height: 100dvh;
-    width: 100%;
-    margin: 0;
-    padding: 16pxx 16px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background:
-        radial-gradient(circle at top left, #3b82f6 0, transparent 35%),
-        linear-gradient(135deg, #07152e, #163d72);
-
-    color: #172033;
+  min-height: 100vh;
+  background: #f3f6fc;
+  color: var(--ink);
 }
+
+a {
+  color: inherit;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 0%, #275ca9 0, transparent 32%),
+    linear-gradient(130deg, #07152b, #103968 62%, #1d4ed8);
+  color: white;
+  padding: 26px max(22px, calc((100% - 1160px) / 2)) 64px;
+}
+
+.topbar {
+  max-width: 1160px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+.brand-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #60a5fa, #2563eb);
+  font-size: 25px;
+  box-shadow: 0 8px 24px #0003;
+}
+
+.top-link {
+  color: white;
+  text-decoration: none;
+  border: 1px solid #ffffff66;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hero-content {
+  max-width: 1160px;
+  margin: 55px auto 0;
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 54px;
+  align-items: center;
+}
+
+.eyebrow {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  background: #ffffff18;
+  border: 1px solid #ffffff35;
+  padding: 8px 12px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+
+.hero h1 {
+  font-size: clamp(34px, 4.5vw, 56px);
+  line-height: 1.08;
+  letter-spacing: -1.3px;
+  margin: 22px 0 18px;
+  max-width: 660px;
+}
+
+.hero h1 span {
+  color: #93c5fd;
+}
+
+.hero-copy {
+  max-width: 610px;
+  color: #dbeafe;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.hero-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.hero-point {
+  font-size: 12px;
+  color: #eff6ff;
+  background: #ffffff12;
+  border: 1px solid #ffffff2b;
+  padding: 9px 11px;
+  border-radius: 9px;
+}
+
+/* LOGIN */
 
 .login-container {
-    width: 100%;
-    max-width: 460px;
-    margin: auto;
-    padding: 36px 28px;
-
-    background: #ffffff;
-    border-radius: 24px;
-
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 440px;
+  justify-self: end;
+  padding: 32px;
+  background: white;
+  color: var(--ink);
+  border-radius: 22px;
+  box-shadow: 0 25px 75px #0004;
 }
 
-@media (max-width: 480px) {
-    body {
-        padding: 16px;
-    }
-
-    .login-container {
-        width: 100%;
-        max-width: 460px;
-        padding: 34px 24px;
-        margin: auto;
-        border-radius: 22px;
-    }
+.login-logo {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  color: white;
+  font-size: 28px;
+  background: linear-gradient(135deg, var(--blue2), #1d4ed8);
+  box-shadow: 0 8px 20px #2563eb35;
 }
 
-        .logo {
-            width: 66px;
-            height: 66px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            border-radius: 20px;
-            color: white;
-            font-size: 30px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
-        }
+.login-container h2 {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 7px;
+  color: #14213d;
+}
 
-        h1 {
-            text-align: center;
-            font-size: 27px;
-            color: #14213d;
-            margin-bottom: 8px;
-        }
+.login-subtitle {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
 
-        .subtitle {
-            text-align: center;
-            color: #718096;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 28px;
-        }
+.form-group {
+  margin-bottom: 17px;
+}
 
-        .form-group {
-            margin-bottom: 19px;
-        }
+label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #334155;
-        }
+.input-wrap {
+  position: relative;
+}
 
-        .input-wrap {
-            position: relative;
-        }
+.input-wrap span {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #8492a6;
+}
 
-        .input-wrap span {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 17px;
-            color: #8492a6;
-        }
+input {
+  width: 100%;
+  padding: 13px 13px 13px 41px;
+  border: 1px solid #dce3ed;
+  border-radius: 11px;
+  background: #f8fafc;
+  font-size: 14px;
+  color: #172033;
+  outline: none;
+  transition: .2s;
+}
 
-        input {
-            width: 100%;
-            padding: 14px 14px 14px 43px;
-            border: 1px solid #dce3ed;
-            border-radius: 12px;
-            background: #f8fafc;
-            font-size: 14px;
-            color: #172033;
-            outline: none;
-            transition: 0.2s;
-        }
+input:focus {
+  border-color: var(--blue);
+  background: white;
+  box-shadow: 0 0 0 3px #2563eb1f;
+}
 
-        input:focus {
-            border-color: #2563eb;
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-        }
+.error-message,
+.success-message {
+  display: none;
+  padding: 11px 13px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
 
-        .error-message {
-            display: none;
-            padding: 12px 14px;
-            margin-bottom: 18px;
-            border-radius: 10px;
-            background: #fff1f2;
-            border: 1px solid #fecdd3;
-            color: #be123c;
-            font-size: 13px;
-            line-height: 1.5;
-        }
+.error-message {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+}
 
-        .error-message.show {
-            display: block;
-        }
+.success-message {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+}
 
-        .success-message {
-            display: none;
-            padding: 12px 14px;
-            margin-bottom: 18px;
-            border-radius: 10px;
-            background: #ecfdf5;
-            border: 1px solid #a7f3d0;
-            color: #047857;
-            font-size: 13px;
-        }
+.error-message.show,
+.success-message.show {
+  display: block;
+}
 
-        .success-message.show {
-            display: block;
-        }
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 18px #2563eb30;
+  transition: .2s;
+}
 
-        .btn-login {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
-            transition: 0.2s;
-        }
+.btn-login:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 11px 24px #2563eb40;
+}
 
-        .btn-login:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 11px 24px rgba(37, 99, 235, 0.3);
-        }
+.btn-login:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+  transform: none;
+}
 
-        .btn-login:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
+.register-link {
+  margin-top: 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
 
-        .register-link {
-            margin-top: 24px;
-            text-align: center;
-            color: #718096;
-            font-size: 13px;
-        }
+.register-link a {
+  color: var(--blue);
+  font-weight: 800;
+  text-decoration: none;
+}
 
-        .register-link a {
-            color: #2563eb;
-            font-weight: 700;
-            text-decoration: none;
-        }
+.register-link a:hover {
+  text-decoration: underline;
+}
 
-        .register-link a:hover {
-            text-decoration: underline;
-        }
+.login-foot {
+  text-align: center;
+  margin-top: 20px;
+  color: #94a3b8;
+  font-size: 11px;
+}
 
-        .footer {
-            text-align: center;
-            margin-top: 25px;
-            color: #94a3b8;
-            font-size: 11px;
-        }
+/* MAIN CONTENT */
 
-        @media (max-width: 420px) {
-            .login-container {
-                padding: 30px 22px;
-                border-radius: 20px;
-            }
+main.content {
+  max-width: 1160px;
+  margin: -22px auto 0;
+  padding: 0 22px 46px;
+  position: relative;
+}
 
-            h1 {
-                font-size: 25px;
-            }
-        }
-    </style>
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 54px;
+}
+
+.stat {
+  background: white;
+  border: 1px solid #e8edf6;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 25px #0f172a08;
+}
+
+.stat-icon {
+  font-size: 23px;
+  margin-bottom: 10px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+.stat p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.section {
+  margin: 0 auto 56px;
+}
+
+.section-heading {
+  text-align: center;
+  max-width: 730px;
+  margin: 0 auto 28px;
+}
+
+.section-kicker {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.section-heading h2 {
+  font-size: clamp(25px, 3vw, 36px);
+  margin: 9px 0 11px;
+  letter-spacing: -.5px;
+}
+
+.section-heading p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.feature {
+  background: white;
+  border: 1px solid #e6ebf4;
+  border-radius: 17px;
+  padding: 23px;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.feature:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px #0f172a0d;
+}
+
+.feature-icon {
+  width: 47px;
+  height: 47px;
+  display: grid;
+  place-items: center;
+  background: #eaf2ff;
+  border-radius: 14px;
+  font-size: 23px;
+  margin-bottom: 15px;
+}
+
+.feature h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.feature p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+/* EMPLOYEE BENEFITS */
+
+.benefit-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  align-items: center;
+  background: linear-gradient(135deg, #e8f1ff, #f8fbff);
+  border: 1px solid #dbeafe;
+  border-radius: 22px;
+  padding: 30px;
+}
+
+.benefit-panel h2 {
+  font-size: 26px;
+  line-height: 1.25;
+  margin: 9px 0 12px;
+}
+
+.benefit-panel > div > p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #52637a;
+}
+
+.benefit-list {
+  list-style: none;
+  display: grid;
+  gap: 13px;
+}
+
+.benefit-list li {
+  display: flex;
+  gap: 11px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #334155;
+}
+
+.check {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 900;
+}
+
+/* HOW TO USE */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.step {
+  background: white;
+  border: 1px solid #e6ebf4;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.step-number {
+  font-size: 12px;
+  font-weight: 900;
+  color: #2563eb;
+  background: #eaf2ff;
+  border-radius: 8px;
+  padding: 7px 9px;
+  display: inline-block;
+  margin-bottom: 13px;
+}
+
+.step h3 {
+  font-size: 15px;
+  margin-bottom: 7px;
+}
+
+.step p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.notice-panel {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.notice-panel h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.notice-panel p,
+.notice-panel li {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.notice-panel ul {
+  padding-left: 19px;
+  margin-top: 8px;
+}
+
+.cta {
+  text-align: center;
+  padding: 34px 20px;
+  background: linear-gradient(130deg, #0b1f3a, #1d4ed8);
+  border-radius: 20px;
+  color: white;
+}
+
+.cta h2 {
+  font-size: 26px;
+  margin-bottom: 9px;
+}
+
+.cta p {
+  color: #dbeafe;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.cta a {
+  display: inline-block;
+  background: white;
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 12px 18px;
+  border-radius: 10px;
+}
+
+footer {
+  text-align: center;
+  padding: 22px;
+  color: #8492a6;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* RESPONSIVE DESIGN */
+
+@media (max-width: 850px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-top: 42px;
+  }
+
+  .hero-copy {
+    max-width: 700px;
+  }
+
+  .login-container {
+    justify-self: start;
+    max-width: 560px;
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .benefit-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding-bottom: 54px;
+  }
+}
+
+@media (max-width: 540px) {
+  .hero {
+    padding: 18px 17px 48px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .brand {
+    font-size: 13px;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .top-link {
+    font-size: 11px;
+    padding: 9px;
+  }
+
+  .hero-content {
+    margin-top: 35px;
+    gap: 26px;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+  }
+
+  .hero-copy {
+    font-size: 14px;
+  }
+
+  .login-container {
+    padding: 25px 20px;
+    border-radius: 18px;
+  }
+
+  main.content {
+    padding: 0 14px 30px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 42px;
+  }
+
+  .stat {
+    padding: 15px;
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+  }
+
+  .stat-icon {
+    margin: 0;
+  }
+
+  .feature-grid,
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .feature {
+    padding: 19px;
+  }
+
+  .benefit-panel {
+    padding: 22px 18px;
+  }
+
+  .benefit-panel h2 {
+    font-size: 23px;
+  }
+
+  .section {
+    margin-bottom: 42px;
+  }
+
+  .section-heading h2 {
+    font-size: 27px;
+  }
+
+  .cta h2 {
+    font-size: 23px;
+  }
+}
+</style>
 </head>
 
 <body>
-    <main class="login-container">
-        <div class="logo">⏱</div>
 
-        <h1>Welcome Back!</h1>
-        <p class="subtitle">
-            Daily Time Attendance System<br>
-            Sign in to access your account.
+<header class="hero" id="top">
+  <nav class="topbar" aria-label="Main navigation">
+    <div class="brand">
+      <div class="brand-icon">⏱</div>
+      <span>DAILY TIME ATTENDANCE</span>
+    </div>
+
+    <a class="top-link" href="#about">Explore the System ↓</a>
+  </nav>
+
+  <div class="hero-content">
+    <section>
+      <div class="eyebrow">✦ SMARTER WORKDAYS START HERE</div>
+
+      <h1>
+        Your workday,<br>
+        <span>organized in one place.</span>
+      </h1>
+
+      <p class="hero-copy">
+        A convenient digital attendance platform designed to help employees
+        record work time, track breaks, and review their attendance details
+        with less paperwork and a clearer daily routine.
+      </p>
+
+      <div class="hero-points">
+        <span class="hero-point">✓ Simple daily time records</span>
+        <span class="hero-point">✓ Attendance history</span>
+        <span class="hero-point">✓ Automatic or manual mode*</span>
+      </div>
+    </section>
+
+    <!-- LOGIN FORM -->
+
+    <section class="login-container" aria-label="Login form">
+      <div class="login-logo">⏱</div>
+
+      <h2>Welcome Back!</h2>
+
+      <p class="login-subtitle">
+        Sign in securely to access your attendance account and dashboard.
+      </p>
+
+      <div
+        id="errorMessage"
+        class="error-message"
+        role="alert"
+        aria-live="polite">
+      </div>
+
+      <div
+        id="successMessage"
+        class="success-message"
+        role="status"
+        aria-live="polite">
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+
+          <div class="input-wrap">
+            <span>✉</span>
+            <input
+              type="email"
+              id="email"
+              placeholder="Enter your email"
+              autocomplete="username"
+              required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+
+          <div class="input-wrap">
+            <span>🔒</span>
+            <input
+              type="password"
+              id="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginButton">
+          Login to Account
+        </button>
+      </form>
+
+      <div class="register-link">
+        Don't have an account?
+        <a href="register.html">Create one</a>
+      </div>
+
+      <div class="login-foot">
+        Daily Time Attendance System
+      </div>
+    </section>
+  </div>
+</header>
+
+<main class="content">
+
+  <!-- QUICK OVERVIEW -->
+
+  <section class="stats" id="about">
+    <article class="stat">
+      <div class="stat-icon">⏰</div>
+      <div>
+        <strong>Daily time records</strong>
+        <p>Keep work start and end times organized in one place.</p>
+      </div>
+    </article>
+
+    <article class="stat">
+      <div class="stat-icon">☕</div>
+      <div>
+        <strong>Break tracking</strong>
+        <p>Keep lunch and coffee break entries easy to review.</p>
+      </div>
+    </article>
+
+    <article class="stat">
+      <div class="stat-icon">📅</div>
+      <div>
+        <strong>Review your records</strong>
+        <p>Check saved attendance details and look back at your work history.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ABOUT THE SYSTEM -->
+
+  <section class="section">
+    <div class="section-heading">
+      <span class="section-kicker">About the platform</span>
+
+      <h2>What is the Daily Time Attendance System?</h2>
+
+      <p>
+        It is a web-based tool that helps organize employee attendance
+        records digitally. Instead of relying only on handwritten notes
+        or scattered records, employees can use one dashboard to record
+        and review important time entries.
+      </p>
+    </div>
+
+    <div class="feature-grid">
+
+      <article class="feature">
+        <div class="feature-icon">🟢</div>
+        <h3>Time In and Time Out</h3>
+        <p>
+          Record the beginning and end of a workday. When enabled by the
+          system, automatic attendance can use the device's current time
+          and request location access for selected actions.
         </p>
+      </article>
 
-        <div id="errorMessage" class="error-message"
-             role="alert" aria-live="polite"></div>
+      <article class="feature">
+        <div class="feature-icon">☕</div>
+        <h3>Lunch and Coffee Breaks</h3>
+        <p>
+          Record Lunch Break Out/In and Coffee Break Out/In to help keep
+          daily work and break entries clear and consistent.
+        </p>
+      </article>
 
-        <div id="successMessage" class="success-message"
-             role="status" aria-live="polite"></div>
+      <article class="feature">
+        <div class="feature-icon">🔁</div>
+        <h3>Automatic and Manual Modes</h3>
+        <p>
+          If the deployed dashboard includes the mode switch, employees
+          can use the normal time-recording flow or select a time manually
+          when authorized to do so.
+        </p>
+      </article>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <div class="input-wrap">
-                    <span>✉</span>
-                    <input
-                        type="email"
-                        id="email"
-                        placeholder="Enter your email"
-                        autocomplete="username"
-                        required
-                    >
-                </div>
-            </div>
+      <article class="feature">
+        <div class="feature-icon">📋</div>
+        <h3>Attendance History</h3>
+        <p>
+          Review recorded dates and time entries to help check personal
+          attendance details and identify missing entries that may need
+          attention.
+        </p>
+      </article>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div class="input-wrap">
-                    <span>🔒</span>
-                    <input
-                        type="password"
-                        id="password"
-                        placeholder="Enter your password"
-                        autocomplete="current-password"
-                        required
-                    >
-                </div>
-            </div>
+      <article class="feature">
+        <div class="feature-icon">📍</div>
+        <h3>Location Support</h3>
+        <p>
+          For attendance actions configured to use GPS, the browser or
+          device may ask permission to access location. Location accuracy
+          depends on the device and its surroundings.
+        </p>
+      </article>
 
-            <button type="submit" class="btn-login" id="loginButton">
-                Login to Account
-            </button>
-        </form>
+      <article class="feature">
+        <div class="feature-icon">📦</div>
+        <h3>Work Tools in One Place</h3>
+        <p>
+          The broader app may also provide links to sellout or inventory
+          records, helping staff access related work tools without
+          searching through many pages.
+        </p>
+      </article>
 
-        <div class="register-link">
-            Don't have an account?
-            <a href="register.html">Create one</a>
-        </div>
+    </div>
+  </section>
 
-        <div class="footer">
-            Daily Time Attendance System
-        </div>
-    </main>
+  <!-- BENEFITS FOR EMPLOYEES -->
 
-    <script>
-        const SUPABASE_URL =
-            "https://oaorsmayfosxrfahkxgi.supabase.co";
+  <section class="section benefit-panel">
+    <div>
+      <span class="section-kicker">Everyday benefits</span>
 
-        const SUPABASE_KEY =
-            "sb_publishable_Vx0EZwKgcNMQNLpmb6RtKw_wpwZ15Bz";
+      <h2>How can it help employees in daily life?</h2>
 
-        const supabaseClient = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
+      <p>
+        A clear attendance routine can make the workday easier to manage.
+        The system is intended to support better organization—not to
+        replace company policies or supervisor verification.
+      </p>
+    </div>
+
+    <ul class="benefit-list">
+      <li>
+        <span class="check">✓</span>
+        <span>
+          <strong>Saves time:</strong>
+          record attendance digitally instead of depending only on
+          handwritten logs.
+        </span>
+      </li>
+
+      <li>
+        <span class="check">✓</span>
+        <span>
+          <strong>Improves organization:</strong>
+          keep time-in, breaks, and time-out entries together.
+        </span>
+      </li>
+
+      <li>
+        <span class="check">✓</span>
+        <span>
+          <strong>Supports self-checking:</strong>
+          review records and notice missing or incorrect entries earlier.
+        </span>
+      </li>
+
+      <li>
+        <span class="check">✓</span>
+        <span>
+          <strong>Helps daily planning:</strong>
+          make it easier to remember work start, break, and end-of-day
+          routines.
+        </span>
+      </li>
+
+      <li>
+        <span class="check">✓</span>
+        <span>
+          <strong>Reduces paper handling:</strong>
+          digital records can reduce reliance on paper logs, depending
+          on workplace procedures.
+        </span>
+      </li>
+
+      <li>
+        <span class="check">✓</span>
+        <span>
+          <strong>Convenient access:</strong>
+          use a compatible phone, tablet, or computer with an internet
+          connection.
+        </span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- HOW TO USE -->
+
+  <section class="section">
+    <div class="section-heading">
+      <span class="section-kicker">Getting started</span>
+
+      <h2>Simple steps for your workday</h2>
+
+      <p>
+        Follow your company's attendance rules and use the options
+        available in your account.
+      </p>
+    </div>
+
+    <div class="steps">
+      <article class="step">
+        <span class="step-number">STEP 01</span>
+        <h3>Sign in</h3>
+        <p>
+          Use your registered email address and password to open
+          your account.
+        </p>
+      </article>
+
+      <article class="step">
+        <span class="step-number">STEP 02</span>
+        <h3>Open attendance</h3>
+        <p>
+          Go to the attendance dashboard and check the displayed
+          date before recording.
+        </p>
+      </article>
+
+      <article class="step">
+        <span class="step-number">STEP 03</span>
+        <h3>Record your time</h3>
+        <p>
+          Select the correct attendance action. Allow location access
+          if the selected action requires it.
+        </p>
+      </article>
+
+      <article class="step">
+        <span class="step-number">STEP 04</span>
+        <h3>Review your entries</h3>
+        <p>
+          Check your saved time records and report discrepancies
+          through your workplace's normal process.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- PRIVACY AND RESPONSIBLE USE -->
+
+  <section class="section notice-panel">
+    <h3>Privacy, accuracy, and responsible use</h3>
+
+    <p>
+      Attendance records may contain personal work information. Keep
+      your password private, sign out on shared devices, and grant
+      location or camera permissions only when needed for an attendance
+      function.
+    </p>
+
+    <ul>
+      <li>Only enter manual times when your workplace permits it.</li>
+      <li>Check the date and selected action before saving an entry.</li>
+      <li>
+        GPS and camera functions require compatible hardware, browser
+        permissions, and a supported connection.
+      </li>
+      <li>
+        Availability of features depends on the version deployed by
+        your organization and its database settings.
+      </li>
+    </ul>
+  </section>
+
+  <!-- CALL TO ACTION -->
+
+  <section class="cta">
+    <h2>Make each workday more organized.</h2>
+
+    <p>
+      Sign in to access your attendance dashboard and keep your daily
+      time entries in one place.
+    </p>
+
+    <a href="#top">Go to Login ↑</a>
+  </section>
+
+  <footer>
+    Daily Time Attendance System · Designed to support a more organized workday.
+    <br>
+    Use according to your organization's attendance policies.
+  </footer>
+
+</main>
+
+<script>
+const SUPABASE_URL =
+  "https://oaorsmayfosxrfahkxgi.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_Vx0EZwKgcNMQNLpmb6RtKw_wpwZ15Bz";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const loginForm = document.getElementById("loginForm");
+const loginButton = document.getElementById("loginButton");
+const errorMessage = document.getElementById("errorMessage");
+const successMessage = document.getElementById("successMessage");
+
+function showError(message) {
+  errorMessage.textContent = message;
+  errorMessage.classList.add("show");
+  successMessage.classList.remove("show");
+}
+
+function hideMessages() {
+  errorMessage.textContent = "";
+  errorMessage.classList.remove("show");
+
+  successMessage.textContent = "";
+  successMessage.classList.remove("show");
+}
+
+loginForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+  hideMessages();
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  loginButton.disabled = true;
+  loginButton.textContent = "Signing in...";
+
+  try {
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+    if (error) {
+      const message = (error.message || "").toLowerCase();
+
+      if (
+        message.includes("invalid login credentials") ||
+        message.includes("invalid_credentials")
+      ) {
+        showError(
+          "Incorrect email or password. Please check your details and try again."
         );
+      } else if (
+        message.includes("email not confirmed")
+      ) {
+        showError(
+          "Your email has not been verified yet. Please check your account settings or contact your administrator."
+        );
+      } else if (
+        message.includes("too many requests") ||
+        message.includes("rate limit")
+      ) {
+        showError(
+          "Too many login attempts. Please wait a while before trying again."
+        );
+      } else {
+        showError(
+          "Unable to log in right now. " + error.message
+        );
+      }
 
-        const loginForm = document.getElementById("loginForm");
-        const loginButton = document.getElementById("loginButton");
-        const errorMessage = document.getElementById("errorMessage");
-        const successMessage = document.getElementById("successMessage");
+      return;
+    }
 
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.classList.add("show");
-            successMessage.classList.remove("show");
-        }
+    if (!data.session) {
+      showError(
+        "Login could not be completed. Please try again."
+      );
+      return;
+    }
 
-        function hideMessages() {
-            errorMessage.textContent = "";
-            errorMessage.classList.remove("show");
-            successMessage.textContent = "";
-            successMessage.classList.remove("show");
-        }
+    successMessage.textContent =
+      "Login successful! Opening your dashboard...";
 
-        loginForm.addEventListener("submit", async function (e) {
-            e.preventDefault();
-            hideMessages();
+    successMessage.classList.add("show");
+    loginButton.textContent = "Login Successful";
 
-            const email = document.getElementById("email")
-                .value.trim();
-            const password = document.getElementById("password")
-                .value;
+    window.location.href = "dashboard.html";
 
-            loginButton.disabled = true;
-            loginButton.textContent = "Signing in...";
+  } catch (err) {
+    console.error("Login error:", err);
 
-            try {
-                const { data, error } =
-                    await supabaseClient.auth.signInWithPassword({
-                        email: email,
-                        password: password
-                    });
+    showError(
+      "Connection problem. Please check your internet connection and try again."
+    );
 
-                if (error) {
-                    const message = (error.message || "").toLowerCase();
+  } finally {
+    loginButton.disabled = false;
 
-                    if (
-                        message.includes("invalid login credentials") ||
-                        message.includes("invalid_credentials")
-                    ) {
-                        showError(
-                            "Incorrect email or password. Please check your details and try again."
-                        );
-                    } else if (
-                        message.includes("email not confirmed")
-                    ) {
-                        showError(
-                            "Your email has not been verified yet. Please check your account settings or contact your administrator."
-                        );
-                    } else if (
-                        message.includes("too many requests") ||
-                        message.includes("rate limit")
-                    ) {
-                        showError(
-                            "Too many login attempts. Please wait a while before trying again."
-                        );
-                    } else {
-                        showError(
-                            "Unable to log in right now. " +
-                            error.message
-                        );
-                    }
+    if (!successMessage.classList.contains("show")) {
+      loginButton.textContent = "Login to Account";
+    }
+  }
+});
+</script>
 
-                    return;
-                }
-
-                if (!data.session) {
-                    showError(
-                        "Login could not be completed. Please try again."
-                    );
-                    return;
-                }
-
-                successMessage.textContent =
-                    "Login successful! Opening your dashboard...";
-                successMessage.classList.add("show");
-
-                loginButton.textContent = "Login Successful";
-
-                window.location.href = "dashboard.html";
-
-            } catch (err) {
-                console.error("Login error:", err);
-
-                showError(
-                    "Connection problem. Please check your internet connection and try again."
-                );
-            } finally {
-                loginButton.disabled = false;
-
-                if (!successMessage.classList.contains("show")) {
-                    loginButton.textContent = "Login to Account";
-                }
-            }
-        });
-    </script>
 </body>
 </html>
-```
