@@ -4,88 +4,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daily Attendance</title>
+<title>Daily Attendance System</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif}
-body{min-height:100vh;min-height:100dvh;padding:24px 16px;color:#172033;background:radial-gradient(circle at top left,#3b82f6 0,transparent 35%),linear-gradient(135deg,#07152e,#163d72)}
-.container{width:100%;max-width:520px;margin:0 auto;padding:25px;background:#fff;border:1px solid #ffffff4d;border-radius:24px;box-shadow:0 25px 60px #0004}
-.logout-btn{display:block;margin-left:auto;padding:9px 13px;border:0;border-radius:10px;background:#fff1f2;color:#e11d48;font-size:12px;font-weight:700;cursor:pointer}
-h2{text-align:center;margin:15px 0;color:#14213d;font-size:23px}
-.clock{margin:10px 0;padding:22px 10px;text-align:center;font-size:clamp(30px,8vw,42px);font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums;color:#2563eb;background:linear-gradient(135deg,#eff6ff,#f8fafc);border:1px solid #dbeafe;border-radius:18px}
-.date{margin-bottom:22px;text-align:center;color:#64748b;font-size:13px}
-table{width:100%;border-collapse:separate;border-spacing:0;margin:18px 0;overflow:hidden;border:1px solid #e2e8f0;border-radius:12px}
-th,td{padding:12px 8px;text-align:center;font-size:13px;border-bottom:1px solid #e2e8f0;overflow-wrap:anywhere}
-th{color:#334155;background:#f1f5f9;font-weight:700}
-td{color:#475569;background:#fff}
-tr:last-child td{border-bottom:none}
-.buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:20px}
-button{-webkit-tap-highlight-color:transparent}
-.buttons button{min-width:0;padding:14px 8px;border:0;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;font-size:13px;font-weight:700;line-height:1.4;cursor:pointer;box-shadow:0 5px 12px #2563eb29}
-.buttons button:disabled{background:#cbd5e1;color:#64748b;cursor:not-allowed}
-.buttons button:last-child{grid-column:1/-1;background:linear-gradient(135deg,#f59e0b,#d97706)}
-.cancel{display:none;margin-top:15px;padding:15px;text-align:center;background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;color:#9a3412;font-size:13px}
-.cancel button{margin-top:10px;padding:10px 18px;border:0;border-radius:9px;background:#ef4444;color:white;font-weight:700;cursor:pointer}
-.view-btn{width:100%;margin-top:18px;padding:14px;border:0;border-radius:12px;background:linear-gradient(135deg,#10b981,#047857);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif}
+body{min-height:100vh;padding:22px 12px;background:radial-gradient(circle at top left,#3b82f6,transparent 35%),linear-gradient(135deg,#07152e,#163d72);color:#172033}
+.container{max-width:520px;margin:auto;background:white;padding:23px;border-radius:22px;box-shadow:0 20px 55px #0004}
+.logout-row{display:flex;justify-content:flex-end}
+.logout-btn{padding:9px 13px;border:0;border-radius:9px;background:#fff1f2;color:#e11d48;font-weight:700;cursor:pointer}
+h2{text-align:center;font-size:23px;margin:12px 0;color:#14213d}
+.date{text-align:center;color:#64748b;font-size:13px;margin-bottom:15px}
+.clock{padding:22px 8px;text-align:center;background:#eff6ff;border:1px solid #dbeafe;border-radius:16px;color:#2563eb;font-size:clamp(30px,8vw,42px);font-weight:800;font-variant-numeric:tabular-nums}
 .mode-panel{margin:18px 0;padding:16px;border:1px solid #dbeafe;border-radius:16px;background:linear-gradient(135deg,#f8fbff,#eff6ff)}
-.mode-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.mode-copy strong{display:block;color:#172554;font-size:14px;margin-bottom:4px}
-.mode-copy small{display:block;color:#64748b;font-size:12px;line-height:1.45}
-.switch-wrap{display:flex;align-items:center;gap:9px;flex-shrink:0}
-.switch{position:relative;display:inline-block;width:52px;height:29px}
-.switch input{opacity:0;width:0;height:0}
-.switch-slider{position:absolute;cursor:pointer;inset:0;background:#94a3b8;border-radius:30px;transition:.2s}
-.switch-slider:before{content:"";position:absolute;width:21px;height:21px;left:4px;top:4px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 4px #0002}
-.switch input:checked+.switch-slider{background:#2563eb}
-.switch input:checked+.switch-slider:before{transform:translateX(23px)}
-.mode-badge{font-size:11px;font-weight:800;padding:6px 9px;border-radius:20px;background:#dcfce7;color:#166534;white-space:nowrap}
+.mode-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.mode-copy strong{display:block;font-size:14px;color:#172554;margin-bottom:4px}
+.mode-copy small{display:block;font-size:12px;color:#64748b;line-height:1.5}
+.switch-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.mode-badge{font-size:11px;font-weight:800;padding:6px 9px;border-radius:20px;background:#dcfce7;color:#166534}
 .mode-badge.manual{background:#ffedd5;color:#9a3412}
+.switch{position:relative;width:50px;height:28px;display:inline-block}
+.switch input{width:0;height:0;opacity:0}
+.switch-slider{position:absolute;inset:0;background:#94a3b8;border-radius:30px;cursor:pointer;transition:.2s}
+.switch-slider:before{content:"";position:absolute;width:20px;height:20px;left:4px;top:4px;background:white;border-radius:50%;transition:.2s}
+.switch input:checked+.switch-slider{background:#2563eb}
+.switch input:checked+.switch-slider:before{transform:translateX(22px)}
 .manual-panel{display:none;margin-top:14px;padding-top:14px;border-top:1px solid #dbeafe}
 .manual-panel.show{display:block}
-.manual-label{display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:8px}
-.time-selects{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.manual-label{display:block;font-size:12px;font-weight:700;margin-bottom:8px;color:#334155}
+.time-selects{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .time-selects label{font-size:11px;color:#64748b}
-.time-selects select{width:100%;margin-top:5px;padding:11px 7px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#0f172a;font-size:15px;font-weight:700}
-.manual-preview{margin-top:10px;padding:11px;text-align:center;border-radius:10px;background:#fff;color:#1d4ed8;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.time-selects select{width:100%;margin-top:5px;padding:10px 5px;border:1px solid #cbd5e1;border-radius:9px;background:white;font-size:15px;font-weight:700}
+.manual-preview{margin-top:10px;padding:11px;text-align:center;background:white;color:#1d4ed8;border-radius:10px;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
 .manual-note{margin-top:8px;color:#64748b;font-size:11px;line-height:1.5}
-@media(max-width:480px){
-body{padding:16px 12px}
-.container{padding:20px 16px;border-radius:20px}
-h2{font-size:20px}
-.clock{padding:20px 8px}
-th,td{padding:10px 5px;font-size:12px}
-.buttons{gap:9px}
-.buttons button{padding:13px 6px;font-size:12px}
-}
-@media(max-width:350px){
-.container{padding:17px 12px}
-.mode-row{align-items:flex-start;flex-direction:column}
-.switch-wrap{align-self:flex-end}
-.time-selects{gap:6px}
-th,td{font-size:11px;padding:9px 3px}
-}
+.usage-guide{margin:18px 0;border:1px solid #dbeafe;border-radius:16px;overflow:hidden;box-shadow:0 7px 20px #1e40af0c}
+.guide-header{padding:16px;background:linear-gradient(135deg,#172554,#2563eb);color:white}
+.guide-kicker{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#bfdbfe;font-weight:800;margin-bottom:5px}
+.guide-header h3{font-size:17px;margin-bottom:6px}
+.guide-header p{font-size:12px;line-height:1.5;color:#dbeafe}
+.guide-content{padding:12px;display:grid;gap:10px}
+.guide-step{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc}
+.guide-number{width:30px;height:30px;flex:0 0 30px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#dbeafe;color:#1d4ed8;font-weight:800}
+.guide-step.auto .guide-number{background:#dcfce7;color:#166534}
+.guide-step.manual .guide-number{background:#ffedd5;color:#9a3412}
+.guide-step h4{font-size:13px;color:#172554;margin:2px 0 5px}
+.guide-step p{font-size:12px;line-height:1.55;color:#475569}
+.guide-tip{margin:0 12px 12px;padding:11px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;color:#9a3412;font-size:11px;line-height:1.55}
+table{width:100%;border-collapse:separate;border-spacing:0;margin:16px 0;border:1px solid #e2e8f0;border-radius:11px;overflow:hidden}
+th,td{width:33.33%;padding:12px 5px;text-align:center;font-size:12px;border-bottom:1px solid #e2e8f0;overflow-wrap:anywhere}
+th{background:#f1f5f9;color:#334155}
+td{background:white;color:#475569}
+tr:last-child td{border-bottom:none}
+.buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.buttons button{padding:14px 5px;border:0;border-radius:11px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:white;font-size:13px;font-weight:700}
+.buttons button:last-child{grid-column:1/-1;background:linear-gradient(135deg,#f59e0b,#d97706)}
+.cancel{display:none;margin-top:15px;padding:14px;text-align:center;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;color:#9a3412;font-size:13px}
+.cancel button{margin-top:10px;padding:10px 18px;border:0;border-radius:8px;background:#ef4444;color:white;font-weight:700}
+.view-btn{width:100%;margin-top:17px;padding:14px;border:0;border-radius:11px;background:linear-gradient(135deg,#10b981,#047857);color:white;font-size:14px;font-weight:700}
+@media(max-width:370px){.container{padding:15px}.mode-row{align-items:flex-start;flex-direction:column}.switch-wrap{align-self:flex-end}th,td{font-size:11px;padding:10px 3px}}
 </style>
 </head>
 
 <body>
 <div class="container">
-  <button class="logout-btn" onclick="logout()">Logout</button>
+
+  <div class="logout-row">
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
 
   <h2>📋 Daily Attendance</h2>
   <div class="date" id="date"></div>
-  <div class="clock" id="clock"></div>
+  <div class="clock" id="clock">00:00:00</div>
 
-  <!-- ATTENDANCE MODE SWITCH -->
-  <div class="mode-panel">
+  <!-- ATTENDANCE MODE -->
+  <section class="mode-panel">
     <div class="mode-row">
       <div class="mode-copy">
         <strong>Attendance Mode</strong>
-        <small>Automatic uses the current device time. Manual lets you choose the exact time.</small>
+        <small>Choose automatic time or enter a time manually.</small>
       </div>
       <div class="switch-wrap">
         <span id="modeStatus" class="mode-badge">AUTO</span>
-        <label class="switch" aria-label="Switch manual attendance mode">
+        <label class="switch" aria-label="Toggle manual mode">
           <input type="checkbox" id="manualModeToggle" onchange="setManualMode(this.checked)">
           <span class="switch-slider"></span>
         </label>
@@ -107,11 +108,59 @@ th,td{font-size:11px;padding:9px 3px}
       </div>
       <div class="manual-preview" id="manualPreview">00:00:00</div>
       <div class="manual-note">
-        Manual mode changes the saved time for today. Time In/Out still require GPS location, and the 5-second cancel option remains active.
+        The selected time is used for the attendance entry. GPS is still required for Time In and Time Out.
       </div>
     </div>
-  </div>
+  </section>
 
+  <!-- HOW TO USE GUIDE -->
+  <section class="usage-guide">
+    <div class="guide-header">
+      <span class="guide-kicker">Quick guide</span>
+      <h3>How to Use Attendance Mode</h3>
+      <p>Follow these steps before recording your attendance.</p>
+    </div>
+
+    <div class="guide-content">
+      <div class="guide-step auto">
+        <div class="guide-number">1</div>
+        <div>
+          <h4>Automatic Mode — Recommended</h4>
+          <p>Keep the switch <strong>OFF</strong> and check that the label says <strong>AUTO</strong>. Press your desired attendance button. The system uses the current time from your device.</p>
+        </div>
+      </div>
+
+      <div class="guide-step manual">
+        <div class="guide-number">2</div>
+        <div>
+          <h4>Manual Mode — Choose Your Time</h4>
+          <p>Turn the switch <strong>ON</strong> until the label says <strong>MANUAL</strong>. Select the hour, minute, and second. Check the preview, then press the correct attendance button.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-number">3</div>
+        <div>
+          <h4>Confirm or Cancel</h4>
+          <p>A <strong>5-second countdown</strong> appears after pressing a button. Press Cancel if you made a mistake. Otherwise, wait for the system to save the entry.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-number">4</div>
+        <div>
+          <h4>Switch Back to Automatic</h4>
+          <p>Turn the switch <strong>OFF</strong> again. The label returns to <strong>AUTO</strong>, and the system uses the current device time for your next attendance entry.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-tip">
+      <strong>Important:</strong> Manual mode changes the recorded time, not the attendance date. Time In and Time Out still require location permission. Use manual time only when authorized.
+    </div>
+  </section>
+
+  <!-- ATTENDANCE RECORDS -->
   <table>
     <tr><th>IN</th><th>LB OUT</th><th>LB IN</th></tr>
     <tr>
@@ -131,36 +180,37 @@ th,td{font-size:11px;padding:9px 3px}
   </table>
 
   <div class="buttons">
-    <button id="btn_time_in" onclick="record('time_in',true)">Time In</button>
-    <button id="btn_lbo" onclick="record('lunch_break_out',false)">LB Out</button>
-    <button id="btn_lbi" onclick="record('lunch_break_in',false)">LB In</button>
-    <button id="btn_cbo" onclick="record('coffee_break_out',false)">CB Out</button>
-    <button id="btn_cbi" onclick="record('coffee_break_in',false)">CB In</button>
-    <button id="btn_time_out" onclick="record('time_out',true)">Time Out</button>
+    <button onclick="record('time_in',true)">Time In</button>
+    <button onclick="record('lunch_break_out',false)">LB Out</button>
+    <button onclick="record('lunch_break_in',false)">LB In</button>
+    <button onclick="record('coffee_break_out',false)">CB Out</button>
+    <button onclick="record('coffee_break_in',false)">CB In</button>
+    <button onclick="record('time_out',true)">Time Out</button>
     <button onclick="location.href='sellout_inventory.html'">📦 Sellout</button>
   </div>
 
   <div class="cancel" id="cancelBox">
-    <p>Saving in <span id="count">5</span> seconds</p>
+    <p>Saving in <strong id="count">5</strong> seconds</p>
     <button onclick="cancelSave()">Cancel</button>
   </div>
 
-  <button class="view-btn" onclick="location.href='view_attendance.html'">📊 View Attendance</button>
+  <button class="view-btn" onclick="location.href='view_attendance.html'">
+    📊 View Attendance
+  </button>
 </div>
 
 <script>
 const SUPABASE_URL = "https://oaorsmayfosxrfahkxgi.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Vx0EZwKgcNMQNLpmb6RtKw_wpwZ15Bz";
-
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let user = null;
+let manualMode = false;
 let pendingField = null;
 let pendingTime = null;
+let locationData = {};
 let countdown = null;
 let seconds = 5;
-let locationData = {};
-let manualMode = false;
 
 const fieldMap = {
   time_in: "time_in",
@@ -172,31 +222,29 @@ const fieldMap = {
 };
 
 function getLocalDate() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
 
-function toLocalString(date) {
-  const pad = n => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+function toLocalString(d) {
+  const p = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 }
 
-/* DIGITAL CLOCK */
+/* LIVE CLOCK */
 function updateClock() {
   const now = new Date();
-  document.getElementById("clock").innerText =
-    now.toLocaleTimeString("en-US", {hour12:false});
-  document.getElementById("date").innerText = now.toDateString();
+  document.getElementById("clock").textContent =
+    now.toLocaleTimeString("en-GB",{hour12:false});
+  document.getElementById("date").textContent =
+    now.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
 }
 updateClock();
-setInterval(updateClock, 1000);
+setInterval(updateClock,1000);
 
 /* AUTHENTICATION */
-(async function init() {
-  const {data, error} = await supabaseClient.auth.getSession();
+async function init() {
+  const {data,error} = await supabaseClient.auth.getSession();
 
   if (error || !data.session) {
     location.href = "login.html";
@@ -205,47 +253,44 @@ setInterval(updateClock, 1000);
 
   user = data.session.user;
 
-  const ok = await ensureToday();
-  if (ok) await loadToday();
-})();
+  if (await ensureToday()) {
+    await loadToday();
+  }
+}
+init();
 
-/* ENSURE TODAY'S ATTENDANCE ROW EXISTS */
+/* CREATE TODAY'S ROW IF MISSING */
 async function ensureToday() {
   const today = getLocalDate();
 
-  const {data, error} = await supabaseClient
+  const {data,error} = await supabaseClient
     .from("attendance")
     .select("id")
-    .eq("user_id", user.id)
-    .eq("attendance_date", today)
+    .eq("user_id",user.id)
+    .eq("attendance_date",today)
     .maybeSingle();
 
   if (error) {
-    console.error("Attendance lookup error:", error);
-    alert("Hindi mabasa ang attendance: " + error.message);
+    alert("Unable to check attendance: " + error.message);
     return false;
   }
 
   if (data) return true;
 
-  const {error: insertError} = await supabaseClient
+  const {error:insertError} = await supabaseClient
     .from("attendance")
-    .insert({
-      user_id: user.id,
-      attendance_date: today
-    });
+    .insert({user_id:user.id,attendance_date:today});
 
   if (insertError) {
-    const {data: existing, error: checkError} = await supabaseClient
+    const {data:existing,error:checkError} = await supabaseClient
       .from("attendance")
       .select("id")
-      .eq("user_id", user.id)
-      .eq("attendance_date", today)
+      .eq("user_id",user.id)
+      .eq("attendance_date",today)
       .maybeSingle();
 
     if (checkError || !existing) {
-      console.error("Create attendance error:", insertError);
-      alert("Hindi makagawa ng attendance record: " + insertError.message);
+      alert("Unable to create attendance row: " + insertError.message);
       return false;
     }
   }
@@ -253,37 +298,34 @@ async function ensureToday() {
   return true;
 }
 
-/* GET GPS LOCATION */
+/* GPS */
 function getLocation() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve,reject) => {
     if (!navigator.geolocation) {
-      reject(new Error("Hindi supported ang GPS sa browser na ito."));
+      reject(new Error("Geolocation is not supported by this browser."));
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       pos => resolve({
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
+        lat:pos.coords.latitude,
+        lng:pos.coords.longitude
       }),
-      err => reject(new Error(err.message)),
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0
-      }
+      err => reject(new Error("Unable to get location: " + err.message)),
+      {enableHighAccuracy:true,timeout:15000,maximumAge:0}
     );
   });
 }
 
-/* MANUAL TIME SELECTORS */
-function fillTimeSelect(id, max) {
+/* MANUAL TIME MENUS */
+function fillTimeSelect(id,max) {
   const select = document.getElementById(id);
 
-  for (let i = 0; i <= max; i++) {
+  for (let i=0;i<=max;i++) {
+    const value = String(i).padStart(2,"0");
     const option = document.createElement("option");
-    option.value = String(i).padStart(2, "0");
-    option.textContent = String(i).padStart(2, "0");
+    option.value = value;
+    option.textContent = value;
     select.appendChild(option);
   }
 }
@@ -299,56 +341,49 @@ function updateManualPreview() {
 function setManualMode(enabled) {
   if (countdown) {
     document.getElementById("manualModeToggle").checked = manualMode;
-    alert("Tapusin o i-cancel muna ang pending attendance bago magpalit ng mode.");
+    alert("Please finish or cancel the pending attendance before changing modes.");
     return;
   }
 
   manualMode = enabled;
-  document.getElementById("manualPanel").classList.toggle("show", enabled);
+  document.getElementById("manualPanel").classList.toggle("show",enabled);
 
   const badge = document.getElementById("modeStatus");
   badge.textContent = enabled ? "MANUAL" : "AUTO";
-  badge.classList.toggle("manual", enabled);
+  badge.classList.toggle("manual",enabled);
 
   if (enabled) {
     const now = new Date();
-
-    document.getElementById("manualHour").value =
-      String(now.getHours()).padStart(2, "0");
-    document.getElementById("manualMinute").value =
-      String(now.getMinutes()).padStart(2, "0");
-    document.getElementById("manualSecond").value =
-      String(now.getSeconds()).padStart(2, "0");
-
+    document.getElementById("manualHour").value = String(now.getHours()).padStart(2,"0");
+    document.getElementById("manualMinute").value = String(now.getMinutes()).padStart(2,"0");
+    document.getElementById("manualSecond").value = String(now.getSeconds()).padStart(2,"0");
     updateManualPreview();
   }
 }
 
 function getSelectedManualDateTime() {
   const now = new Date();
-
   now.setHours(Number(document.getElementById("manualHour").value));
   now.setMinutes(Number(document.getElementById("manualMinute").value));
   now.setSeconds(Number(document.getElementById("manualSecond").value));
   now.setMilliseconds(0);
-
   return now;
 }
 
-fillTimeSelect("manualHour", 23);
-fillTimeSelect("manualMinute", 59);
-fillTimeSelect("manualSecond", 59);
+fillTimeSelect("manualHour",23);
+fillTimeSelect("manualMinute",59);
+fillTimeSelect("manualSecond",59);
 updateManualPreview();
 
 /* RECORD ATTENDANCE */
-async function record(field, locationRequired) {
+async function record(field,locationRequired) {
   if (!user) {
-    alert("Hindi pa naka-login. Mag-login muna.");
+    alert("Please log in first.");
     return;
   }
 
   if (countdown) {
-    alert("May pending attendance action pa. I-cancel o hintaying matapos.");
+    alert("An attendance action is already pending.");
     return;
   }
 
@@ -362,45 +397,45 @@ async function record(field, locationRequired) {
     } catch (err) {
       pendingField = null;
       pendingTime = null;
-      alert("Kailangan ang location para sa Time In/Out.\n" + err.message);
+      alert("Location is required for Time In and Time Out.\n" + err.message);
       return;
     }
   }
 
-  startCountdown(field);
+  startCountdown();
 }
 
-/* FIVE-SECOND CANCEL COUNTDOWN */
-function startCountdown(field) {
-  document.getElementById(fieldMap[field]).innerText =
-    pendingTime.toLocaleTimeString("en-US", {hour12:false});
+/* FIVE-SECOND CONFIRMATION */
+function startCountdown() {
+  document.getElementById(fieldMap[pendingField]).textContent =
+    pendingTime.toLocaleTimeString("en-GB",{hour12:false});
 
   seconds = 5;
-  document.getElementById("count").innerText = seconds;
+  document.getElementById("count").textContent = seconds;
   document.getElementById("cancelBox").style.display = "block";
 
   countdown = setInterval(async () => {
     seconds--;
-    document.getElementById("count").innerText = seconds;
+    document.getElementById("count").textContent = seconds;
 
     if (seconds <= 0) {
       clearInterval(countdown);
       countdown = null;
       document.getElementById("cancelBox").style.display = "none";
-      await save();
+      await saveAttendance();
     }
-  }, 1000);
+  },1000);
 }
 
-/* SAVE ATTENDANCE TO SUPABASE */
-async function save() {
+/* SAVE TO SUPABASE */
+async function saveAttendance() {
   if (!pendingField || !pendingTime || !user) return;
 
   const field = pendingField;
   const today = getLocalDate();
 
   const payload = {
-    [field]: toLocalString(pendingTime)
+    [field]:toLocalString(pendingTime)
   };
 
   if (field === "time_in" || field === "time_out") {
@@ -408,31 +443,30 @@ async function save() {
     payload.longitude = locationData.lng;
   }
 
-  const {data, error} = await supabaseClient
+  const {data,error} = await supabaseClient
     .from("attendance")
     .update(payload)
-    .eq("user_id", user.id)
-    .eq("attendance_date", today)
+    .eq("user_id",user.id)
+    .eq("attendance_date",today)
     .select("id");
 
   if (error) {
-    console.error("Attendance save error:", error);
-    alert("Save failed: " + error.message);
-    document.getElementById(fieldMap[field]).innerText = "--";
+    alert("Attendance save failed: " + error.message);
     clearPending();
+    await loadToday();
     return;
   }
 
   if (!data || data.length === 0) {
-    alert("Walang attendance row na na-update. Tingnan ang attendance table, user_id, petsa, at RLS policies.");
-    document.getElementById(fieldMap[field]).innerText = "--";
+    alert("No attendance row was updated. Check your attendance row and Supabase RLS policies.");
     clearPending();
+    await loadToday();
     return;
   }
 
+  clearPending();
   await loadToday();
   alert("Attendance saved successfully!");
-  clearPending();
 }
 
 function clearPending() {
@@ -441,47 +475,48 @@ function clearPending() {
   locationData = {};
 }
 
-/* CANCEL PENDING ATTENDANCE */
+/* CANCEL */
 function cancelSave() {
   if (countdown) clearInterval(countdown);
   countdown = null;
 
-  if (pendingField) {
-    document.getElementById(fieldMap[pendingField]).innerText = "--";
-  }
-
-  clearPending();
   document.getElementById("cancelBox").style.display = "none";
+  clearPending();
+  loadToday();
 }
 
-/* LOAD TODAY'S ATTENDANCE */
+/* LOAD TODAY */
 async function loadToday() {
-  const today = getLocalDate();
+  if (!user) return;
 
-  const {data, error} = await supabaseClient
+  const {data,error} = await supabaseClient
     .from("attendance")
     .select("*")
-    .eq("user_id", user.id)
-    .eq("attendance_date", today)
+    .eq("user_id",user.id)
+    .eq("attendance_date",getLocalDate())
     .maybeSingle();
 
   if (error) {
-    console.error("Load attendance error:", error);
-    alert("Hindi ma-load ang attendance: " + error.message);
+    console.error(error);
+    alert("Unable to load attendance: " + error.message);
     return;
   }
 
   if (!data) return;
 
-  Object.keys(fieldMap).forEach(field => {
+  for (const field of Object.keys(fieldMap)) {
     const value = data[field];
+    let display = "--";
 
-    document.getElementById(fieldMap[field]).innerText = value
-      ? String(value).includes("T")
-        ? String(value).split("T")[1].substring(0, 8)
-        : value
-      : "--";
-  });
+    if (value) {
+      const textValue = String(value);
+      display = textValue.includes("T")
+        ? textValue.split("T")[1].substring(0,8)
+        : textValue;
+    }
+
+    document.getElementById(fieldMap[field]).textContent = display;
+  }
 }
 
 /* LOGOUT */
