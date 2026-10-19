@@ -113,7 +113,45 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
     </div>
   </section>
 
-  <!-- HOW TO USE GUIDE -->
+  <!-- ATTENDANCE RECORDS -->
+  <table>
+    <tr><th>IN</th><th>LB OUT</th><th>LB IN</th></tr>
+    <tr>
+      <td id="time_in">--</td>
+      <td id="lbo">--</td>
+      <td id="lbi">--</td>
+    </tr>
+  </table>
+
+  <table>
+    <tr><th>CB OUT</th><th>CB IN</th><th>OUT</th></tr>
+    <tr>
+      <td id="cbo">--</td>
+      <td id="cbi">--</td>
+      <td id="time_out">--</td>
+    </tr>
+  </table>
+
+  <div class="buttons">
+    <button onclick="record('time_in',true)">Time In</button>
+    <button onclick="record('lunch_break_out',false)">LB Out</button>
+    <button onclick="record('lunch_break_in',false)">LB In</button>
+    <button onclick="record('coffee_break_out',false)">CB Out</button>
+    <button onclick="record('coffee_break_in',false)">CB In</button>
+    <button onclick="record('time_out',true)">Time Out</button>
+    <button onclick="location.href='sellout_inventory.html'">📦 Sellout</button>
+  </div>
+
+  <div class="cancel" id="cancelBox">
+    <p>Saving in <strong id="count">5</strong> seconds</p>
+    <button onclick="cancelSave()">Cancel</button>
+  </div>
+
+  <button class="view-btn" onclick="location.href='view_attendance.html'">
+    📊 View Attendance
+  </button>
+</div>
+ <!-- HOW TO USE GUIDE -->
   <section class="usage-guide">
     <div class="guide-header">
       <span class="guide-kicker">Quick guide</span>
@@ -159,46 +197,6 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
       <strong>Important:</strong> Manual mode changes the recorded time, not the attendance date. Time In and Time Out still require location permission. Use manual time only when authorized.
     </div>
   </section>
-
-  <!-- ATTENDANCE RECORDS -->
-  <table>
-    <tr><th>IN</th><th>LB OUT</th><th>LB IN</th></tr>
-    <tr>
-      <td id="time_in">--</td>
-      <td id="lbo">--</td>
-      <td id="lbi">--</td>
-    </tr>
-  </table>
-
-  <table>
-    <tr><th>CB OUT</th><th>CB IN</th><th>OUT</th></tr>
-    <tr>
-      <td id="cbo">--</td>
-      <td id="cbi">--</td>
-      <td id="time_out">--</td>
-    </tr>
-  </table>
-
-  <div class="buttons">
-    <button onclick="record('time_in',true)">Time In</button>
-    <button onclick="record('lunch_break_out',false)">LB Out</button>
-    <button onclick="record('lunch_break_in',false)">LB In</button>
-    <button onclick="record('coffee_break_out',false)">CB Out</button>
-    <button onclick="record('coffee_break_in',false)">CB In</button>
-    <button onclick="record('time_out',true)">Time Out</button>
-    <button onclick="location.href='sellout_inventory.html'">📦 Sellout</button>
-  </div>
-
-  <div class="cancel" id="cancelBox">
-    <p>Saving in <strong id="count">5</strong> seconds</p>
-    <button onclick="cancelSave()">Cancel</button>
-  </div>
-
-  <button class="view-btn" onclick="location.href='view_attendance.html'">
-    📊 View Attendance
-  </button>
-</div>
-
 <script>
 const SUPABASE_URL = "https://oaorsmayfosxrfahkxgi.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Vx0EZwKgcNMQNLpmb6RtKw_wpwZ15Bz";
