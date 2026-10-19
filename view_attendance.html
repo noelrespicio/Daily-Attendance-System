@@ -7,423 +7,274 @@
 <title>My Attendance</title>
 
 <style>
-/* ===============================
-   GLOBAL DESIGN
-================================ */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --navy: #07152e;
-    --text: #172033;
-    --muted: #64748b;
-    --border: #e5eaf2;
-    --white: #ffffff;
-    --light-blue: #eff6ff;
-    --shadow: 0 20px 50px rgba(2, 12, 35, 0.20);
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --text:#172033;
+    --muted:#64748b;
+    --border:#e5eaf2;
+    --white:#fff;
+    --shadow:0 20px 50px rgba(2,12,35,.20);
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter,'Segoe UI',Arial,sans-serif;
 }
 
 body {
-    min-height: 100vh;
-    padding: 35px 24px;
-    color: var(--text);
+    min-height:100vh;
+    padding:35px 24px;
+    color:var(--text);
     background:
-        radial-gradient(ellipse at 10% 0%, rgba(59,130,246,.38), transparent 38%),
-        radial-gradient(ellipse at 100% 100%, rgba(14,165,233,.20), transparent 35%),
-        linear-gradient(135deg, #061126 0%, #102b52 50%, #173f70 100%);
-    background-attachment: fixed;
+        radial-gradient(ellipse at 10% 0%,rgba(59,130,246,.38),transparent 38%),
+        radial-gradient(ellipse at 100% 100%,rgba(14,165,233,.20),transparent 35%),
+        linear-gradient(135deg,#061126 0%,#102b52 50%,#173f70 100%);
+    background-attachment:fixed;
 }
 
-/* ===============================
-   PAGE TITLE
-================================ */
 h2 {
-    width: fit-content;
-    margin: 5px auto 30px;
-    color: var(--white);
-    font-size: clamp(25px, 3vw, 34px);
-    font-weight: 800;
-    letter-spacing: -1px;
-    text-align: center;
-    text-shadow: 0 4px 15px rgba(0,0,0,.18);
+    margin:5px auto 30px;
+    color:white;
+    font-size:clamp(25px,3vw,34px);
+    font-weight:800;
+    letter-spacing:-1px;
+    text-align:center;
 }
 
-/* Optional subtitle if added to HTML */
 .page-subtitle {
-    margin: -18px auto 28px;
-    color: #cbdaf0;
-    font-size: 14px;
-    text-align: center;
-    line-height: 1.7;
+    margin:-18px auto 28px;
+    color:#cbdaf0;
+    font-size:14px;
+    text-align:center;
+    line-height:1.7;
 }
 
-/* ===============================
-   MONTH SELECTOR CARD
-================================ */
 .date-picker {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-    max-width: 620px;
-    margin: 0 auto 28px;
-    padding: 24px;
-    background: rgba(255,255,255,.97);
-    border: 1px solid rgba(255,255,255,.7);
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(12px);
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    width:100%;
+    max-width:620px;
+    margin:0 auto 28px;
+    padding:24px;
+    background:rgba(255,255,255,.97);
+    border:1px solid rgba(255,255,255,.7);
+    border-radius:20px;
+    box-shadow:var(--shadow);
 }
 
 .date-picker label {
-    color: #334155;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: .3px;
-    text-transform: uppercase;
+    color:#334155;
+    font-size:13px;
+    font-weight:800;
+    text-transform:uppercase;
 }
 
-.date-picker input,
-.date-picker select {
-    min-height: 46px;
-    max-width: 100%;
-    padding: 12px 15px;
-    border: 1px solid #dbe4f0;
-    border-radius: 12px;
-    outline: none;
-    background: #f8fafc;
-    color: #172033;
-    font-size: 14px;
-    font-weight: 600;
-    transition: border-color .2s, box-shadow .2s, background .2s;
+.date-picker input {
+    min-height:46px;
+    max-width:100%;
+    padding:12px 15px;
+    border:1px solid #dbe4f0;
+    border-radius:12px;
+    outline:none;
+    background:#f8fafc;
+    color:#172033;
+    font-size:14px;
+    font-weight:600;
 }
 
-.date-picker input:hover,
-.date-picker select:hover {
-    border-color: #93b4f8;
+.date-picker input:focus {
+    border-color:var(--primary);
+    background:white;
+    box-shadow:0 0 0 4px rgba(37,99,235,.12);
 }
 
-.date-picker input:focus,
-.date-picker select:focus {
-    border-color: var(--primary);
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(37,99,235,.12);
-}
-
-/* ===============================
-   BUTTONS
-================================ */
 button {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    min-height: 36px;
-    padding: 10px 14px;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .1px;
-    cursor: pointer;
-    white-space: nowrap;
-    box-shadow: 0 4px 10px rgba(37,99,235,.15);
-    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+    min-height:36px;
+    padding:10px 14px;
+    border:1px solid transparent;
+    border-radius:10px;
+    background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+    color:white;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+    box-shadow:0 4px 10px rgba(37,99,235,.15);
+    transition:transform .2s,box-shadow .2s;
 }
 
 button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    filter: brightness(1.05);
-    box-shadow: 0 8px 18px rgba(37,99,235,.28);
-}
-
-button:active:not(:disabled) {
-    transform: translateY(0) scale(.98);
-}
-
-button:focus-visible {
-    outline: 3px solid rgba(96,165,250,.6);
-    outline-offset: 3px;
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(37,99,235,.28);
 }
 
 button:disabled {
-    background: #cbd5e1;
-    color: #64748b;
-    box-shadow: none;
-    cursor: not-allowed;
-    transform: none;
+    background:#cbd5e1;
+    color:#64748b;
+    box-shadow:none;
+    cursor:not-allowed;
+    transform:none;
 }
 
 button.cancel-btn {
-    background: #64748b;
-    box-shadow: none;
+    background:#64748b;
+    box-shadow:none;
 }
 
-button.cancel-btn:hover:not(:disabled) {
-    background: #475569;
+button.save-btn {
+    background:linear-gradient(135deg,#10b981,#047857);
 }
 
-/* ===============================
-   TABLE CARD
-================================ */
 .table-container {
-    width: 100%;
-    max-width: 1450px;
-    margin: 0 auto;
-    overflow: auto;
-    background: var(--white);
-    border: 1px solid rgba(255,255,255,.7);
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    scrollbar-width: thin;
-    scrollbar-color: #93b4f8 #f1f5f9;
+    width:100%;
+    max-width:1450px;
+    margin:0 auto;
+    overflow:auto;
+    background:white;
+    border:1px solid rgba(255,255,255,.7);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+    scrollbar-width:thin;
+    scrollbar-color:#93b4f8 #f1f5f9;
 }
 
-.table-container::-webkit-scrollbar {
-    height: 9px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 20px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: #93b4f8;
-    border-radius: 20px;
-}
-
-/* ===============================
-   ATTENDANCE TABLE
-================================ */
 table {
-    width: 100%;
-    min-width: 950px;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: #fff;
+    width:100%;
+    min-width:950px;
+    border-collapse:separate;
+    border-spacing:0;
+    background:white;
 }
 
 thead th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    padding: 17px 13px;
-    background: linear-gradient(135deg, #10294b, #1e477b);
-    color: #fff;
-    border-right: 1px solid rgba(255,255,255,.10);
-    border-bottom: none;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .1px;
-    text-align: center;
-    text-transform: uppercase;
-    white-space: nowrap;
+    position:sticky;
+    top:0;
+    z-index:1;
+    padding:17px 13px;
+    background:linear-gradient(135deg,#10294b,#1e477b);
+    color:white;
+    border-right:1px solid rgba(255,255,255,.1);
+    font-size:11px;
+    font-weight:800;
+    text-align:center;
+    text-transform:uppercase;
+    white-space:nowrap;
 }
 
-thead th:first-child {
-    border-top-left-radius: 3px;
-}
-
-thead th:last-child {
-    border-right: none;
-}
-
-th,
-td {
-    padding: 15px 12px;
-    border-right: 1px solid #edf1f7;
-    border-bottom: 1px solid #e9eef5;
-    text-align: center;
-    font-size: 13px;
+th,td {
+    padding:15px 12px;
+    border-right:1px solid #edf1f7;
+    border-bottom:1px solid #e9eef5;
+    text-align:center;
+    font-size:13px;
 }
 
 td {
-    color: #475569;
-    background: #fff;
-    font-weight: 500;
-    white-space: nowrap;
+    color:#475569;
+    background:white;
+    font-weight:500;
+    white-space:nowrap;
 }
 
 td:first-child {
-    color: #1e293b;
-    font-weight: 700;
-}
-
-tbody tr {
-    transition: background .2s ease;
+    color:#1e293b;
+    font-weight:700;
 }
 
 tbody tr:hover td {
-    background: #f3f7ff;
+    background:#f3f7ff;
 }
 
 tbody tr:last-child td {
-    border-bottom: none;
+    border-bottom:none;
 }
 
 tbody td:last-child,
 thead th:last-child {
-    border-right: none;
+    border-right:none;
 }
 
-/* ===============================
-   CUTOFF ROWS
-================================ */
 .cutoff td {
-    padding: 15px 18px;
-    background: linear-gradient(90deg, #dbeafe, #eff6ff) !important;
-    color: #1e40af !important;
-    border-top: 1px solid #bfdbfe;
-    border-bottom: 1px solid #bfdbfe;
-    border-right: none;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .25px;
-    text-align: left;
+    padding:15px 18px;
+    background:linear-gradient(90deg,#dbeafe,#eff6ff)!important;
+    color:#1e40af!important;
+    border-top:1px solid #bfdbfe;
+    border-bottom:1px solid #bfdbfe;
+    border-right:none;
+    font-size:12px;
+    font-weight:800;
+    text-align:left;
 }
 
-/* ===============================
-   EDIT TIME INPUTS
-================================ */
 td input[type="time"] {
-    width: 112px;
-    max-width: 100%;
-    min-height: 36px;
-    padding: 7px 8px;
-    border: 1px solid #cbd5e1;
-    border-radius: 9px;
-    outline: none;
-    background: #f8fafc;
-    color: #172033;
-    font-size: 12px;
-    font-weight: 600;
-    transition: .2s;
+    width:125px;
+    max-width:100%;
+    min-height:36px;
+    padding:7px;
+    border:1px solid #cbd5e1;
+    border-radius:9px;
+    outline:none;
+    background:#f8fafc;
+    color:#172033;
+    font-size:12px;
+    font-weight:600;
 }
 
 td input[type="time"]:focus {
-    border-color: var(--primary);
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+    border-color:var(--primary);
+    background:white;
+    box-shadow:0 0 0 3px rgba(37,99,235,.10);
 }
 
-/* ===============================
-   STATUS / EMPTY STATE
-================================ */
 .status-message {
-    padding: 35px 20px !important;
-    color: var(--muted) !important;
-    background: #fff !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    text-align: center !important;
+    padding:35px 20px!important;
+    color:var(--muted)!important;
+    background:white!important;
+    font-size:14px!important;
+    font-weight:600!important;
+    text-align:center!important;
 }
 
-/* ===============================
-   TABLE LINKS
-================================ */
-table a {
-    color: var(--primary);
-    font-weight: 700;
-    text-decoration: none;
+@media(max-width:768px) {
+    body {padding:25px 14px}
+    h2 {margin-bottom:24px}
+    .date-picker {gap:12px;padding:20px}
+    .table-container {border-radius:15px}
+    thead th {padding:14px 10px}
+    th,td {padding:12px 9px;font-size:12px}
 }
 
-table a:hover {
-    color: var(--primary-dark);
-    text-decoration: underline;
-}
-
-/* ===============================
-   RESPONSIVE DESIGN
-================================ */
-@media (max-width: 768px) {
-    body {
-        padding: 25px 14px;
-    }
-
-    h2 {
-        margin-bottom: 24px;
-        letter-spacing: -.6px;
-    }
-
+@media(max-width:480px) {
+    body {padding:20px 10px}
+    h2 {font-size:24px;margin-bottom:22px}
     .date-picker {
-        gap: 12px;
-        padding: 20px;
-        border-radius: 16px;
+        flex-direction:column;
+        align-items:stretch;
+        padding:18px;
+        gap:10px;
     }
-
-    .table-container {
-        border-radius: 15px;
-    }
-
-    thead th {
-        padding: 14px 10px;
-    }
-
-    th,
-    td {
-        padding: 12px 9px;
-        font-size: 12px;
-    }
+    .date-picker input {width:100%;min-height:45px}
+    .table-container {border-radius:12px}
+    button {padding:9px 11px;font-size:11px}
 }
 
-@media (max-width: 480px) {
-    body {
-        padding: 20px 10px;
-    }
-
-    h2 {
-        font-size: 24px;
-        margin-bottom: 22px;
-    }
-
-    .date-picker {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 18px;
-        gap: 10px;
-    }
-
-    .date-picker label {
-        font-size: 12px;
-    }
-
-    .date-picker input,
-    .date-picker select {
-        width: 100%;
-        min-height: 45px;
-    }
-
-    .table-container {
-        border-radius: 12px;
-    }
-
-    button {
-        padding: 9px 11px;
-        font-size: 11px;
-    }
-}
-
-/* Respect reduced-motion preferences */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        scroll-behavior: auto !important;
-        transition: none !important;
-        animation: none !important;
+@media(prefers-reduced-motion:reduce) {
+    *,*::before,*::after {
+        scroll-behavior:auto!important;
+        transition:none!important;
+        animation:none!important;
     }
 }
 </style>
@@ -432,6 +283,9 @@ table a:hover {
 <body>
 
 <h2>📊 My Attendance</h2>
+<p class="page-subtitle">
+    View your attendance records, check your cutoff edits, and update recorded times.
+</p>
 
 <div class="date-picker">
     <label for="monthPicker">Select Month:</label>
@@ -454,7 +308,11 @@ table a:hover {
             </tr>
         </thead>
         <tbody>
-            <tr><td colspan="9" class="status-message">Loading attendance...</td></tr>
+            <tr>
+                <td colspan="9" class="status-message">
+                    Loading attendance...
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>
@@ -463,6 +321,7 @@ table a:hover {
 import { createClient } from
 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
+/* SUPABASE CONFIG */
 const supabase = createClient(
     "https://oaorsmayfosxrfahkxgi.supabase.co",
     "sb_publishable_Vx0EZwKgcNMQNLpmb6RtKw_wpwZ15Bz"
@@ -474,8 +333,19 @@ let loading = false;
 const monthPicker = document.getElementById("monthPicker");
 const tbody = document.querySelector("#attendanceTable tbody");
 
+const TIME_FIELDS = [
+    "time_in",
+    "lunch_break_out",
+    "lunch_break_in",
+    "coffee_break_out",
+    "coffee_break_in",
+    "time_out"
+];
+
+/* GENERAL HELPERS */
 function showMessage(message) {
-    tbody.innerHTML = "";
+    tbody.replaceChildren();
+
     const tr = document.createElement("tr");
     const td = document.createElement("td");
 
@@ -495,28 +365,98 @@ function localDateString(date) {
     return `${year}-${month}-${day}`;
 }
 
+function getDay(dateString) {
+    return Number(dateString.slice(8, 10));
+}
+
+function getMonthPrefix(dateString) {
+    return dateString.slice(0, 7);
+}
+
+/*
+ * Convert a database value into a local display time.
+ *
+ * Supports:
+ * 1. timestamptz values returned as ISO timestamps
+ * 2. plain TIME values such as HH:MM:SS
+ */
 function formatTime(value) {
     if (!value) return "";
 
-    // Supabase TIME columns commonly return "HH:MM:SS".
-    if (/^\d{2}:\d{2}/.test(value)) {
-        return value.slice(0, 5);
+    if (/^\d{2}:\d{2}/.test(value) && !value.includes("T")) {
+        return value.length >= 8
+            ? value.slice(0, 8)
+            : value.slice(0, 5);
     }
 
-    // Handle timestamp values.
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "";
+
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
 
     return date.toLocaleTimeString("en-GB", {
         hour: "2-digit",
         minute: "2-digit",
+        second: "2-digit",
         hour12: false
     });
 }
 
-function getDay(dateString) {
-    // Avoid timezone shifts from parsing YYYY-MM-DD.
-    return Number(dateString.slice(8, 10));
+/*
+ * Convert a selected local time into an ISO timestamp.
+ * The attendance date is kept unchanged.
+ *
+ * Example input:
+ * date = 2026-10-19
+ * time = 08:30:45
+ *
+ * Output:
+ * An ISO timestamp representing 08:30:45 local time.
+ */
+function makeTimestamp(attendanceDate, timeValue) {
+    if (!timeValue) return null;
+
+    const normalizedTime = timeValue.length === 5
+        ? `${timeValue}:00`
+        : timeValue;
+
+    if (!/^\d{2}:\d{2}:\d{2}$/.test(normalizedTime)) {
+        throw new Error("Invalid time format: " + timeValue);
+    }
+
+    const localDateTime = new Date(
+        `${attendanceDate}T${normalizedTime}`
+    );
+
+    if (Number.isNaN(localDateTime.getTime())) {
+        throw new Error("Invalid attendance date or time.");
+    }
+
+    return localDateTime.toISOString();
+}
+
+/*
+ * Convert a stored timestamp back to a local time
+ * suitable for <input type="time">.
+ */
+function toInputTime(value) {
+    if (!value) return "";
+
+    // Plain TIME value from PostgreSQL
+    if (/^\d{2}:\d{2}/.test(value) && !value.includes("T")) {
+        return value.length >= 8
+            ? value.slice(0, 8)
+            : `${value.slice(0, 5)}:00`;
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "";
+
+    const pad = n => String(n).padStart(2, "0");
+
+    return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
 /* AUTHENTICATION */
@@ -524,7 +464,6 @@ async function initialize() {
     const { data, error } = await supabase.auth.getSession();
 
     if (error || !data.session) {
-        alert("Please log in first.");
         window.location.href = "login.html";
         return;
     }
@@ -532,6 +471,7 @@ async function initialize() {
     user = data.session.user;
 
     const now = new Date();
+
     monthPicker.value =
         `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
@@ -544,7 +484,7 @@ monthPicker.addEventListener("change", async () => {
     }
 });
 
-/* LOAD ATTENDANCE */
+/* LOAD MONTHLY ATTENDANCE */
 async function loadAttendance(month) {
     if (!user || !month || loading) return;
 
@@ -553,6 +493,7 @@ async function loadAttendance(month) {
 
     try {
         const [year, monthNumber] = month.split("-").map(Number);
+
         const startDate = `${month}-01`;
         const endDate = localDateString(
             new Date(year, monthNumber, 0)
@@ -573,41 +514,51 @@ async function loadAttendance(month) {
             return;
         }
 
-        const first = data.filter(d => getDay(d.attendance_date) <= 15);
-        const second = data.filter(d => getDay(d.attendance_date) > 15);
-
-        const firstEdits = first.reduce(
-            (sum, d) => sum + (Number(d.edit_count) || 0), 0
+        const firstCutoff = data.filter(
+            item => getDay(item.attendance_date) <= 15
         );
 
-        const secondEdits = second.reduce(
-            (sum, d) => sum + (Number(d.edit_count) || 0), 0
+        const secondCutoff = data.filter(
+            item => getDay(item.attendance_date) >= 16
         );
 
-        tbody.innerHTML = "";
+        const firstEdits = firstCutoff.reduce(
+            (sum, item) => sum + (Number(item.edit_count) || 0),
+            0
+        );
 
-        if (first.length) {
+        const secondEdits = secondCutoff.reduce(
+            (sum, item) => sum + (Number(item.edit_count) || 0),
+            0
+        );
+
+        tbody.replaceChildren();
+
+        if (firstCutoff.length) {
             addCutoffRow(
-                `🟢 1st Cutoff (1–15) — Total edits used: ${firstEdits}`
+                `1st Cutoff (1–15) — Edits used: ${firstEdits}/5`
             );
 
-            first.forEach(record => {
+            firstCutoff.forEach(record => {
                 addAttendanceRow(record, firstEdits, secondEdits);
             });
         }
 
-        if (second.length) {
+        if (secondCutoff.length) {
             addCutoffRow(
-                `🔵 2nd Cutoff (16–End) — Total edits used: ${secondEdits}`
+                `2nd Cutoff (16–End) — Edits used: ${secondEdits}/5`
             );
 
-            second.forEach(record => {
+            secondCutoff.forEach(record => {
                 addAttendanceRow(record, firstEdits, secondEdits);
             });
         }
+
     } catch (error) {
         console.error("Load attendance error:", error);
-        showMessage("Failed to load attendance. Please check your connection and database settings.");
+        showMessage(
+            "Failed to load attendance. Check your connection and database settings."
+        );
     } finally {
         loading = false;
     }
@@ -625,9 +576,12 @@ function addCutoffRow(label) {
     tbody.appendChild(tr);
 }
 
+/* BUILD ATTENDANCE ROW */
 function addAttendanceRow(record, firstEdits, secondEdits) {
     const tr = document.createElement("tr");
     tr.id = `row-${record.id}`;
+    tr.dataset.recordId = record.id;
+    tr.dataset.attendanceDate = record.attendance_date;
 
     const values = [
         record.attendance_date,
@@ -645,23 +599,26 @@ function addAttendanceRow(record, firstEdits, secondEdits) {
 
         if (index >= 1 && index <= 6) {
             td.className = "editable";
+            td.dataset.field = TIME_FIELDS[index - 1];
         }
 
         tr.appendChild(td);
     });
 
+    /* MAP */
     const mapCell = document.createElement("td");
 
     if (record.latitude != null && record.longitude != null) {
         const mapButton = document.createElement("button");
         mapButton.textContent = "📍 Map";
+
         mapButton.addEventListener("click", () => {
-            window.open(
-                `map.html?lat=${encodeURIComponent(record.latitude)}&lng=${encodeURIComponent(record.longitude)}`,
-                "_blank",
-                "noopener"
-            );
+            const url =
+                `https://www.google.com/maps?q=${encodeURIComponent(record.latitude)},${encodeURIComponent(record.longitude)}`;
+
+            window.open(url, "_blank", "noopener,noreferrer");
         });
+
         mapCell.appendChild(mapButton);
     } else {
         mapCell.textContent = "--";
@@ -669,16 +626,18 @@ function addAttendanceRow(record, firstEdits, secondEdits) {
 
     tr.appendChild(mapCell);
 
+    /* EDIT BUTTON */
     const editCell = document.createElement("td");
+
     const day = getDay(record.attendance_date);
-    const used = day <= 15 ? firstEdits : secondEdits;
+    const editsUsed = day <= 15 ? firstEdits : secondEdits;
 
     const editButton = document.createElement("button");
     editButton.textContent = "✏️ Edit";
-    editButton.disabled = used >= 5;
-    editButton.title = used >= 5
-        ? "The edit limit has been reached."
-        : "Edit this attendance record";
+    editButton.disabled = editsUsed >= 5;
+    editButton.title = editsUsed >= 5
+        ? "The edit limit for this cutoff has been reached."
+        : "Edit attendance time";
 
     editButton.addEventListener("click", () => {
         startEdit(record.id);
@@ -690,64 +649,127 @@ function addAttendanceRow(record, firstEdits, secondEdits) {
     tbody.appendChild(tr);
 }
 
-/* EDIT ATTENDANCE */
-window.startEdit = function(id) {
+/* START EDITING A RECORD */
+async function startEdit(id) {
+    if (!user) return;
+
     const row = document.getElementById(`row-${id}`);
     if (!row) return;
 
-    const cells = row.querySelectorAll(".editable");
+    const editButton = row.lastElementChild.querySelector("button");
 
-    cells.forEach(cell => {
-        const input = document.createElement("input");
-        input.type = "time";
-        input.value = cell.textContent === "--" ? "" : cell.textContent;
-        cell.textContent = "";
-        cell.appendChild(input);
-    });
+    if (editButton) {
+        editButton.disabled = true;
+        editButton.textContent = "Loading...";
+    }
 
-    const actionCell = row.lastElementChild;
-    actionCell.innerHTML = "";
+    try {
+        const { data: record, error } = await supabase
+            .from("attendance")
+            .select("id, user_id, attendance_date, time_in, lunch_break_out, lunch_break_in, coffee_break_out, coffee_break_in, time_out")
+            .eq("id", id)
+            .eq("user_id", user.id)
+            .single();
 
-    const saveButton = document.createElement("button");
-    saveButton.textContent = "💾 Save";
-    saveButton.addEventListener("click", () => saveEdit(id));
+        if (error) throw error;
 
-    const cancelButton = document.createElement("button");
-    cancelButton.textContent = "Cancel";
-    cancelButton.className = "cancel-btn";
-    cancelButton.style.marginTop = "5px";
-    cancelButton.addEventListener("click", () => {
-        loadAttendance(monthPicker.value);
-    });
+        row.dataset.attendanceDate = record.attendance_date;
 
-    actionCell.append(saveButton, document.createElement("br"), cancelButton);
-};
+        const cells = row.querySelectorAll(".editable");
 
-window.saveEdit = async function(id) {
+        cells.forEach((cell, index) => {
+            const field = TIME_FIELDS[index];
+            const input = document.createElement("input");
+
+            input.type = "time";
+            input.step = "1";
+            input.setAttribute("aria-label", field.replaceAll("_", " "));
+
+            input.value = toInputTime(record[field]);
+
+            cell.replaceChildren(input);
+        });
+
+        const actionCell = row.lastElementChild;
+        actionCell.replaceChildren();
+
+        const saveButton = document.createElement("button");
+        saveButton.textContent = "💾 Save";
+        saveButton.className = "save-btn";
+        saveButton.addEventListener("click", () => saveEdit(id));
+
+        const cancelButton = document.createElement("button");
+        cancelButton.textContent = "Cancel";
+        cancelButton.className = "cancel-btn";
+        cancelButton.style.marginTop = "5px";
+        cancelButton.addEventListener("click", () => {
+            loadAttendance(monthPicker.value);
+        });
+
+        actionCell.append(
+            saveButton,
+            document.createElement("br"),
+            cancelButton
+        );
+
+    } catch (error) {
+        console.error("Start edit error:", error);
+        alert("Unable to open this attendance record: " + error.message);
+        await loadAttendance(monthPicker.value);
+    }
+}
+
+/* SAVE EDITED ATTENDANCE AS TIMESTAMPS */
+async function saveEdit(id) {
     const row = document.getElementById(`row-${id}`);
+
     if (!row || !user) return;
+
+    const attendanceDate = row.dataset.attendanceDate;
+
+    if (!attendanceDate) {
+        alert("Attendance date is missing.");
+        return;
+    }
 
     const inputs = row.querySelectorAll(".editable input");
 
     if (inputs.length !== 6) {
-        alert("Unable to read the attendance fields. Please reload the page.");
+        alert("Unable to read all attendance fields. Please reopen Edit.");
         return;
     }
 
-    const [
-        time_in,
-        lunch_break_out,
-        lunch_break_in,
-        coffee_break_out,
-        coffee_break_in,
-        time_out
-    ] = Array.from(inputs).map(input => input.value || null);
-
-    const saveButton = row.lastElementChild.querySelector("button");
-    if (saveButton) saveButton.disabled = true;
+    let payload;
 
     try {
-        // Verify the record belongs to the logged-in user.
+        const values = Array.from(inputs).map(input => input.value);
+
+        payload = {
+            time_in: makeTimestamp(attendanceDate, values[0]),
+            lunch_break_out: makeTimestamp(attendanceDate, values[1]),
+            lunch_break_in: makeTimestamp(attendanceDate, values[2]),
+            coffee_break_out: makeTimestamp(attendanceDate, values[3]),
+            coffee_break_in: makeTimestamp(attendanceDate, values[4]),
+            time_out: makeTimestamp(attendanceDate, values[5])
+        };
+
+    } catch (error) {
+        alert(error.message);
+        return;
+    }
+
+    const actionCell = row.lastElementChild;
+    const saveButton = actionCell.querySelector("button");
+
+    if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.textContent = "Saving...";
+    }
+
+    try {
+        /*
+         * Verify the record belongs to the current user.
+         */
         const { data: record, error: fetchError } = await supabase
             .from("attendance")
             .select("id, user_id, attendance_date, edit_count")
@@ -757,23 +779,25 @@ window.saveEdit = async function(id) {
 
         if (fetchError) throw fetchError;
 
-        const currentCount = Number(record.edit_count) || 0;
-
-        // Count edits within the record's cutoff period.
         const day = getDay(record.attendance_date);
-        const firstDay = `${record.attendance_date.slice(0, 7)}-01`;
-        const [year, monthNumber] =
-            record.attendance_date.slice(0, 7).split("-").map(Number);
-        const lastDay = localDateString(new Date(year, monthNumber, 0));
+        const monthPrefix = getMonthPrefix(record.attendance_date);
+
+        const [year, monthNumber] = monthPrefix.split("-").map(Number);
+        const lastDay = localDateString(
+            new Date(year, monthNumber, 0)
+        );
 
         const rangeStart = day <= 15
-            ? firstDay
-            : `${record.attendance_date.slice(0, 7)}-16`;
+            ? `${monthPrefix}-01`
+            : `${monthPrefix}-16`;
 
         const rangeEnd = day <= 15
-            ? `${record.attendance_date.slice(0, 7)}-15`
+            ? `${monthPrefix}-15`
             : lastDay;
 
+        /*
+         * Count all edits already used in this cutoff.
+         */
         const { data: cutoffRecords, error: countError } = await supabase
             .from("attendance")
             .select("edit_count")
@@ -784,7 +808,8 @@ window.saveEdit = async function(id) {
         if (countError) throw countError;
 
         const editsUsed = (cutoffRecords || []).reduce(
-            (sum, item) => sum + (Number(item.edit_count) || 0), 0
+            (sum, item) => sum + (Number(item.edit_count) || 0),
+            0
         );
 
         if (editsUsed >= 5) {
@@ -793,31 +818,49 @@ window.saveEdit = async function(id) {
             return;
         }
 
-        const { error: updateError } = await supabase
+        /*
+         * The timestamps above are ISO strings, for example:
+         * 2026-10-19T00:30:45.000Z
+         *
+         * This represents the selected local time converted to UTC.
+         */
+        const newEditCount =
+            (Number(record.edit_count) || 0) + 1;
+
+        const { data: updatedRows, error: updateError } = await supabase
             .from("attendance")
             .update({
-                time_in,
-                lunch_break_out,
-                lunch_break_in,
-                coffee_break_out,
-                coffee_break_in,
-                time_out,
-                edit_count: currentCount + 1
+                ...payload,
+                edit_count: newEditCount
             })
             .eq("id", id)
-            .eq("user_id", user.id);
+            .eq("user_id", user.id)
+            .select("id");
 
         if (updateError) throw updateError;
 
-        alert("Attendance updated successfully!");
+        if (!updatedRows || updatedRows.length === 0) {
+            throw new Error(
+                "No record was updated. Check your Supabase RLS policies."
+            );
+        }
+
+        alert("Attendance timestamp updated successfully!");
         await loadAttendance(monthPicker.value);
+
     } catch (error) {
         console.error("Save attendance error:", error);
-        alert("Failed to save attendance. Check the database columns and RLS policies.");
+
+        alert(
+            "Failed to save attendance: " +
+            (error.message || "Unknown error")
+        );
+
         await loadAttendance(monthPicker.value);
     }
-};
+}
 
+/* START PAGE */
 initialize();
 </script>
 
